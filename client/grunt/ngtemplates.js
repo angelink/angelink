@@ -2,7 +2,7 @@
 
 module.exports = {
   options: {
-    module: 'particle.templates', //  needs to match the name of an existing angular module
+    module: 'n4j.templates', //  needs to match the name of an existing angular module
     htmlmin: {
       collapseBooleanAttributes: true,
       collapseWhitespace: true,
