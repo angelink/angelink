@@ -10,7 +10,6 @@
     "angular-sanitize": "1.2.6",
     "angular-ui-utils": "~0.1.0",
     "angular-ui-router": "~0.2.10",
-    "animate-css": "git@github.com:daneden/animate.css.git",
     "es5-shim": "~2.1.0",
     "lodash": "~2.4.1",
     "ng-Fx": "~0.3.3",
