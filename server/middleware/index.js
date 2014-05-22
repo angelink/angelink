@@ -2,8 +2,8 @@
 
 // Module dependencies
 var express = require('express');
-
 var livereload = require('./livereload');
+var passport = require('passport');
 // var enableCORS = require('./enableCORS');
 
 var middleware = function (server, config) {
@@ -28,29 +28,10 @@ var middleware = function (server, config) {
   // allow CORS
   // server.use(enableCORS);
 
-  var viewEngine;
-
   // ## Views
 
   // views directory
   server.set('views', config.dirs.views);
-
-  // view engine
-  switch (config.viewEngine) {
-    case 'jade':
-      server.set('view engine', 'jade');
-      break;
-    case 'ect':
-      viewEngine = require('ect')({watch: true, root: server.get('views')});
-      server.engine('ect', viewEngine.render);
-      server.set('view engine', 'ect');
-      break;
-    case 'html' :
-      viewEngine = require('ect')({watch: true, root: server.get('views')});
-      server.engine('html', viewEngine.render); // assign ect as the engine for html files
-      server.set('view engine', 'html'); // set .html as the default extension
-      break;
-  }
 
   // ## Livereload 
   if (config.livereload) {
@@ -71,6 +52,9 @@ var middleware = function (server, config) {
       server.use(express.static(staticDirs[i], {maxAge: maxAge}));
     }
   }
+
+  // ## Passport
+  server.use(passport.initialize());
 
   // ## Error Handler
   // Picks up any left over errors and returns a nicely formatted server 500 error

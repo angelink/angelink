@@ -1,10 +1,10 @@
 'use strict';
 
-var api;
-
 // Module Dependencies
-api = require('./api');
+var api = require('./api');
+var auth = require('../auth');
 
-module.exports = {
-  api: api
-};
+// Initialize
+auth.init();
+
+exports.api = api;
