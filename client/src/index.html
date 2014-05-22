@@ -1,0 +1,137 @@
+<!doctype html>
+<!--[if lt IE 7]>
+<html class="no-js lt-ie9 lt-ie8 lt-ie7"> 
+<![endif]-->
+<!--[if IE 7]>
+<html class="no-js lt-ie9 lt-ie8"> 
+<![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie9">
+<![endif]-->
+<!--[if gt IE 8]><!--> 
+<html class="no-js"> 
+<!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <!-- Needed for deeplinking -->
+    <base href="/"></base>
+
+    <title>Particle Angular Seed</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+    <!-- build:css styles/app.vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="components/animate-css/animate.css" />
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:css(.tmp) styles/app.main.css -->
+    <link rel="stylesheet" href="styles/bootstrap-v3.0.2/bootstrap.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+  </head>
+  <body ng-app="n4j" ng-controller="BaseCtrl" id="{{bodyId}}">
+
+    <!--[if lt IE 7]>
+      <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+    <![endif]-->
+
+    <!--[if lt IE 9]>
+      <script src="es5-shim/es5-shim.js"></script>
+      <script src="json3/lib/json3.min.js"></script>
+    <![endif]-->
+    
+    <div id="realm">
+      <div class="header">
+        <div class="container">
+          <ul class="nav nav-pills pull-right">
+            <li class="active"><a ng-href="#">Home</a></li>
+            <li><a ng-href="/about">About</a></li>
+            <li><a ng-href="#">Contact</a></li>
+          </ul>
+          <h4 class="text-muted">
+            <a href="http://github.com/dremonkey/n4j-angular-seed">github.com/dremonkey/n4j-angular-seed</a>
+          </h4>
+        </div>
+      </div>
+
+      <!-- AngularJS Content -->
+      <div ui-view></div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <p>♥ for the Yeoman team whose yo angular generator was used to begin this</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- build:js scripts/app.vendor.js -->
+    <!-- bower:js -->
+    <script src="components/es5-shim/es5-shim.js"></script>
+    <script src="components/angular/angular.js"></script>
+    <script src="components/angular-animate/angular-animate.js"></script>
+    <script src="components/angular-cookies/angular-cookies.js"></script>
+    <script src="components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="components/angular-resource/angular-resource.js"></script>
+    <script src="components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="components/angular-ui-utils/ui-utils.js"></script>
+    <script src="components/angular-ui-router/release/angular-ui-router.js"></script>
+    <script src="components/lodash/dist/lodash.compat.js"></script>
+    <script src="components/gsap/src/uncompressed/TweenMax.js"></script>
+    <script src="components/ng-Fx/dist/ng-Fx.js"></script>
+    <script src="components/restangular/dist/restangular.min.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:js scripts/app.concat.js -->
+    <script src="app/app.js"></script>
+
+    <!-- common module -->
+    <script src="app/common/module.js"></script>
+    <script src="app/common/services/utils.srv.js"></script>
+    <script src="app/common/directives/skrollr.dir.js"></script>
+
+    <!-- pages module -->
+    <script src="app/pages/module.js"></script>
+    <script src="app/pages/controllers/base.ctrl.js"></script>
+    <script src="app/pages/controllers/home.ctrl.js"></script>
+    <script src="app/pages/directives/home.dir.js"></script>
+    <!-- endbuild -->
+
+    <script src="scripts/app.templates.js"></script>
+
+    <!-- Google Analytics -->
+    <script>
+      // (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      // (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      // m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      // })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      // ga('create', 'UA-42892769-1', 'dtangl.com');
+      // ga('send', 'pageview');
+    </script>
+
+    <!-- Webfonts -->
+    <script>
+      // WebFontConfig = {google: { families: [ 'Bevan::latin', 'Norican::latin', 'Roboto+Slab::latin' ] }};
+      // (function() {
+      //   var wf = document.createElement('script');
+      //   wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+      //     '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+      //   wf.type = 'text/javascript';
+      //   wf.async = 'true';
+      //   var s = document.getElementsByTagName('script')[0];
+      //   s.parentNode.insertBefore(wf, s);
+      // })();
+    </script>
+    
+  </body>
+</html>

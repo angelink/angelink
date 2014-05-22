@@ -1,0 +1,27 @@
+{
+  "name": "particle-angular-seed",
+  "version": "0.0.1",
+  "dependencies": {
+    "angular": "~1.2.10",
+    "angular-animate": "~1.2.5",
+    "angular-cookies": "1.2.6",
+    "angular-bootstrap": "~0.9.0",
+    "angular-resource": "1.2.6",
+    "angular-sanitize": "1.2.6",
+    "angular-ui-utils": "~0.1.0",
+    "angular-ui-router": "~0.2.10",
+    "animate-css": "git@github.com:daneden/animate.css.git",
+    "es5-shim": "~2.1.0",
+    "lodash": "~2.4.1",
+    "ng-Fx": "~0.3.3",
+    "restangular": "~1.2.2",
+    "sass-bootstrap": "~3.0.2"
+  },
+  "devDependencies": {
+    "angular-mocks": "1.2.6",
+    "angular-scenario": "1.2.6"
+  },
+  "resolutions": {
+    "angular": "~1.2.10"
+  }
+}
