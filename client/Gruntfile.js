@@ -55,7 +55,7 @@ module.exports = function (grunt) {
     'clean:dist',
     'bower-install',
     'copy:dist',
-    'compass:dist',
+    // 'compass:dist',
     'concurrent:dist',
     'useminPrepare',
     'autoprefixer',

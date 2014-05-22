@@ -4,10 +4,10 @@
 
 module.exports = {
   serve: [
-    'compass:serve'
+    // 'compass:serve'
   ],
   dist: [
-    'compass:dist',
+    // 'compass:dist',
     'newer:imagemin'
   ]
 };
