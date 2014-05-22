@@ -7,6 +7,8 @@
     "ect": "~0.5.6",
     "express": "~3.4.8",
     "lodash": "~2.4.1",
+    "passport": "^0.2.0",
+    "passport-linkedin-oauth2": "^1.1.1",
     "send": "~0.1.4",
     "when": "~2.7.0"
   },
