@@ -1,20 +1,14 @@
-//retrieves company ids from page by web scraping using phantomjs
-var page = require('webpage').create();
-var fs = require('fs');
+var request = require('request')
+  , fs = require('fs');
 
-page.open("https://angel.co/companies", function(status) {
-  if ( status !== "success" ) {
-    output.errors.push('Unable to access network');
-  } else {
-    var repeats = 0;
-    window.setInterval(function(){
-      var ids = page.evaluate(function() {
-        return [].map.call(document.querySelectorAll('a.profile-link'), function(id){
-          return id.getAttribute('data-id');
-        }).join('\n');
-      });
-      fs.write('companyIds.txt', ids , 'w');
-      phantom.exit();
-    }, 2000);
-  }
-});
+var ids = fs.readFileSync('id.txt');
+for (var i = 0; i < ids.length; i++){
+  var url = 'https://api.angel.co/1/startups/' + ids[i];
+  request({uri : url}, function(err, res, body){
+    if (err) console.error(err);
+    //TODO: parse body before writing to db.txt
+    fs.appendFile('db.txt', body, function(err){
+      if (err) console.error(err);
+    });
+  });
+}
