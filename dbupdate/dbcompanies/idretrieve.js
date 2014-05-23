@@ -13,7 +13,7 @@ page.open("https://angel.co/companies", function(status) {
           return id.getAttribute('data-id');
         }).join('\n');
       });
-      fs.write('companyIds.txt', ids , 'w');
+      fs.write('id.txt', ids , 'w');
       phantom.exit();
     }, 2000);
   }
