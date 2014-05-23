@@ -21,6 +21,7 @@ log.info('Configurations loaded... initializing the server');
 middleware(server, cfg);
 
 // ## Initialize Routes
+routes.auth(server, cfg);
 routes.api(server, cfg);
 
 // Forward remaining requests to index

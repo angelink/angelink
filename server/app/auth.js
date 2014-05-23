@@ -11,13 +11,13 @@ exports.init = function () {
   passport.use(new LinkedInStrategy({
     clientID: cfg.linkedin.apiKey,
     clientSecret: cfg.linkedin.secret,
-    callbackURL: 'http://127.0.0.1:3000/auth/linkedin/callback',
+    callbackURL: cfg.server.baseUrl + '/auth/linkedin/callback',
     scope: ['r_emailaddress', 'r_fullprofile', 'r_network'],
   }, function (accessToken, refreshToken, profile, done) {
 
       // console.log('profile', profile._json);
 
-      // Need to save the token to databases
+      // Need to save the token to databases and/or client session / JWT
 
       // asynchronous verification, for effect...
       process.nextTick(function () {
