@@ -1,0 +1,13 @@
+{
+  "name": "dbupdate",
+  "version": "0.0.1",
+  "description": "obtain data from angelList",
+  "main": "",
+  "repository": "",
+  "license": "Proprietary",
+  "private": true,
+  "dependencies": {
+    "express": "~4.3.0",
+    "request": "~2.36.0",
+  }
+}
