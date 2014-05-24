@@ -17,7 +17,7 @@ module.exports = {
     },
     created: {
       type: 'string',
-      description: 'Unix Time Created'
+      description: 'UTC Time Created'
     }
   }
 };
