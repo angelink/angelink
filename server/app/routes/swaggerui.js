@@ -4,8 +4,8 @@
 var path = require('path');
 var express = require('express');
 
-var swaggerUIPath = path.resolve(__dirname, '../../node_modules/neo4j-swagger-ui/dist/')
-var docs_handler = express.static(swaggerUIPath);
+var swaggerUIPath = path.resolve(__dirname, '../../node_modules/neo4j-swagger-ui/dist/');
+var handler = express.static(swaggerUIPath);
 
 module.exports = function (server) {
 
@@ -23,6 +23,6 @@ module.exports = function (server) {
 
     // take off leading /docs so that connect locates file correctly
     req.url = req.url.substr('/docs'.length);
-    return docs_handler(req, res, next);
+    return handler(req, res, next);
   });
 };
