@@ -6,7 +6,9 @@
 var swagger = require('swagger-node-express');
 var url = require('url');
 var users = require('./api/users');
+var locations = require('./api/locations');
 var models = require('../models/swagger');
+var skills = require('./api/skills');
 
 module.exports = function (subpath, cfg) {
 
@@ -47,6 +49,10 @@ module.exports = function (subpath, cfg) {
     // .addDelete(users.deleteUser)
   //   .addDelete(users.deleteAllUsers)
   //   .addPut(users.resetUsers)
+    .addGet(skills.findByName)
+    .addPost(skills.addSkill)
+    .addGet(locations.find)
+    .addPost(locations.addLocation)
     ;
 
   // swagger.configureDeclaration('users', {

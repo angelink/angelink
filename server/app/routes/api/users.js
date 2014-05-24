@@ -2,7 +2,6 @@
 
 // ## Module Dependencies
 var sw = require('swagger-node-express');
-var url = require('url');
 var utils = require('../../utils');
 
 

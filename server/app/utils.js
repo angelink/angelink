@@ -17,7 +17,7 @@ exports.setHeaders = function (res, queries, start) {
   if (queries) {
     res.header('Neo4j', JSON.stringify(queries));
   }
-}
+};
 
 exports.writeResponse = function (res, results, queries, start) {
   exports.setHeaders(res, queries, start);
@@ -30,4 +30,9 @@ exports.getQueryValue = function (req, key) {
 
 exports.existsInQuery = function (req, key) {
   return url.parse(req.url,true).query[key] !== undefined;
+};
+
+exports.normalizeString = function (string) {
+  var res = string.toLowerCase();
+  return res;
 };
