@@ -21,11 +21,11 @@ module.exports = {
     },
     email: {
       type: 'string',
-      description: 'Users Email. Set when this user becomes a member. Not available to unauthenticated requests.'
+      description: 'User Email. Set when user becomes a member. Not available to unauthenticated requests.'
     },
     linkedinToken: {
       type: 'string',
-      description: 'User LinkedIn Token. Set when this user becomes a member. Not available to unauthenticated requests.'
+      description: 'User LinkedIn Token. Set when user becomes a member. Not available to unauthenticated requests.'
     },
     profileImage: {
       type: 'string',
@@ -33,7 +33,7 @@ module.exports = {
     },
     joined: {
       type: 'integer',
-      description: 'Unix Time. Set when this user becomes a member.'
+      description: 'Unix Time. Set when user becomes a member.'
     },
     created: {
       type: 'integer',

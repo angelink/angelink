@@ -3,6 +3,7 @@
 // ## Module Dependencies
 var sw = require('swagger-node-express');
 var url = require('url');
+var utils = require('../../utils');
 
 
 // ## Models
@@ -10,29 +11,6 @@ var Users = require('../../models/users');
 
 var param = sw.params;
 var swe = sw.errors;
-
-
-// ## Utility Functions
-
-function setHeaders (res, queries, start) {
-  res.header('Duration-ms', new Date() - start);
-  if (queries) {
-    res.header('Neo4j', JSON.stringify(queries));
-  }
-}
-
-function writeResponse (res, results, queries, start) {
-  setHeaders(res, queries, start);
-  res.send(results);
-}
-
-function getQueryValue(req, key) {
-  return url.parse(req.url,true).query[key];
-}
-
-function existsInQuery (req, key) {
-  return url.parse(req.url,true).query[key] !== undefined;
-}
 
 
 // ## API Specs
@@ -61,11 +39,11 @@ function existsInQuery (req, key) {
 //     var options = {};
 //     var start = new Date();
     
-//     options.neo4j = existsInQuery(req, 'neo4j');
+//     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
 //     function callback (err, results, queries) {
 //       if (err || !results) throw swe.notFound('users');
-//       writeResponse(res, results, queries, start);
+//       utils.writeResponse(res, results, queries, start);
 //     }
 
 //     Users.getAll(null, options, callback);
@@ -88,6 +66,7 @@ exports.addUser = {
     parameters : [
       param.query('firstname', 'User firstname', 'string', true),
       param.query('lastname', 'User lastname', 'string', true),
+      param.query('fullname', 'User fullname', 'string', true),
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addUser'
@@ -97,15 +76,15 @@ exports.addUser = {
     var options = {};
     var start = new Date();
 
-    options.neo4j = existsInQuery(req, 'neo4j');
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
 
     Users.create({
-      id: getQueryValue(req, 'id'),
-      firstname: getQueryValue(req, 'firstname'),
-      lastname: getQueryValue(req, 'lastname')
+      id: utils.getQueryValue(req, 'id'),
+      firstname: utils.getQueryValue(req, 'firstname'),
+      lastname: utils.getQueryValue(req, 'lastname')
     }, options, function (err, results, queries) {
       if (err || !results) throw swe.invalid('input');
-      writeResponse(res, results, queries, start);
+      utils.writeResponse(res, results, queries, start);
     });
   }
 };
@@ -134,7 +113,7 @@ exports.findById = {
     var params = {};
     var start = new Date();
 
-    options.neo4j = existsInQuery(req, 'neo4j');
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
 
     if (!id) throw swe.invalid('id');
 
@@ -142,7 +121,7 @@ exports.findById = {
 
     var callback = function (err, results, queries) {
       if (err) throw swe.notFound('user');
-      writeResponse(res, results, queries, start);
+      utils.writeResponse(res, results, queries, start);
     };
 
     Users.getById(params, options, callback);
