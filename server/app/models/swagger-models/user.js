@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  id: 'User',
+  id: 'Person',
   properties: {
     id: {
       type: 'string',
@@ -9,15 +9,19 @@ module.exports = {
     },
     firstname: {
       type: 'string',
-      description: 'Firstname of User'
+      description: 'Firstname of Person'
     },
     lastname: {
       type: 'string',
-      description: 'Lastname of User'
+      description: 'Lastname of Person'
+    },
+    fullname: {
+      type: 'string',
+      description: 'Fullname of Person'
     },
     created: {
       type: 'integer',
       description: 'Unix Time Created'
-    }
+    },
   }
 };
