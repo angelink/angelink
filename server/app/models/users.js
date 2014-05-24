@@ -57,7 +57,8 @@ var _matchAll = _.partial(_matchBy, []);
 var _create = function (params, callback) {
   var cypherParams = {
     id: params.id,
-    name: params.name
+    firstname: params.firstname,
+    lastname: params.lastname
   };
 
   var query = [
