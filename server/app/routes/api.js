@@ -7,6 +7,8 @@ var swagger = require('swagger-node-express');
 var url = require('url');
 var users = require('./api/users');
 var locations = require('./api/locations');
+var companies = require('./api/companies');
+var jobs = require('./api/jobs');
 var models = require('../models/swagger');
 var skills = require('./api/skills');
 
@@ -53,6 +55,10 @@ module.exports = function (subpath, cfg) {
     .addPost(skills.addSkill)
     .addGet(locations.find)
     .addPost(locations.addLocation)
+    .addGet(companies.findById)
+    .addPost(companies.addCompany)
+    .addGet(jobs.findById)
+    .addPost(jobs.addJob)
     ;
 
   // swagger.configureDeclaration('users', {
