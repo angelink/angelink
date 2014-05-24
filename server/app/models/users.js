@@ -4,6 +4,7 @@
 var _ = require('lodash');
 var User = require('./neo4j/user.js');
 var Architect = require('neo4j-architect');
+var defaultResponseObject = require('../utils').defaultResponseObject;
 
 Architect.init();
 
@@ -15,20 +16,29 @@ var Cypher = Architect.Cypher;
 
 // return a single user
 var _singleUser = function (results, callback) {
+ 
+  var response = _.extend({}, defaultResponseObject);
+  response.object = 'user';
+
   if (results.length) {
-    callback(null, new User(results[0].user));
+    response.data = new User(results[0].user);
+    callback(null, response);
   } else {
-    callback(null, null);
+    callback(null, response);
   }
 };
 
 // return many users
 var _manyUsers = function (results, callback) {
+  
+  var response = _.extend({}, defaultResponseObject);
   var users = _.map(results, function (result) {
     return new User(result.user);
   });
 
-  callback(null, users);
+  response.data = users;
+  response.object = 'list';
+  callback(null, response);
 };
 
 
