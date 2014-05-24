@@ -16,7 +16,7 @@ module.exports = {
       description: 'URL with job application'
     },
     created: {
-      type: 'string',
+      type: 'integer',
       description: 'UTC Time Created'
     }
   }
