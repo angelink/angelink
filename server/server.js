@@ -11,18 +11,29 @@ var Config = require('./config/index.js')
 
 var cfg = new Config().getSync();
 
-// Initializes the server
+// Initializes the main server and api server (subpath)
 var server = express();
+var subpath = express();
 
 log.info('Using configurations for ' + process.env.NODE_ENV);
 log.info('Configurations loaded... initializing the server');
+
+// configure /api path for api versioning and setup to only serve json
+server.use(cfg.server.apiBasePath, subpath);
+subpath.configure(function () {
+  
+  // just using json for the api
+  subpath.use(express.json());
+  subpath.use(express.methodOverride());
+});
 
 // ## Middlesware
 middleware(server, cfg);
 
 // ## Initialize Routes
 routes.auth(server, cfg);
-routes.api(server, cfg);
+routes.api(subpath, cfg);
+routes.swaggerui(server);
 
 // Forward remaining requests to index
 server.all('/*', function (req, res) {
