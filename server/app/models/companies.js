@@ -39,7 +39,7 @@ var _matchBy = function (keys, params, callback) {
   var cypherParams = _.pick(params, keys);
 
   var query = [
-    'MATCH (company:Companies)',
+    'MATCH (company:Company)',
     Cypher.where('company', keys),
     'RETURN company'
   ].join('\n');

@@ -6,6 +6,7 @@
 var swagger = require('swagger-node-express');
 var url = require('url');
 var users = require('./api/users');
+var companies = require('./api/companies');
 var models = require('../models/swagger');
 
 module.exports = function (subpath, cfg) {
@@ -47,6 +48,8 @@ module.exports = function (subpath, cfg) {
     // .addDelete(users.deleteUser)
   //   .addDelete(users.deleteAllUsers)
   //   .addPut(users.resetUsers)
+    .addGet(companies.findById)
+    .addPost(companies.addCompany)
     ;
 
   // swagger.configureDeclaration('users', {
