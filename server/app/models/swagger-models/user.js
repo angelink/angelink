@@ -15,10 +15,6 @@ module.exports = {
       type: 'string',
       description: 'Lastname of User'
     },
-    fullname: {
-      type: 'string',
-      description: 'Fullname of User'
-    },
     email: {
       type: 'string',
       description: 'User Email. Set when user becomes a member. Not available to unauthenticated requests.'
@@ -33,11 +29,15 @@ module.exports = {
     },
     joined: {
       type: 'integer',
-      description: 'Unix Time. Set when user becomes a member.'
+      description: 'Unix Time. Automatically set when user becomes a member.'
     },
     created: {
       type: 'integer',
-      description: 'Unix Time Created'
+      description: 'Unix Time. Automatically set when the user is created.'
     },
+    lastLogin: {
+      type: 'integer',
+      description: 'Unix Time Last Login. Automatically set when the user logs in.'
+    }
   }
 };

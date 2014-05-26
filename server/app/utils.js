@@ -6,7 +6,7 @@ var url = require('url');
 // ## Default Response Object
 
 exports.defaultResponseObject = {
-  object: '', // String designator for data type, either model name or list 
+  object: '', // String descriptor for data type, either model name or list 
   data: null // Null, Object, Array
 };
 
@@ -25,11 +25,16 @@ exports.writeResponse = function (res, results, queries, start) {
 };
 
 exports.getQueryValue = function (req, key) {
-  return url.parse(req.url,true).query[key];
+  return url.parse(req.url, true).query[key];
+};
+
+exports.getBodyParam = function (req, key) {
+  // console.log(req.body)
+  return req.body[key];
 };
 
 exports.existsInQuery = function (req, key) {
-  return url.parse(req.url,true).query[key] !== undefined;
+  return url.parse(req.url, true).query[key] !== undefined;
 };
 
 exports.normalizeString = function (string) {

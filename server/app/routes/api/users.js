@@ -12,42 +12,63 @@ var param = sw.params;
 var swe = sw.errors;
 
 
+// ## Helpers
+var _prepareUserDataForInsert = function (req) {
+  var params = {};
+
+  // params.id = req.params.id || utils.getQueryValue(req, 'id');
+  // params.firstname = utils.getQueryValue(req, 'firstname');
+  // params.lastname = utils.getQueryValue(req, 'lastname');
+  // params.email = utils.getQueryValue(req, 'email');
+  // params.linkedInToken = utils.getQueryValue(req, 'linkedInToken');
+  // params.profileImage = utils.getQueryValue(req, 'profileImage');
+
+  params = req.body;
+  params.id = req.params.id || req.body.id;
+
+  return params;
+};
+
+
 // ## API Specs
 
-
 // Route: GET '/users'
-// exports.list = {
+exports.list = {
 
-//   spec: {
-//     description : "List all users",
-//     path : "/users",
-//     method: "GET",
-//     summary : "Find all users",
-//     notes : "Returns all users",
-//     type: "array",
-//     items: {
-//       $ref: "User"
-//     },
-//     produces: ["application/json"],
-//     parameters : [],
-//     responseMessages: [swe.notFound('users')],
-//     nickname : "getUsers"
-//   },
+  spec: {
+    description : 'List all users',
+    path : '/users',
+    method: 'GET',
+    summary : 'Find all users',
+    notes : 'Returns all users',
+    type: 'object',
+    items: {
+      $ref: 'User'
+    },
+    produces: ['application/json'],
+    parameters : [],
+    responseMessages: [swe.notFound('users')],
+    nickname : 'getUsers'
+  },
 
-//   action: function (req, res) {
-//     var options = {};
-//     var start = new Date();
+  action: function (req, res) {
+    var options = {};
+    var start = new Date();
     
-//     options.neo4j = utils.existsInQuery(req, 'neo4j');
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-//     function callback (err, results, queries) {
-//       if (err || !results) throw swe.notFound('users');
-//       utils.writeResponse(res, results, queries, start);
-//     }
+    function callback (err, results, queries) {
+      if (err || !results) {
+        swe.notFound('users', res);
+        return;
+      }
 
-//     Users.getAll(null, options, callback);
-//   }
-// };
+      utils.writeResponse(res, results, queries, start);
+    }
+
+    Users.getAll(null, options, callback);
+  }
+};
 
 
 // Route: POST '/users'
@@ -58,14 +79,17 @@ exports.addUser = {
     notes : 'adds a user to the graph',
     summary : 'Add a new user to the graph',
     method: 'POST',
-    type : 'array',
+    type : 'object',
     items : {
       $ref: 'User'
     },
     parameters : [
-      param.query('firstname', 'User firstname', 'string', true),
-      param.query('lastname', 'User lastname', 'string', true),
-      param.query('fullname', 'User fullname', 'string', true),
+      param.form('id', 'User UUID', 'string', true),
+      param.form('firstname', 'User firstname', 'string', true),
+      param.form('lastname', 'User lastname', 'string', true),
+      param.form('email', 'User email', 'string', false),
+      param.form('linkedInToken', 'LinkedIn OAuth Token', 'string', false),
+      param.form('profileImage', 'User profile image url', 'string', false),
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addUser'
@@ -73,18 +97,23 @@ exports.addUser = {
 
   action: function(req, res) {
     var options = {};
+    var params = {};
     var start = new Date();
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Users.create({
-      id: utils.getQueryValue(req, 'id'),
-      firstname: utils.getQueryValue(req, 'firstname'),
-      lastname: utils.getQueryValue(req, 'lastname')
-    }, options, function (err, results, queries) {
-      if (err || !results) throw swe.invalid('input');
+    var callback = function (err, results, queries) {
+      if (err || !results) {
+        swe.invalid('input', res);
+        return;
+      }
+
       utils.writeResponse(res, results, queries, start);
-    });
+    };
+
+    params = _prepareUserDataForInsert(req);
+
+    Users.create(params, options, callback);
   }
 };
 
@@ -94,14 +123,14 @@ exports.findById = {
   
   spec: {
     description : 'find a user',
-    path : '/users/{id}',
-    notes : 'Returns a user based on ID',
-    summary : 'Find user by ID',
+    path: '/users/{id}',
+    notes: 'Returns a user based on ID',
+    summary: 'Find user by ID',
     method: 'GET',
+    type: 'object',
     parameters : [
       param.path('id', 'ID of user that needs to be fetched', 'string'),
     ],
-    type : 'User',
     responseMessages : [swe.invalid('id'), swe.notFound('user')],
     nickname : 'getUserById'
   },
@@ -124,5 +153,50 @@ exports.findById = {
     };
 
     Users.getById(params, options, callback);
+  }
+};
+
+// Route: POST '/users/:id'
+exports.updateById = {
+
+  spec: {
+    path: '/users/{id}',
+    notes: 'updates an existing user',
+    summary: 'Update a user',
+    method: 'POST',
+    type: 'object',
+    items: {
+      $ref: 'User'
+    },
+    parameters : [
+      param.form('id', 'User UUID', 'string', true),
+      param.form('firstname', 'User firstname', 'string', true),
+      param.form('lastname', 'User lastname', 'string', true),
+      param.form('email', 'User email', 'string', false),
+      param.form('linkedInToken', 'LinkedIn OAuth Token', 'string', false),
+      param.form('profileImage', 'User profile image url', 'string', false),
+    ],
+    responseMessages : [swe.invalid('input')],
+    nickname : 'updateUser'
+  },
+
+  action: function (req, res) {
+    var id = req.params.id;
+    var options = {};
+    var params = {};
+    var start = new Date();
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+
+    if (!id) throw swe.invalid('id');
+
+    var callback = function (err, results, queries) {
+      if (err) throw swe.notFound('user');
+      utils.writeResponse(res, results, queries, start);
+    };
+
+    params = _prepareUserDataForInsert(req);
+
+    Users.update(params, options, callback);
   }
 };
