@@ -55,6 +55,7 @@ module.exports = function (subpath, cfg) {
     .addPost(skills.addSkill)
     .addGet(locations.find)
     .addPost(locations.addLocation)
+    .addGet(companies.list)
     .addGet(companies.findById)
     .addPost(companies.addCompany)
     .addGet(jobs.findById)
