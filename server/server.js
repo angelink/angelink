@@ -24,6 +24,8 @@ subpath.configure(function () {
   
   // just using json for the api
   subpath.use(express.json());
+  subpath.use(express.urlencoded());
+  
   subpath.use(express.methodOverride());
 });
 

@@ -37,26 +37,29 @@ module.exports = function (subpath, cfg) {
 
   // Add models and methods to swagger
   swagger.addModels(models)
-    // .addGet(users.list)
-  //   .addGet(users.userCount)
+
+    // User Model and Methods
+    .addGet(users.list)
     .addGet(users.findById)
-  //   .addGet(users.getRandom)
     .addPost(users.addUser)
-  //   .addPost(users.addRandomUsers)
-  //   .addPost(users.manyRandomFriendships)
-  //   .addPost(users.friendRandomUser)
-  //   .addPost(users.friendUser)
-  //   .addPost(users.unfriendUser)
-    // .addPut(users.updateUser)
+    .addPut(users.updateById)
     // .addDelete(users.deleteUser)
   //   .addDelete(users.deleteAllUsers)
   //   .addPut(users.resetUsers)
+
+    // Skill Model and Methods
     .addGet(skills.findByName)
     .addPost(skills.addSkill)
+
+    // Location Model and Methods
     .addGet(locations.find)
     .addPost(locations.addLocation)
+
+    // Company Model and Methods
     .addGet(companies.findById)
     .addPost(companies.addCompany)
+
+    // Job Model and Methods
     .addGet(jobs.findById)
     .addPost(jobs.addJob)
     ;
