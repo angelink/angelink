@@ -61,6 +61,7 @@ module.exports = function (subpath, cfg) {
     .addPost(companies.addCompany)
 
     // Job Model and Methods
+    .addGet(jobs.list)
     .addGet(jobs.findById)
     .addPost(jobs.addJob)
     ;
