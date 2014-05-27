@@ -54,12 +54,14 @@ module.exports = function (subpath, cfg) {
     // Location Model and Methods
     .addGet(locations.find)
     .addPost(locations.addLocation)
-
+    
     // Company Model and Methods
+    .addGet(companies.list)
     .addGet(companies.findById)
     .addPost(companies.addCompany)
 
     // Job Model and Methods
+    .addGet(jobs.list)
     .addGet(jobs.findById)
     .addPost(jobs.addJob)
     ;

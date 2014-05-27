@@ -38,42 +38,42 @@ function existsInQuery (req, key) {
 // ## API Specs
 
 
-// Route: GET '/users'
-// exports.list = {
+// Route: GET '/jobs'
+exports.list = {
 
-//   spec: {
-//     description : "List all users",
-//     path : "/users",
-//     method: "GET",
-//     summary : "Find all users",
-//     notes : "Returns all users",
-//     type: "array",
-//     items: {
-//       $ref: "User"
-//     },
-//     produces: ["application/json"],
-//     parameters : [],
-//     responseMessages: [swe.notFound('users')],
-//     nickname : "getUsers"
-//   },
+  spec: {
+    description : 'List all jobs',
+    path : '/jobs',
+    method: 'GET',
+    summary : 'Find all jobs',
+    notes : 'Returns all jobs',
+    type: 'array',
+    items: {
+      $ref: 'Job'
+    },
+    produces: ['application/json'],
+    parameters : [],
+    responseMessages: [swe.notFound('jobs')],
+    nickname : 'getJobs'
+  },
 
-//   action: function (req, res) {
-//     var options = {};
-//     var start = new Date();
+  action: function (req, res) {
+    var options = {};
+    var start = new Date();
     
-//     options.neo4j = existsInQuery(req, 'neo4j');
+    options.neo4j = existsInQuery(req, 'neo4j');
 
-//     function callback (err, results, queries) {
-//       if (err || !results) throw swe.notFound('users');
-//       writeResponse(res, results, queries, start);
-//     }
+    function callback (err, results, queries) {
+      if (err || !results) throw swe.notFound('jobs');
+      writeResponse(res, results, queries, start);
+    }
 
-//     Users.getAll(null, options, callback);
-//   }
-// };
+    Jobs.getAll(null, options, callback);
+  }
+};
 
 
-// Route: POST '/users'
+// Route: POST '/jobs'
 exports.addJob = {
   
   spec: {
@@ -114,7 +114,7 @@ exports.addJob = {
 };
 
 
-// Route: GET '/users/:id'
+// Route: GET '/jobs/:id'
 exports.findById = {
   
   spec: {
