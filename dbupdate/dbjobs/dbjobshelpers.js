@@ -1,5 +1,8 @@
 'use strict';
 
+var fs = require('fs');
+
+
 exports.parseTags = function(angel, output){
   if (angel.tags.length) {
     for (var i=0; i<angel.tags.length; i++){
@@ -33,4 +36,14 @@ exports.parseObj= function(angel){
   output.skills = [];
   exports.parseTags(angel, output);
   return output;
+};
+
+exports.appendJob = function (job) {
+  return function (err, res, body) {
+    if (err) console.error(err);
+    job.size = body.company_size;
+    fs.appendFile('db.txt', JSON.stringify(job) + '\n', function(err){
+      if (err) console.error(err);
+    });
+  };
 };
