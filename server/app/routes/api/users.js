@@ -168,7 +168,10 @@ exports.addUsers = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
     Users.createMany({users:users}, options, function (err, results) {
-      console.log(results, typeof results);
+      _.each(results, function () {
+
+      });
+      
       callback(err, results);
     });
   }
