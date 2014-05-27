@@ -42,6 +42,7 @@ module.exports = function (subpath, cfg) {
     .addGet(users.list)
     .addGet(users.findById)
     .addPost(users.addUser)
+    .addPost(users.addUsers)
     .addPut(users.updateById)
     .addDelete(users.deleteUser)
     .addDelete(users.deleteAllUsers)

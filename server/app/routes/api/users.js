@@ -5,12 +5,18 @@ var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
 
-
 // ## Models
 var Users = require('../../models/users');
 
 var param = sw.params;
 var swe = sw.errors;
+
+// var neo4j = require('neo4j');
+// var db = new neo4j.GraphDatabase(
+//     process.env['NEO4J_URL'] ||
+//     process.env['GRAPHENEDB_URL'] ||
+//     'http://localhost:7474'
+// );
 
 
 // ## Helpers
@@ -22,6 +28,18 @@ var _prepareParams = function (req) {
   return params;
 };
 
+// callback helper function
+// 
+// This is meant to be bound to a new function within the endpoint request callback
+// using _partial(). The first two parameters should be provided by the request callback 
+// for the endpoint this is being used in.
+//
+// Example:
+//
+// action: function(req, res) {
+//   var errLabel = 'Route: POST /users';
+//   var callback = _.partial(_callback, res, errLabel);
+// }
 var _callback = function (res, errLabel, err, results, queries) {
   var start = new Date();
 
@@ -87,6 +105,9 @@ exports.addUser = {
       param.form('email', 'User email', 'string', false),
       param.form('linkedInToken', 'LinkedIn OAuth Token', 'string', false),
       param.form('profileImage', 'User profile image url', 'string', false),
+      param.form('skills', 'User skills', 'array', false),
+      param.form('roles', 'User past and present roles', 'array', false),
+      param.form('location', 'User\'s current location', 'object', false)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addUser'
@@ -102,16 +123,63 @@ exports.addUser = {
     params = _prepareParams(req);
 
     Users.create(params, options, callback);
+
+    // The below method uses the neo4j module's db.createNode method
+    // It works but is limiting because you cannot add labels.
+
+    // var params = _prepareParams(req);
+    // var node = db.createNode(params);
+    // var errLabel = 'Route: POST /users';
+    // var callback = _.partial(_callback, res, errLabel);
+
+    // node.save(callback);
+  }
+};
+
+// Route: POST '/users/batch'
+exports.addUsers = {
+  
+  spec: {
+    path : '/users/batch',
+    notes : 'adds a user to the graph',
+    summary : 'Add multiple users to the graph',
+    method: 'POST',
+    type : 'object',
+    parameters : [
+      param.form('users', 'Array of user object JSON strings', 'array', true),
+    ],
+    responseMessages : [swe.invalid('users')],
+    nickname : 'addUsers'
+  },
+
+  action: function(req, res) {
+    var options = {};
+    var params = req.body;
+    var errLabel = 'Route: POST /users';
+    var callback = _.partial(_callback, res, errLabel);
+    var users = JSON.parse(params.users);
+
+    if (!users.length) throw swe.invalid('users');
+
+    // @TODO 
+    // should probably check to see if all user objects contain the minimum
+    // required properties (id, firstname, lastname, etc) and stop if not.
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+
+    Users.createMany({users:users}, options, function (err, results) {
+      console.log(results, typeof results);
+      callback(err, results);
+    });
   }
 };
 
 // Route: DELETE '/users'
 exports.deleteAllUsers = {
   spec: {
-    description : 'delete all users',
     path: '/users',
     notes: 'Deletes all users and their relationships',
-    summary: 'Find user by ID',
+    summary: 'Delete all users',
     method: 'DELETE',
     type: 'object',
     nickname : 'deleteAllUsers'
@@ -124,7 +192,7 @@ exports.deleteAllUsers = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Users.deleteAllUsers({}, options, callback);
+    Users.deleteAllUsers(null, options, callback);
   }
 };
 
@@ -133,7 +201,6 @@ exports.deleteAllUsers = {
 exports.findById = {
   
   spec: {
-    description : 'find a user',
     path: '/users/{id}',
     notes: 'Returns a user based on ID',
     summary: 'Find user by ID',

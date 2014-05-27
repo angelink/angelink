@@ -9,9 +9,22 @@ var utils = require('./utils');
 
 /**
 
+When defining a schema, only schema properties are being used in the query builder. 
+The value doesn't matter currently. Schema properties are used to prevent non-schema
+defined properties from being inserted accidentally into the database.
+
 Example Usage:
 
-qb = new QueryBuilder('ModelName');
+var schema = {
+  id: String,
+  firstname: String,
+  lastname: String,
+  email: String,
+  linkedInToken: String,
+  profileImage: String
+};
+
+qb = new QueryBuilder('ModelName', schema);
 
 var _matchAll = qb.makeMatch();
 var _matchByUUID = qb.makeMatch(['id']);
@@ -29,7 +42,6 @@ QueryBuilder.prototype.makeDelete = function (keys) {
 
   // Make sure that keys is an array
   keys = utils.forceArray(keys);
-  
   var func = function (keys, params, callback) {
     var queryStr = query.del(name, keys);
     callback(null, queryStr, params);
@@ -55,6 +67,12 @@ QueryBuilder.prototype.makeMatch = function (keys) {
   return _.partial(func, keys);
 };
 
+
+// Returns a 'merge' function
+//
+// Params of returned function:
+// @param {params} object with data to be merged
+// @param {callback} function to execute on completion of the merge
 QueryBuilder.prototype.makeMerge = function (keys, onCreate, onMatch) {
   
   var name = this.modelName;
