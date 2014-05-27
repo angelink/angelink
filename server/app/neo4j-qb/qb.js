@@ -4,8 +4,8 @@
 
 // ## Module Dependencies
 var _ = require('lodash');
-
 var query = require('./templates/query');
+var utils = require('./utils');
 
 /**
 
@@ -19,17 +19,31 @@ var _matchByUUID = qb.makeMatch(['id']);
 */
 
 var QueryBuilder = function (modelName, schema) {
-  this.model = modelName;
+  this.modelName = modelName;
   this.schema = schema;
+};
+
+QueryBuilder.prototype.makeDelete = function (keys) {
+
+  var name = this.modelName;
+
+  // Make sure that keys is an array
+  keys = utils.forceArray(keys);
+  
+  var func = function (keys, params, callback) {
+    var queryStr = query.del(name, keys);
+    callback(null, queryStr, params);
+  };
+
+  return _.partial(func, keys);
 };
 
 QueryBuilder.prototype.makeMatch = function (keys) {
 
-  var name = this.model;
+  var name = this.modelName;
 
   // Make sure that keys is an array
-  keys = keys || [];
-  if (typeof keys === 'string') keys = keys.split(', ');
+  keys = utils.forceArray(keys);
 
   var func = function (keys, params, callback) {
     var cypherParams = _.pick(params, keys);
@@ -41,18 +55,62 @@ QueryBuilder.prototype.makeMatch = function (keys) {
   return _.partial(func, keys);
 };
 
-QueryBuilder.prototype.makeMerge = function (keys) {
+QueryBuilder.prototype.makeMerge = function (keys, onCreate, onMatch) {
   
-  var name = this.model;
+  var name = this.modelName;
   var schema = this.schema;
 
-  var func = function (keys, params, callback, onCreate, onMatch) {
+  // Make sure that keys is an array
+  keys = utils.forceArray(keys);
 
-    // @TODO Make sure filtered parameters are part of the schema definition
-    var filtered = _.extend(params, schema);
-    var queryStr = query.merge(name, keys, filtered, onCreate, onMatch);
+  var func = function (keys, params, callback) {
 
-    console.log(queryStr);
+    var filtered = {};
+    var queryStr = '';
+
+    // Use the model schema to create a filtered params object.
+    // Any property not defined in schema will not be copied over.
+    // Value of all properties in the filtered params object will be set to 
+    // 'undefined' so that the statement builder knows to use a placeholder.
+    _.each(schema, function (val, key) {
+      if (params[key]) {
+        filtered[key] = undefined;
+      }
+    });
+
+    queryStr = query.merge(name, keys, filtered, onCreate, onMatch);
+
+    callback(null, queryStr, params);
+  };
+
+  return _.partial(func, keys);
+};
+
+
+QueryBuilder.prototype.makeUpdate = function (keys) {
+  
+  var name = this.modelName;
+  var schema = this.schema;
+
+  // Make sure that keys is an array
+  keys = utils.forceArray(keys);
+
+  var func = function (keys, params, callback) {
+
+    var filtered = {};
+    var queryStr = '';
+
+    // Use the model schema to create a filtered params object.
+    // Any property not defined in schema will not be copied over.
+    // Value of all properties in the filtered params object will be set to 
+    // 'undefined' so that the statement builder knows to use a placeholder.
+    _.each(schema, function (val, key) {
+      if (params[key]) {
+        filtered[key] = undefined;
+      }
+    });
+
+    queryStr = query.update(name, keys, filtered);
 
     callback(null, queryStr, params);
   };

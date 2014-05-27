@@ -24,14 +24,17 @@ var _whereTemplate = function (name, key, paramKey) {
 
 // ## Exports
 
+// Returns a 'match' statement with an optional pattern
+exports.match = function (name, keys) {
+  var pattern = _.map(keys, function (key) {
+    return util.format('%s:{%s}', key, key);
+  });
 
-// Returns a 'match' statement
-exports.match = function (name) {
-  return util.format('MATCH (%s:%s)', name.toLowerCase(), utils.capitalize(name));
+  return util.format('MATCH (%s:%s {%s})', name.toLowerCase(), utils.capitalize(name), pattern);
 };
 
 
-// Returns a 'merge' statement
+// Returns a 'merge' statement with an optional pattern
 exports.merge = function (name, keys) {
   var pattern = _.map(keys, function (key) {
     return util.format('%s:{%s}', key, key);
@@ -41,7 +44,7 @@ exports.merge = function (name, keys) {
 };
 
 
-// Returns a 'set' statement
+// Returns 'set' statement(s)
 exports.set = function (name, params) {
   var qs = 'SET ';
   var query = _.map(params, function (val, key) {
@@ -54,7 +57,6 @@ exports.set = function (name, params) {
     return '';
   }
 };
-
 
 // Returns a 'where' statement
 exports.where = function (name, keys) {
