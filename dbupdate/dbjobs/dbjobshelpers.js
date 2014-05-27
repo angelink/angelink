@@ -41,7 +41,7 @@ exports.parseObj= function(angel){
 exports.appendJob = function (job) {
   return function (err, res, body) {
     if (err) console.error(err);
-    job.size = body.company_size;
+    job.companySize = JSON.parse(body).company_size;
     fs.appendFile('db.txt', JSON.stringify(job) + '\n', function(err){
       if (err) console.error(err);
     });
