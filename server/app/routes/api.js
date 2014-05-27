@@ -43,8 +43,8 @@ module.exports = function (subpath, cfg) {
     .addGet(users.findById)
     .addPost(users.addUser)
     .addPut(users.updateById)
-    // .addDelete(users.deleteUser)
-  //   .addDelete(users.deleteAllUsers)
+    .addDelete(users.deleteUser)
+    .addDelete(users.deleteAllUsers)
   //   .addPut(users.resetUsers)
 
     // Skill Model and Methods

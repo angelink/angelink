@@ -1,6 +1,7 @@
 'use strict';
 
 // ## Module Dependencies
+var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
 
@@ -13,20 +14,24 @@ var swe = sw.errors;
 
 
 // ## Helpers
-var _prepareUserDataForInsert = function (req) {
-  var params = {};
+var _prepareParams = function (req) {
+  var params = req.body;
 
-  // params.id = req.params.id || utils.getQueryValue(req, 'id');
-  // params.firstname = utils.getQueryValue(req, 'firstname');
-  // params.lastname = utils.getQueryValue(req, 'lastname');
-  // params.email = utils.getQueryValue(req, 'email');
-  // params.linkedInToken = utils.getQueryValue(req, 'linkedInToken');
-  // params.profileImage = utils.getQueryValue(req, 'profileImage');
-
-  params = req.body;
   params.id = req.params.id || req.body.id;
 
   return params;
+};
+
+var _callback = function (res, errLabel, err, results, queries) {
+  var start = new Date();
+
+  if (err || !results) {
+    if (err) console.error(errLabel + ' ', err);
+    swe.invalid('input', res);
+    return;
+  }
+
+  utils.writeResponse(res, results, queries, start);
 };
 
 
@@ -53,18 +58,10 @@ exports.list = {
 
   action: function (req, res) {
     var options = {};
-    var start = new Date();
+    var errLabel = 'Route: GET /users';
+    var callback = _.partial(_callback, res, errLabel);
     
     options.neo4j = utils.existsInQuery(req, 'neo4j');
-
-    function callback (err, results, queries) {
-      if (err || !results) {
-        swe.notFound('users', res);
-        return;
-      }
-
-      utils.writeResponse(res, results, queries, start);
-    }
 
     Users.getAll(null, options, callback);
   }
@@ -98,22 +95,36 @@ exports.addUser = {
   action: function(req, res) {
     var options = {};
     var params = {};
-    var start = new Date();
+    var errLabel = 'Route: POST /users';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
+
+    Users.create(params, options, callback);
+  }
+};
+
+// Route: DELETE '/users'
+exports.deleteAllUsers = {
+  spec: {
+    description : 'delete all users',
+    path: '/users',
+    notes: 'Deletes all users and their relationships',
+    summary: 'Find user by ID',
+    method: 'DELETE',
+    type: 'object',
+    nickname : 'deleteAllUsers'
+  },
+
+  action: function (req, res) {
+    var options = {};
+    var errLabel = 'Route: DELETE /users';
+    var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    var callback = function (err, results, queries) {
-      if (err || !results) {
-        swe.invalid('input', res);
-        return;
-      }
-
-      utils.writeResponse(res, results, queries, start);
-    };
-
-    params = _prepareUserDataForInsert(req);
-
-    Users.create(params, options, callback);
+    Users.deleteAllUsers({}, options, callback);
   }
 };
 
@@ -139,18 +150,14 @@ exports.findById = {
     var id = req.params.id;
     var options = {};
     var params = {};
-    var start = new Date();
-
-    options.neo4j = utils.existsInQuery(req, 'neo4j');
 
     if (!id) throw swe.invalid('id');
 
-    params.id = id;
+    var errLabel = 'Route: GET /users/{id}';
+    var callback = _.partial(_callback, res, errLabel);
 
-    var callback = function (err, results, queries) {
-      if (err) throw swe.notFound('user');
-      utils.writeResponse(res, results, queries, start);
-    };
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
 
     Users.getById(params, options, callback);
   }
@@ -161,7 +168,7 @@ exports.updateById = {
 
   spec: {
     path: '/users/{id}',
-    notes: 'updates an existing user',
+    notes: 'Updates an existing user',
     summary: 'Update a user',
     method: 'POST',
     type: 'object',
@@ -169,7 +176,7 @@ exports.updateById = {
       $ref: 'User'
     },
     parameters : [
-      param.form('id', 'User UUID', 'string', true),
+      param.path('id', 'ID of user that needs to be fetched', 'string'),
       param.form('firstname', 'User firstname', 'string', true),
       param.form('lastname', 'User lastname', 'string', true),
       param.form('email', 'User email', 'string', false),
@@ -184,19 +191,48 @@ exports.updateById = {
     var id = req.params.id;
     var options = {};
     var params = {};
-    var start = new Date();
-
-    options.neo4j = utils.existsInQuery(req, 'neo4j');
 
     if (!id) throw swe.invalid('id');
 
-    var callback = function (err, results, queries) {
-      if (err) throw swe.notFound('user');
-      utils.writeResponse(res, results, queries, start);
-    };
+    var errLabel = 'Route: POST /users/{id}';
+    var callback = _.partial(_callback, res, errLabel);
 
-    params = _prepareUserDataForInsert(req);
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
 
     Users.update(params, options, callback);
+  }
+};
+
+// Route: DELETE '/users/:id'
+exports.deleteUser = {
+
+  spec: {
+    path: '/users/{id}',
+    notes: 'Deletes an existing user and his/her relationships',
+    summary: 'Delete a user',
+    method: 'DELETE',
+    type: 'object',
+    parameters: [
+      param.path('id', 'ID of user to be deleted', 'string'),
+    ],
+    responseMessages: [swe.invalid('input')],
+    nickname : 'deleteUser'
+  },
+
+  action: function (req, res) {
+    var id = req.params.id;
+    var options = {};
+    var params = {};
+
+    if (!id) throw swe.invalid('id');
+
+    var errLabel = 'Route: DELETE /users/{id}';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
+
+    Users.deleteUser(params, options, callback);
   }
 };
