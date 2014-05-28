@@ -15,9 +15,9 @@ exports.init = function () {
     scope: ['r_emailaddress', 'r_fullprofile', 'r_network'],
   }, function (accessToken, refreshToken, profile, done) {
 
-      // console.log('profile', profile._json);
+      console.log('profile', profile._json);
 
-      // Need to save the token to databases and/or client session / JWT
+      // Need to save the token to databases and/or client session/JWT
 
       // asynchronous verification, for effect...
       process.nextTick(function () {
@@ -29,8 +29,8 @@ exports.init = function () {
   ));
 
   // ** This happens after the above callback.
+  // @NOTE Auth will fail without this for some reason
   passport.serializeUser(function(user, done) {
-    console.log('serialize', user);
     done(null, user);
   });
 };

@@ -34,6 +34,7 @@ var _matchByUUID = qb.makeMatch(['id']);
 var QueryBuilder = function (modelName, schema) {
   this.modelName = modelName;
   this.schema = schema;
+  this.queryString = query;
 };
 
 QueryBuilder.prototype.makeDelete = function (keys) {
@@ -135,5 +136,8 @@ QueryBuilder.prototype.makeUpdate = function (keys) {
 
   return _.partial(func, keys);
 };
+
+// @TODO
+QueryBuilder.prototype.makeRelate = function () {};
 
 module.exports = QueryBuilder;
