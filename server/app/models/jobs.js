@@ -2,132 +2,78 @@
 
 // ## Module Dependencies
 var _ = require('lodash');
-var Job = require('./neo4j/job.js');
 var Architect = require('neo4j-architect');
+var db = require('../db');
+var QueryBuilder = require('../neo4j-qb/qb.js');
+var utils = require('../utils');
 
 Architect.init();
 
 var Construct = Architect.Construct;
-var Cypher = Architect.Cypher;
+
+var schema = {
+  id: String,
+  title: String,
+  created: String
+};
+
+var qb = new QueryBuilder('Job', schema);
+
+// ## Model
+
+var Job = function(_data) {
+  _.extend(this, _data);
+  //get the unique node id
+  this.nodeId = +this.self.split('/').pop();
+};
+
+Job.prototype.modelName = 'Job';
 
 // ## Results Functions
-// To be combined with queries using _.partial()
 
-// return a single user
-var _singleJob = function (results, callback) {
-  if (results.length) {
-    callback(null, new Job(results[0].job));
-  } else {
-    callback(null, null);
-  }
-};
-
-// return many users
-var _manyJobs = function (results, callback) {
-  var jobs = _.map(results, function (result) {
-    return new Job(result.job);
-  });
-
-  callback(null, jobs);
-};
-
+var _singleJob = _.partial(utils.formatSingleResponse, Job);
+var _manyJobs = _.partial(utils.formatManyResponse, Job);
 
 // ## Query Functions
 // Should be combined with results functions using _.partial()
 
-var _matchBy = function (keys, params, callback) {
-  var cypherParams = _.pick(params, keys);
+var _matchByJUID = qb.makeMatch(['id']);
 
-  var query = [
-    'MATCH (job:Job)',
-    Cypher.where('job', keys),
-    'RETURN job'
-  ].join('\n');
+var _matchAll = qb.makeMatch();
 
-  console.log('_matchBy query', query);
+var _create = qb.makeMerge(['id']);
 
-  callback(null, query, cypherParams);
+// var _createRelationship = qb.makeRelate();
+
+var _update = qb.makeUpdate(['id']);
+
+var _delete = qb.makeDelete(['id']);
+
+var _deleteAll = qb.makeDelete();
+
+var _createManySetup = function (params, callback) {
+  if (params.list && _.isArray(params.list)) {
+    callback(null, _.map(params.list, function (job) {
+      return _.pick(job, Object.keys(schema));
+    }));
+  } else {
+    callback(null, []);
+  }
 };
 
-var _matchByJUID = _.partial(_matchBy, ['id']);
 
-var _matchAll = _.partial(_matchBy, []);
-
-// creates the user with cypher
-var _create = function (params, callback) {
-  var cypherParams = {
-    id: params.id,
-    title: params.title,
-    applyURL: params.applyURL,
-    created: params.created
-  };
-
-  var query = [
-    'MERGE (job:Job {title: {title}, applyURL: {applyURL}, created: {created}, id: {id}})',
-    'RETURN job'
-  ].join('\n');
-
-  console.log('create query', query);
-
-  callback(null, query, cypherParams);
-};
-
-// update the user with cypher
-// var _update = function (params, callback) {
-
-//   var cypherParams = {
-//     id : params.id,
-//     firstname : params.firstname,
-//     lastname : params.lastname,
-//   };
-
-//   var query = [
-//     'MATCH (user:User {id:{id}})',
-//     'SET user.firstname = {firstname}',
-//     'SET user.lastname = {lastname}',
-//     'RETURN user'
-//   ].join('\n');
-
-//   callback(null, query, cypherParams);
-// };
-
-// delete the user and any relationships with cypher
-var _delete = function (params, callback) {
-  var cypherParams = {
-    id: params.id
-  };
-
-  var query = [
-    'MATCH (job:Job {id:{id}})',
-    'OPTIONAL MATCH (job)-[r]-()',
-    'DELETE job, r',
-  ].join('\n');
-
-  callback(null, query, cypherParams);
-};
-
-// delete all users
-var _deleteAll = function (params, callback) {
-  var cypherParams = {};
-
-  var query = [
-    'MATCH (job:Job)',
-    'OPTIONAL MATCH (job)-[r]-()',
-    'DELETE job, r',
-  ].join('\n');
-
-  callback(null, query, cypherParams);
-};
+// ## Constructed Functions
 
 // create a new user
 var create = new Construct(_create, _singleJob);
+
+var createMany = new Construct(_createManySetup).map(create);
 
 var getById = new Construct(_matchByJUID).query().then(_singleJob);
 
 var getAll = new Construct(_matchAll, _manyJobs);
 
-// get a user by id and update their properties
-// var update = new Construct(_update, _singleUser);
+var update = new Construct(_update, _singleJob);
 
 // delete a user by id
 var deleteJob = new Construct(_delete);
@@ -135,11 +81,70 @@ var deleteJob = new Construct(_delete);
 // delete a user by id
 var deleteAllJobs = new Construct(_deleteAll);
 
-// export exposed functions
-module.exports = {
-  getById: getById.done(),
-  create: create.done(),
-  getAll: getAll.done(),
-  deleteJob: deleteJob.done(),
-  deleteAllJobs: deleteAllJobs.done(),
+// ## Building relationships
+
+Job.prototype.hasRole = function (toRole, callback) {
+  var that = this;
+  var query = [];
+  
+  query.push('START a=node({from}), b=node({to})');
+  query.push('CREATE UNIQUE (a)-[:HAS_ROLE]->(b)');
+  var qs = query.join('\n');
+
+  db.query(qs, {from: that.nodeId, to: toRole.nodeId}, callback);
 };
+
+Job.prototype.atLocation = function (toLocation, callback) {
+  var that = this;
+  var query = [];
+  
+  query.push('START a=node({from}), b=node({to})');
+  query.push('CREATE UNIQUE (a)-[:AT]->(b)');
+  var qs = query.join('\n');
+
+  db.query(qs, {from: that.nodeId, to: toLocation.nodeId}, callback);
+};
+
+Job.prototype.requiresSkill = function (toSkill, callback) {
+  var that = this;
+  var query = [];
+  
+  query.push('START a=node({from}), b=node({to})');
+  query.push('CREATE UNIQUE (a)-[:REQUIRES_SKILL]->(b)');
+  var qs = query.join('\n');
+
+  db.query(qs, {from: that.nodeId, to: toSkill.nodeId}, callback);
+};
+
+Job.prototype.atCompany = function (toCompany, callback) {
+  var that = this;
+  var query = [];
+  
+  query.push('START a=node({from}), b=node({to})');
+  query.push('CREATE UNIQUE (a)-[:AT_COMPANY]->(b)');
+  var qs = query.join('\n');
+
+  db.query(qs, {from: that.nodeId, to: toCompany.nodeId}, callback);
+};
+
+Job.prototype.hasSalary = function (toSalary, callback) {
+  var that = this;
+  var query = [];
+  
+  query.push('START a=node({from}), b=node({to})');
+  query.push('CREATE UNIQUE (a)-[:HAS_SALARY]->(b)');
+  var qs = query.join('\n');
+
+  db.query(qs, {from: that.nodeId, to: toSalary.nodeId}, callback);
+};
+
+// static methods
+Job.create = create.done();
+Job.createMany = createMany.done();
+Job.deleteJob = deleteJob.done();
+Job.deleteAllJobs = deleteAllJobs.done();
+Job.getById = getById.done();
+Job.getAll = getAll.done();
+Job.update = update.done();
+
+module.exports = Job;

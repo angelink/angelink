@@ -67,6 +67,10 @@ module.exports = function (subpath, cfg) {
     .addGet(jobs.list)
     .addGet(jobs.findById)
     .addPost(jobs.addJob)
+    .addPost(jobs.addJobs)
+    .addPut(jobs.updateById)
+    .addDelete(jobs.deleteJob)
+    .addDelete(jobs.deleteAllJobs)
     ;
 
   // swagger.configureDeclaration('users', {

@@ -1,39 +1,36 @@
 'use strict';
 
 // ## Module Dependencies
+var _ = require('lodash');
 var sw = require('swagger-node-express');
-var url = require('url');
-
+var utils = require('../../utils');
 
 // ## Models
-var Jobs = require('../../models/jobs');
+var Job = require('../../models/jobs');
 
 var param = sw.params;
 var swe = sw.errors;
 
+// ## Helpers
+var _prepareParams = function (req) {
+  var params = req.body;
 
-// ## Utility Functions
+  params.userId = req.params.userId || req.body.userId;
 
-function setHeaders (res, queries, start) {
-  res.header('Duration-ms', new Date() - start);
-  if (queries) {
-    res.header('Neo4j', JSON.stringify(queries));
+  return params;
+};
+
+var _callback = function (res, errLabel, err, results, queries) {
+  var start = new Date();
+
+  if (err || !results) {
+    if (err) console.error(errLabel + ' ', err);
+    swe.invalid('input', res);
+    return;
   }
-}
 
-function writeResponse (res, results, queries, start) {
-  setHeaders(res, queries, start);
-  res.send(results);
-}
-
-function getQueryValue(req, key) {
-  return url.parse(req.url,true).query[key];
-}
-
-function existsInQuery (req, key) {
-  return url.parse(req.url,true).query[key] !== undefined;
-}
-
+  utils.writeResponse(res, results, queries, start);
+};
 
 // ## API Specs
 
@@ -47,7 +44,7 @@ exports.list = {
     method: 'GET',
     summary : 'Find all jobs',
     notes : 'Returns all jobs',
-    type: 'array',
+    type: 'object',
     items: {
       $ref: 'Job'
     },
@@ -59,16 +56,12 @@ exports.list = {
 
   action: function (req, res) {
     var options = {};
-    var start = new Date();
+    var errLabel = 'Route: GET /users';
+    var callback = _.partial(_callback, res, errLabel);
     
-    options.neo4j = existsInQuery(req, 'neo4j');
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    function callback (err, results, queries) {
-      if (err || !results) throw swe.notFound('jobs');
-      writeResponse(res, results, queries, start);
-    }
-
-    Jobs.getAll(null, options, callback);
+    Job.getAll(null, options, callback);
   }
 };
 
@@ -81,15 +74,14 @@ exports.addJob = {
     notes : 'adds a job to the graph',
     summary : 'Add a new job to the graph',
     method: 'POST',
-    type : 'array',
+    type : 'object',
     items : {
       $ref: 'Job'
     },
     parameters : [
-      param.query('title', 'Job title', 'string', true),
-      param.query('applyURL', 'Job applyURL', 'string', true),
-      param.query('created', 'Job created', 'string', true),
-      param.query('id', 'Job id', 'string', true)
+      param.form('id', 'Job JUID', 'string', true),
+      param.form('title', 'Job title', 'string', true),
+      param.form('created', 'Job created', 'string', true)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addJob'
@@ -97,22 +89,96 @@ exports.addJob = {
 
   action: function(req, res) {
     var options = {};
-    var start = new Date();
+    var params = {};
+    var errLabel = 'Route: POST /users';
+    var callback = _.partial(_callback, res, errLabel);
 
-    options.neo4j = existsInQuery(req, 'neo4j');
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
 
-    Jobs.create({
-      id: getQueryValue(req, 'id'),
-      name: getQueryValue(req, 'name'),
-      applyURL: getQueryValue(req, 'applyURL'),
-      created: getQueryValue(req, 'created')
-    }, options, function (err, results, queries) {
-      if (err || !results) throw swe.invalid('input');
-      writeResponse(res, results, queries, start);
-    });
+    Job.create(params, options, callback);
   }
 };
 
+// Route: POST '/jobs/batch'
+exports.addJobs = {
+  
+  spec: {
+    path : '/jobs/batch',
+    notes : 'adds many jobs to the graph',
+    summary : 'Add multiple jobs to the graph',
+    method: 'POST',
+    type : 'object',
+    parameters : [
+      param.form('list', 'Array of job object JSON strings', 'array', true),
+    ],
+    responseMessages : [swe.invalid('list')],
+    nickname : 'addJobs'
+  },
+
+  action: function(req, res) {
+    var options = {};
+    var params = req.body;
+    var errLabel = 'Route: POST /jobs/batch';
+    var callback = _.partial(_callback, res, errLabel);
+    var jobs = JSON.parse(params.list);
+
+    if (!jobs.length) throw swe.invalid('jobs');
+
+    // @TODO 
+    // should probably check to see if all user objects contain the minimum
+    // required properties (userId, firstname, lastname, etc) and stop if not.
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+
+    Job.createMany({list:jobs}, options, callback);
+
+    // ## test relationship creation for new Job node
+    // var getNextJob = function (index, length, collection) {
+    //   var next = index + 1;
+    //   if (next >= length) {
+    //     next = 0;
+    //   }
+
+    //   return collection[next].data;
+    // };
+
+    // Job.createMany({list:jobs}, options, function (err, results) {
+    //   _.each(results, function (job, index, results) {
+    //     var nextJob = getNextJob(index, results.length, results);
+
+    //     job.data.hasSalary(nextJob, function (err, res) {
+    //       console.log(err, res);
+    //     });
+    //   });
+
+    //   callback(err, results);
+    // });
+
+  }
+};
+
+// Route: DELETE '/jobs'
+exports.deleteAllJobs = {
+  spec: {
+    path: '/jobs',
+    notes: 'Deletes all jobs and their relationships',
+    summary: 'Delete all jobs',
+    method: 'DELETE',
+    type: 'object',
+    nickname : 'deleteAllJobs'
+  },
+
+  action: function (req, res) {
+    var options = {};
+    var errLabel = 'Route: DELETE /jobs';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+
+    Job.deleteAllJobs(null, options, callback);
+  }
+};
 
 // Route: GET '/jobs/:id'
 exports.findById = {
@@ -135,19 +201,88 @@ exports.findById = {
     var id = req.params.id;
     var options = {};
     var params = {};
-    var start = new Date();
-
-    options.neo4j = existsInQuery(req, 'neo4j');
 
     if (!id) throw swe.invalid('id');
 
-    params.id = id;
+    var errLabel = 'Route: GET /jobs/{id}';
+    var callback = _.partial(_callback, res, errLabel);
 
-    var callback = function (err, results, queries) {
-      if (err) throw swe.notFound('job');
-      writeResponse(res, results, queries, start);
-    };
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
 
-    Jobs.getById(params, options, callback);
+    Job.getById(params, options, callback);
+  }
+};
+
+
+// Route: POST '/jobs/:id'
+exports.updateById = {
+
+  spec: {
+    path: '/jobs/{id}',
+    notes: 'Updates an existing job',
+    summary: 'Update a job',
+    method: 'POST',
+    type: 'object',
+    items: {
+      $ref: 'Job'
+    },
+    parameters : [
+      param.path('id', 'ID of job that needs to be fetched', 'string'),
+      param.form('id', 'Job JUID', 'string', true),
+      param.form('title', 'Job title', 'string', true),
+      param.form('created', 'Job created', 'string', true)
+    ],
+    responseMessages : [swe.invalid('input')],
+    nickname : 'updateJob'
+  },
+
+  action: function (req, res) {
+    var id = req.params.id;
+    var options = {};
+    var params = {};
+
+    if (!id) throw swe.invalid('userId');
+
+    var errLabel = 'Route: POST /jobs/{id}';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
+
+    Job.update(params, options, callback);
+  }
+};
+
+// Route: DELETE '/users/:userId'
+exports.deleteJob = {
+
+  spec: {
+    path: '/jobs/{id}',
+    notes: 'Deletes an existing job and relationships',
+    summary: 'Delete a job',
+    method: 'DELETE',
+    type: 'object',
+    parameters: [
+      param.path('id', 'ID of job to be deleted', 'string'),
+    ],
+    responseMessages: [swe.invalid('input')],
+    nickname : 'deleteUser'
+  },
+
+  action: function (req, res) {
+    var id = req.params.userId;
+    var options = {};
+    var params = {};
+
+    if (!id) throw swe.invalid('id');
+
+    var errLabel = 'Route: DELETE /jobs/{id}';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
+
+    Job.deleteJob(params, options, callback);
   }
 };
