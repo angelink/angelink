@@ -14,7 +14,7 @@ var Construct = Architect.Construct;
 // Presently only schema properties are being used in the query builder. 
 // The value doesn't matter right now.
 var schema = {
-  userId: String,
+  id: String,
   firstname: String,
   lastname: String,
   email: String,
@@ -30,7 +30,7 @@ var User = function (_data) {
   _.extend(this, _data);
 
   // get the id from the self property returned by neo4j
-  this.id = +this.self.split('/').pop();
+  this.nodeId = +this.self.split('/').pop();
 };
 
 User.prototype.modelName = 'User';
@@ -46,7 +46,7 @@ var _manyUsers = _.partial(utils.formatManyResponse, User);
 // ## Query Functions
 // Should be combined with results functions using Construct
 
-var _matchByUUID = qb.makeMatch(['userId']);
+var _matchByUUID = qb.makeMatch(['id']);
 
 var _matchAll = qb.makeMatch();
 
@@ -56,20 +56,20 @@ var _create = (function () {
     created: 'timestamp()'
   };
 
-  return qb.makeMerge(['userId'], onCreate);
+  return qb.makeMerge(['id'], onCreate);
 })();
 
 // var _createRelationship = qb.makeRelate();
 
-var _update = qb.makeUpdate(['userId']);
+var _update = qb.makeUpdate(['id']);
 
-var _delete = qb.makeDelete(['userId']);
+var _delete = qb.makeDelete(['id']);
 
 var _deleteAll = qb.makeDelete();
 
 var _createManySetup = function (params, callback) {
-  if (params.users && _.isArray(params.users)) {
-    callback(null, _.map(params.users, function (user) {
+  if (params.list && _.isArray(params.list)) {
+    callback(null, _.map(params.list, function (user) {
       return _.pick(user, Object.keys(schema));
     }));
   } else {
@@ -90,30 +90,20 @@ var getById = new Construct(_matchByUUID).query().then(_singleUser);
 
 var getAll = new Construct(_matchAll, _manyUsers);
 
-// get a user by userId and update their properties
+// get a user by id and update their properties
 var update = new Construct(_update, _singleUser);
 
-// delete a user by userId
+// delete a user by id
 var deleteUser = new Construct(_delete);
 
-// delete a user by userId
+// delete a user by id
 var deleteAllUsers = new Construct(_deleteAll);
 
 
 // ## User Model
 
-
-// @param _data {object} the raw data object from neo4j
-// var User = function (_data) {
-//   _.extend(this, _data);
-
-//   // get the id from the self property returned by neo4j
-//   this.id = +this.self.split('/').pop();
-// };
-
-// instance methods:
-
 // relationships:
+
 User.prototype.knows = function (toUser, callback) {
   var that = this;
   var query = [];
@@ -149,6 +139,7 @@ User.prototype.hasSkill = function (toSkill, callback) {
 
 
 // static methods:
+
 User.create = create.done();
 User.createMany = createMany.done();
 User.deleteUser = deleteUser.done();
