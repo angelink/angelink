@@ -64,8 +64,8 @@ var _deleteAll = qb.makeDelete();
 
 var _createManySetup = function (params, callback) {
   if (params.list && _.isArray(params.list)) {
-    callback(null, _.map(params.list, function (obj) {
-      return _.pick(obj, Object.keys(schema));
+    callback(null, _.map(params.list, function (data) {
+      return _.pick(data, Object.keys(schema));
     }));
   } else {
     callback(null, []);

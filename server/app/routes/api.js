@@ -57,8 +57,13 @@ module.exports = function (subpath, cfg) {
     .addDelete(skills.deleteAllSkills)
 
     // Location Model and Methods
-    .addGet(locations.find)
+    .addGet(locations.list)
+    .addGet(locations.findById)
     .addPost(locations.addLocation)
+    .addPost(locations.addLocations)
+    .addPut(locations.updateById)
+    .addDelete(locations.deleteLocation)
+    .addDelete(locations.deleteAllLocations)
     
     // Company Model and Methods
     .addGet(companies.list)

@@ -59,8 +59,6 @@ var _create = (function () {
   return qb.makeMerge(['id'], onCreate);
 })();
 
-// var _createRelationship = qb.makeRelate();
-
 var _update = qb.makeUpdate(['id']);
 
 var _delete = qb.makeDelete(['id']);
@@ -69,8 +67,8 @@ var _deleteAll = qb.makeDelete();
 
 var _createManySetup = function (params, callback) {
   if (params.list && _.isArray(params.list)) {
-    callback(null, _.map(params.list, function (user) {
-      return _.pick(user, Object.keys(schema));
+    callback(null, _.map(params.list, function (data) {
+      return _.pick(data, Object.keys(schema));
     }));
   } else {
     callback(null, []);
@@ -98,9 +96,6 @@ var deleteUser = new Construct(_delete);
 
 // delete a user by id
 var deleteAllUsers = new Construct(_deleteAll);
-
-
-// ## User Model
 
 // relationships:
 

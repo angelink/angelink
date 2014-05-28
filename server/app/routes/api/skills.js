@@ -139,7 +139,7 @@ exports.addSkills = {
   action: function(req, res) {
     var options = {};
     var params = req.body;
-    var errLabel = 'Route: POST /skills';
+    var errLabel = 'Route: POST /skills/batch';
     var callback = _.partial(_callback, res, errLabel);
     var list = JSON.parse(params.list);
 
