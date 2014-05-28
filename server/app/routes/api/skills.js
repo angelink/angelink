@@ -7,47 +7,80 @@ var utils = require('../../utils');
 
 
 // ## Models
-var Skills = require('../../models/skills');
+var Skill = require('../../models/skills');
 
 var param = sw.params;
 var swe = sw.errors;
 
+// ## Helpers
+var _prepareParams = function (req) {
+  var params = req.body;
+
+  params.id = req.params.id;
+
+  // Turn name into ID
+  if (!params.id) {
+    params.id = utils.urlSafeString(params.name);
+  }
+
+  return params;
+};
+
+// callback helper function
+// 
+// This is meant to be bound to a new function within the endpoint request callback
+// using _partial(). The first two parameters should be provided by the request callback 
+// for the endpoint this is being used in.
+//
+// Example:
+//
+// action: function(req, res) {
+//   var errLabel = 'Route: POST /users';
+//   var callback = _.partial(_callback, res, errLabel);
+// }
+var _callback = function (res, errLabel, err, results, queries) {
+  var start = new Date();
+
+  if (err || !results) {
+    if (err) console.error(errLabel + ' ', err);
+    swe.invalid('input', res);
+    return;
+  }
+
+  utils.writeResponse(res, results, queries, start);
+};
+
 // ## API Specs
 
-
 // Route: GET '/skills'
-// exports.list = {
+exports.list = {
 
-//   spec: {
-//     description : "List all skills",
-//     path : "/skills",
-//     method: "GET",
-//     summary : "Find all skills",
-//     notes : "Returns all skills",
-//     type: "array",
-//     items: {
-//       $ref: "User"
-//     },
-//     produces: ["application/json"],
-//     parameters : [],
-//     responseMessages: [swe.notFound('skills')],
-//     nickname : "getSkills"
-//   },
+  spec: {
+    description : 'List all skills',
+    path : '/skills',
+    method: 'GET',
+    summary : 'Find all skills',
+    notes : 'Returns all skills',
+    type: 'object',
+    items: {
+      $ref: 'Skill'
+    },
+    produces: ['application/json'],
+    parameters : [],
+    responseMessages: [swe.notFound('skills')],
+    nickname : 'getSkills'
+  },
 
-//   action: function (req, res) {
-//     var options = {};
-//     var start = new Date();
+  action: function (req, res) {
+    var options = {};
+    var errLabel = 'Route: GET /skills';
+    var callback = _.partial(_callback, res, errLabel);
     
-//     options.neo4j = utils.existsInQuery(req, 'neo4j');
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-//     function callback (err, results, queries) {
-//       if (err || !results) throw swe.notFound('skills');
-//       utils.writeResponse(res, results, queries, start);
-//     }
-
-//     Skills.getAll(null, options, callback);
-//   }
-// };
+    Skill.getAll(null, options, callback);
+  }
+};
 
 
 // Route: POST '/skills'
@@ -58,12 +91,12 @@ exports.addSkill = {
     notes : 'adds a skill to the graph',
     summary : 'Add a new skill to the graph',
     method: 'POST',
-    type : 'array',
+    type : 'object',
     items : {
       $ref: 'User'
     },
     parameters : [
-      param.query('name', 'Skill name. Will be normalized before being saved.', 'string', true),
+      param.form('name', 'Skill name. A normalized id will be created from this.', 'string', true),
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addSkill'
@@ -71,67 +104,91 @@ exports.addSkill = {
 
   action: function(req, res) {
     var options = {};
-    var names = [];
-    var start = new Date();
+    var params = {};
+    var errLabel = 'Route: POST /skills';
+    var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
 
-    // so that we are able to add multiple skills at once
-    names = _.invoke(utils.getQueryValue(req, 'name').split(','), 'trim');
-
-    // normalize the names
-    names = _.map(names, function (name) {
-      return utils.normalize(name);
-    });
-
-    if (!names.length){
-      throw swe.invalid('input');
-    } else {
-      Skills.createMany({
-        names: names
-      }, options, function (err, results, queries) {
-        if (err || !results) throw swe.invalid('input');
-        utils.writeResponse(res, results, queries, start);
-      });
-    }
+    Skill.create(params, options, callback);
   }
 };
 
 
-// Route: GET '/skills/:name'
-exports.findByName = {
+// Route: POST '/skills/batch'
+exports.addSkills = {
   
   spec: {
-    description : 'find a skill',
-    path : '/skills/{name}',
-    notes : 'Returns a skill based on name',
-    summary : 'Find skill by name',
-    method: 'GET',
+    path : '/skills/batch',
+    notes : 'add skills to the graph',
+    summary : 'Add multiple skills to the graph',
+    method: 'POST',
+    type : 'object',
     parameters : [
-      param.path('name', 'name of skill that needs to be fetched', 'string'),
+      param.form('list', 'Array of skill object JSON strings', 'array', true),
     ],
-    type : 'User',
-    responseMessages : [swe.invalid('name'), swe.notFound('skill')],
-    nickname : 'getSkillByName'
+    responseMessages : [swe.invalid('list')],
+    nickname : 'addSkills'
   },
 
-  action: function (req, res) {
-    var name = req.params.name;
+  action: function(req, res) {
     var options = {};
-    var params = {};
-    var start = new Date();
+    var params = req.body;
+    var errLabel = 'Route: POST /skills';
+    var callback = _.partial(_callback, res, errLabel);
+    var skills = JSON.parse(params.list);
+
+    if (!skills.length) throw swe.invalid('skills');
+
+    // @TODO 
+    // should probably check to see if all skill objects contain the minimum
+    // required properties and stop if not.
+
+    skills = _.map(skills, function (skill) {
+      return {
+        id: utils.urlSafeString(skill.name),
+        name: skill.name
+      };
+    });
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    if (!name) throw swe.invalid('name');
+    Skill.createMany({list:skills}, options, callback);
+  }
+};
 
-    params.name = name;
 
-    var callback = function (err, results, queries) {
-      if (err) throw swe.notFound('skill');
-      utils.writeResponse(res, results, queries, start);
-    };
+// Route: GET '/skills/:id'
+exports.findById = {
+  
+  spec: {
+    description : 'find a skill',
+    path : '/skills/{id}',
+    notes : 'Returns a skill based on id',
+    summary : 'Find skill by id',
+    method: 'GET',
+    parameters : [
+      param.path('id', 'ID of skill that needs to be fetched', 'string'),
+    ],
+    type : 'Skill',
+    responseMessages : [swe.invalid('id'), swe.notFound('skill')],
+    nickname : 'getSkillById'
+  },
 
-    Skills.getSkillByName(params, options, callback);
+  action: function (req, res) {
+    var id = req.params.id;
+    var options = {};
+    var params = {};
+
+    if (!id) throw swe.invalid('id');
+
+    var errLabel = 'Route: GET /skills/{id}';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
+
+    Skill.getById(params, options, callback);
   }
 };

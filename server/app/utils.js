@@ -1,14 +1,17 @@
 'use strict';
 
 // ## Module Dependencies
+var _ = require('lodash');
 var url = require('url');
 
 // ## Default Response Object
 
-exports.defaultResponseObject = {
+var defaultResponseObject = {
   object: '', // String descriptor for data type, either model name or list 
   data: null // Null, Object, Array
 };
+
+exports.defaultResponseObject = defaultResponseObject;
 
 // ## Utility Functions
 
@@ -38,6 +41,42 @@ exports.existsInQuery = function (req, key) {
 };
 
 exports.normalizeString = function (string) {
-  var res = string.toLowerCase();
+  var res = string.toLowerCase().trim();
   return res;
+};
+
+exports.urlSafeString = function (string) {
+  var res = string.toLowerCase().trim();
+  res = res.replace(/([^\w-_])/, '-');
+  return res;
+};
+
+exports.formatSingleResponse = function (Model, results, callback) {
+  var response = _.extend({}, defaultResponseObject);
+  var modelName = Model.prototype.modelName;
+
+  response.object = modelName;
+
+  if (results.length) {
+    var _data = results[0][modelName.toLowerCase()]._data;
+
+    response.data = new Model(_data);
+    callback(null, response);
+  } else {
+    callback(null, response);
+  }
+};
+
+exports.formatManyResponse = function (Model, results, callback) {
+  var response = _.extend({}, defaultResponseObject);
+  var modelName = Model.prototype.modelName;
+
+  var list = _.map(results, function (result) {
+    var _data = result[modelName.toLowerCase()]._data;
+    return new Model(_data);
+  });
+
+  response.data = list;
+  response.object = 'list';
+  callback(null, response);
 };

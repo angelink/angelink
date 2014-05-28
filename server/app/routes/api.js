@@ -49,8 +49,10 @@ module.exports = function (subpath, cfg) {
   //   .addPut(users.resetUsers)
 
     // Skill Model and Methods
-    .addGet(skills.findByName)
+    .addGet(skills.list)
+    .addGet(skills.findById)
     .addPost(skills.addSkill)
+    .addPost(skills.addSkills)
 
     // Location Model and Methods
     .addGet(locations.find)

@@ -6,7 +6,7 @@ var sw = require('swagger-node-express');
 var utils = require('../../utils');
 
 // ## Models
-var Users = require('../../models/users');
+var User = require('../../models/users');
 
 var param = sw.params;
 var swe = sw.errors;
@@ -74,7 +74,7 @@ exports.list = {
     
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Users.getAll(null, options, callback);
+    User.getAll(null, options, callback);
   }
 };
 
@@ -115,7 +115,7 @@ exports.addUser = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Users.create(params, options, callback);
+    User.create(params, options, callback);
 
     // The below method uses the neo4j module's db.createNode method
     // It works but is limiting because you cannot add labels.
@@ -169,7 +169,7 @@ exports.addUsers = {
       return collection[next].data;
     };
 
-    Users.createMany({users:users}, options, function (err, results) {
+    User.createMany({users:users}, options, function (err, results) {
       _.each(results, function (user, index, results) {
         var nextUser = getNextUser(index, results.length, results);
 
@@ -201,7 +201,7 @@ exports.deleteAllUsers = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Users.deleteAllUsers(null, options, callback);
+    User.deleteAllUsers(null, options, callback);
   }
 };
 
@@ -235,7 +235,7 @@ exports.findById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Users.getById(params, options, callback);
+    User.getById(params, options, callback);
   }
 };
 
@@ -276,7 +276,7 @@ exports.updateById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Users.update(params, options, callback);
+    User.update(params, options, callback);
   }
 };
 
@@ -309,6 +309,6 @@ exports.deleteUser = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Users.deleteUser(params, options, callback);
+    User.deleteUser(params, options, callback);
   }
 };

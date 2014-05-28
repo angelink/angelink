@@ -2,19 +2,14 @@
 
 // ## Module Dependencies
 var _ = require('lodash');
-
-// var User = require('./neo4j/user.js');
 var Architect = require('neo4j-architect');
-var defaultResponseObject = require('../utils').defaultResponseObject;
+var neo4j = require('neo4j');
+var QueryBuilder = require('../neo4j-qb/qb.js');
+var utils = require('../utils');
 
 Architect.init();
 
 var Construct = Architect.Construct;
-var QueryBuilder = require('../neo4j-qb/qb.js');
-
-// var request = require('request');
-
-var neo4j = require('neo4j');
 var db = new neo4j.GraphDatabase(
     process.env.NEO4J_URL ||
     process.env.GRAPHENEDB_URL ||
@@ -33,40 +28,24 @@ var schema = {
 };
 
 var qb = new QueryBuilder('User', schema);
-var User = null; // defined here to prevent jshint throwing a fit
+
+// ## Model
+
+var User = function (_data) {
+  _.extend(this, _data);
+
+  // get the id from the self property returned by neo4j
+  this.id = +this.self.split('/').pop();
+};
+
+User.prototype.modelName = 'User';
 
 
 // ## Results Functions
 // To be combined with queries using Construct
 
-// return a single user
-var _singleUser = function (results, callback) {
- 
-  var response = _.extend({}, defaultResponseObject);
-  response.object = 'user';
-
-  if (results.length) {
-    var _data = results[0].user._data;
-    response.data = new User(_data);
-    callback(null, response);
-  } else {
-    callback(null, response);
-  }
-};
-
-// return many users
-var _manyUsers = function (results, callback) {
-  
-  var response = _.extend({}, defaultResponseObject);
-  var users = _.map(results, function (result) {
-    var _data = result.user._data;
-    return new User(_data);
-  });
-
-  response.data = users;
-  response.object = 'list';
-  callback(null, response);
-};
+var _singleUser = _.partial(utils.formatSingleResponse, User);
+var _manyUsers = _.partial(utils.formatManyResponse, User);
 
 
 // ## Query Functions
@@ -111,9 +90,6 @@ var create = new Construct(_create, _singleUser);
 // create many new users
 var createMany = new Construct(_createManySetup).map(create);
 
-// create relationship
-// var createRelationship = new Construct(_createRelationship);
-
 var getById = new Construct(_matchByUUID).query().then(_singleUser);
 // var getById = new Construct(_matchByUUID, _singleUser);
 
@@ -133,12 +109,12 @@ var deleteAllUsers = new Construct(_deleteAll);
 
 
 // @param _data {object} the raw data object from neo4j
-var User = function (_data) {
-  _.extend(this, _data);
+// var User = function (_data) {
+//   _.extend(this, _data);
 
-  // get the id from the self property returned by neo4j
-  this.id = +this.self.split('/').pop();
-};
+//   // get the id from the self property returned by neo4j
+//   this.id = +this.self.split('/').pop();
+// };
 
 // instance methods:
 
@@ -151,7 +127,7 @@ User.prototype.knows = function (toUser, callback) {
   query.push('CREATE UNIQUE (a)-[:KNOWS]->(b)');
   var qs = query.join('\n');
 
-  db.query(qs, {from: that.id, to: toUser.id}, callback);
+  db.query(qs, {from: that.nodeId, to: toUser.nodeId}, callback);
 };
 
 User.prototype.joined = function (toUsers, callback) {
@@ -162,7 +138,7 @@ User.prototype.joined = function (toUsers, callback) {
   query.push('CREATE UNIQUE (a)-[:JOINED {date:timestamp()}]->(b)');
   var qs = query.join('\n');
 
-  db.query(qs, {from: that.id, to: toUsers.id}, callback);
+  db.query(qs, {from: that.nodeId, to: toUsers.nodeId}, callback);
 };
 
 User.prototype.hasSkill = function (toSkill, callback) {
@@ -173,7 +149,7 @@ User.prototype.hasSkill = function (toSkill, callback) {
   query.push('CREATE UNIQUE (a)-[:HAS_SKILL]->(b)');
   var qs = query.join('\n');
 
-  db.query(qs, {from: that.id, to: toSkill.id}, callback);
+  db.query(qs, {from: that.nodeId, to: toSkill.nodeId}, callback);
 };
 
 

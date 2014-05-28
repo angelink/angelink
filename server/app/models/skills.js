@@ -2,144 +2,80 @@
 
 // ## Module Dependencies
 var _ = require('lodash');
-var Skill = require('./neo4j/skill.js');
 var Architect = require('neo4j-architect');
-var defaultResponseObject = require('../utils').defaultResponseObject;
+// var neo4j = require('neo4j');
+var QueryBuilder = require('../neo4j-qb/qb.js');
+var utils = require('../utils');
 
 Architect.init();
 
 var Construct = Architect.Construct;
-var Cypher = Architect.Cypher;
+// var db = new neo4j.GraphDatabase(
+//     process.env.NEO4J_URL ||
+//     process.env.GRAPHENEDB_URL ||
+//     'http://localhost:7474'
+// );
+
+// Presently only schema properties are being used in the query builder. 
+// The value doesn't matter right now.
+var schema = {
+  id: String,
+  name: String
+};
+
+var qb = new QueryBuilder('Skill', schema);
+
+// ## Model
+
+var Skill = function (_data) {
+  _.extend(this, _data);
+
+  // get the id from the self property returned by neo4j
+  this.nodeId = +this.self.split('/').pop();
+};
+
+Skill.prototype.modelName = 'Skill';
 
 // ## Results Functions
 // To be combined with queries using _.partial()
 
-// return a single skill
-var _singleSkill = function (results, callback) {
- 
-  var response = _.extend({}, defaultResponseObject);
-  response.object = 'skill';
-
-  if (results.length) {
-    response.data = new Skill(results[0].skill);
-    callback(null, response);
-  } else {
-    callback(null, response);
-  }
-};
-
-// return many skills
-var _manySkills = function (results, callback) {
-  
-  var response = _.extend({}, defaultResponseObject);
-  var skills = _.map(results, function (result) {
-    return new Skill(result.skill);
-  });
-
-  response.data = skills;
-  response.object = 'list';
-  callback(null, response);
-};
+var _singleSkill = _.partial(utils.formatSingleResponse, Skill);
+var _manySkills = _.partial(utils.formatManyResponse, Skill);
 
 
 // ## Query Functions
 // Should be combined with results functions using _.partial()
 
-var _matchBy = function (keys, params, callback) {
+var _matchById = qb.makeMatch(['id']);
+
+var _matchAll = qb.makeMatch();
+
+var _create = (function () {
   
-  var cypherParams = _.pick(params, keys);
-
-  var query = [
-    'MATCH (skill:Skill)',
-    Cypher.where('skill', keys),
-    'RETURN skill'
-  ].join('\n');
-
-  console.log('_matchBy query', query);
-
-  callback(null, query, cypherParams);
-};
-
-var _matchByName = _.partial(_matchBy, ['name']);
-
-var _matchAll = _.partial(_matchBy, []);
-
-// creates the skill with cypher
-var _create = function (params, callback) {
-  
-  var cypherParams = {
-    name: params.name
+  var onCreate = {
+    created: 'timestamp()'
   };
 
-  var query = [
-    'MERGE (skill:Skill {name: {name}})',
-    'RETURN skill'
-  ].join('\n');
+  return qb.makeMerge(['name'], onCreate);
+})();
 
-  console.log('create query', query);
+var _update = qb.makeUpdate(['name']);
 
-  callback(null, query, cypherParams);
-};
+var _delete = qb.makeDelete(['name']);
+
+var _deleteAll = qb.makeDelete();
 
 var _createManySetup = function (params, callback) {
-  if (params.names && _.isArray(params.names)) {
-    callback(null, _.map(params.names, function (name) {
-      return {name: name};
-    }));
-  } else if (params.skills && _.isArray(params.skills)) {
-    callback(null, _.map(params.skills, function (skill) {
-      return _.pick(skill, 'name');
+  if (params.list && _.isArray(params.list)) {
+    callback(null, _.map(params.list, function (obj) {
+      return _.pick(obj, Object.keys(schema));
     }));
   } else {
     callback(null, []);
   }
 };
 
-// update the skill with cypher
-var _update = function (params, callback) {
-
-  var cypherParams = {
-    name: params.name
-  };
-
-  var query = [
-    'MATCH (skill:Skill {name:{name}})',
-    'SET skill.name = {name}',
-    'RETURN skill'
-  ].join('\n');
-
-  callback(null, query, cypherParams);
-};
-
-// delete the skill and any relationships with cypher
-var _delete = function (params, callback) {
-  
-  var cypherParams = {
-    name: params.name
-  };
-
-  var query = [
-    'MATCH (skill:Skill {name:{name}})',
-    'OPTIONAL MATCH (skill)-[r]-()',
-    'DELETE skill, r',
-  ].join('\n');
-
-  callback(null, query, cypherParams);
-};
-
-// delete all skills
-var _deleteAll = function (params, callback) {
-  
-  var cypherParams = {};
-
-  var query = [
-    'MATCH (skill:Skill)',
-    'OPTIONAL MATCH (skill)-[r]-()',
-    'DELETE skill, r',
-  ].join('\n');
-
-  callback(null, query, cypherParams);
-};
+// ## Constructed Functions
 
 // create a new skill
 var create = new Construct(_create, _singleSkill);
@@ -147,7 +83,7 @@ var create = new Construct(_create, _singleSkill);
 // create many new skills
 var createMany = new Construct(_createManySetup).map(create);
 
-var getByName = new Construct(_matchByName).query().then(_singleSkill);
+var getById = new Construct(_matchById).query().then(_singleSkill);
 
 var getAll = new Construct(_matchAll, _manySkills);
 
@@ -160,13 +96,14 @@ var deleteSkill = new Construct(_delete);
 // delete all skills
 var deleteAllSkills = new Construct(_deleteAll);
 
-// export exposed functions
-module.exports = {
-  create: create.done(),
-  createMany: createMany.done(),
-  getByName: getByName.done(),
-  getAll: getAll.done(),
-  deleteSkill: deleteSkill.done(),
-  deleteAllSkills: deleteAllSkills.done(),
-  update: update.done()
-};
+// static methods:
+
+Skill.create = create.done();
+Skill.createMany = createMany.done();
+Skill.getById = getById.done();
+Skill.getAll = getAll.done();
+Skill.deleteSkill = deleteSkill.done();
+Skill.deleteAllSkills = deleteAllSkills.done();
+Skill.update = update.done();
+
+module.exports = Skill;

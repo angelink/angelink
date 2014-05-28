@@ -95,7 +95,7 @@ exports.merge = function (name, keys, params, onCreate, onMatch) {
 };
 
 // @TODO
-exports.relate = function (from, to, relName, props) {};
+// exports.relate = function (from, to, relName, props) {};
 
 exports.update = function (name, keys, params) {
   var query = [];
