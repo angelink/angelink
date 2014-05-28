@@ -3,24 +3,20 @@
 // ## Module Dependencies
 var _ = require('lodash');
 var Architect = require('neo4j-architect');
-// var neo4j = require('neo4j');
+// var db = require('../db');
 var QueryBuilder = require('../neo4j-qb/qb.js');
 var utils = require('../utils');
 
 Architect.init();
 
 var Construct = Architect.Construct;
-// var db = new neo4j.GraphDatabase(
-//     process.env.NEO4J_URL ||
-//     process.env.GRAPHENEDB_URL ||
-//     'http://localhost:7474'
-// );
 
 // Presently only schema properties are being used in the query builder. 
 // The value doesn't matter right now.
 var schema = {
   id: String,
-  name: String
+  name: String,
+  normalized: String
 };
 
 var qb = new QueryBuilder('Skill', schema);
@@ -47,6 +43,7 @@ var _manySkills = _.partial(utils.formatManyResponse, Skill);
 // Should be combined with results functions using _.partial()
 
 var _matchById = qb.makeMatch(['id']);
+var _matchByName = qb.makeMatch(['normalized']);
 
 var _matchAll = qb.makeMatch();
 
@@ -56,12 +53,12 @@ var _create = (function () {
     created: 'timestamp()'
   };
 
-  return qb.makeMerge(['name'], onCreate);
+  return qb.makeMerge(['normalized'], onCreate);
 })();
 
-var _update = qb.makeUpdate(['name']);
+var _update = qb.makeUpdate(['id']);
 
-var _delete = qb.makeDelete(['name']);
+var _delete = qb.makeDelete(['id']);
 
 var _deleteAll = qb.makeDelete();
 
@@ -85,6 +82,8 @@ var createMany = new Construct(_createManySetup).map(create);
 
 var getById = new Construct(_matchById).query().then(_singleSkill);
 
+var getByName = new Construct(_matchByName).query().then(_singleSkill);
+
 var getAll = new Construct(_matchAll, _manySkills);
 
 // get a skill by name and update it
@@ -101,6 +100,7 @@ var deleteAllSkills = new Construct(_deleteAll);
 Skill.create = create.done();
 Skill.createMany = createMany.done();
 Skill.getById = getById.done();
+Skill.getByName = getByName.done();
 Skill.getAll = getAll.done();
 Skill.deleteSkill = deleteSkill.done();
 Skill.deleteAllSkills = deleteAllSkills.done();

@@ -53,6 +53,9 @@ module.exports = function (subpath, cfg) {
     .addGet(skills.findById)
     .addPost(skills.addSkill)
     .addPost(skills.addSkills)
+    .addPut(skills.updateById)
+    .addDelete(skills.deleteSkill)
+    .addDelete(skills.deleteAllSkills)
 
     // Location Model and Methods
     .addGet(locations.find)

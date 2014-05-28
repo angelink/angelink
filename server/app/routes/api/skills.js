@@ -5,7 +5,6 @@ var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
 
-
 // ## Models
 var Skill = require('../../models/skills');
 
@@ -16,11 +15,16 @@ var swe = sw.errors;
 var _prepareParams = function (req) {
   var params = req.body;
 
-  params.id = req.params.id;
+  params.id = req.params && req.params.id;
 
-  // Turn name into ID
+  // Create normalized name
+  if (params.name) {
+    params.normalized = utils.urlSafeString(params.name);
+  }
+
+  // Create ID if it doesn't exist
   if (!params.id) {
-    params.id = utils.urlSafeString(params.name);
+    params.id = utils.createId(params);
   }
 
   return params;
@@ -35,7 +39,7 @@ var _prepareParams = function (req) {
 // Example:
 //
 // action: function(req, res) {
-//   var errLabel = 'Route: POST /users';
+//   var errLabel = 'Route: POST /skills';
 //   var callback = _.partial(_callback, res, errLabel);
 // }
 var _callback = function (res, errLabel, err, results, queries) {
@@ -137,24 +141,43 @@ exports.addSkills = {
     var params = req.body;
     var errLabel = 'Route: POST /skills';
     var callback = _.partial(_callback, res, errLabel);
-    var skills = JSON.parse(params.list);
+    var list = JSON.parse(params.list);
 
-    if (!skills.length) throw swe.invalid('skills');
+    if (!list.length) throw swe.invalid('list');
 
     // @TODO 
     // should probably check to see if all skill objects contain the minimum
     // required properties and stop if not.
-
-    skills = _.map(skills, function (skill) {
-      return {
-        id: utils.urlSafeString(skill.name),
-        name: skill.name
-      };
+    list = _.map(list, function (skill) {
+      return _prepareParams({body: skill});
     });
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Skill.createMany({list:skills}, options, callback);
+    Skill.createMany({list:list}, options, callback);
+  }
+};
+
+
+// Route: DELETE '/skills'
+exports.deleteAllSkills = {
+  spec: {
+    path: '/skills',
+    notes: 'Deletes all skills and their relationships',
+    summary: 'Delete all skills',
+    method: 'DELETE',
+    type: 'object',
+    nickname : 'deleteAllSkills'
+  },
+
+  action: function (req, res) {
+    var options = {};
+    var errLabel = 'Route: DELETE /skills';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+
+    Skill.deleteAllSkills(null, options, callback);
   }
 };
 
@@ -190,5 +213,75 @@ exports.findById = {
     params = _prepareParams(req);
 
     Skill.getById(params, options, callback);
+  }
+};
+
+// Route: POST '/skills/:id'
+exports.updateById = {
+
+  spec: {
+    path: '/skills/{id}',
+    notes: 'Updates an existing skill',
+    summary: 'Update a skill',
+    method: 'POST',
+    type: 'object',
+    items: {
+      $ref: 'Skill'
+    },
+    parameters : [
+      param.path('id', 'ID of skill that needs to be fetched', 'string'),
+      param.form('name', 'Skill name. A normalized id will be created from this.', 'string', true),
+    ],
+    responseMessages : [swe.invalid('input')],
+    nickname : 'updateSkill'
+  },
+
+  action: function (req, res) {
+    var id = req.params.id;
+    var options = {};
+    var params = {};
+
+    if (!id) throw swe.invalid('id');
+
+    var errLabel = 'Route: POST /skills/{id}';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
+
+    Skill.update(params, options, callback);
+  }
+};
+
+// Route: DELETE '/skills/:id'
+exports.deleteSkill = {
+
+  spec: {
+    path: '/skills/{id}',
+    notes: 'Deletes an existing skill and its relationships',
+    summary: 'Delete a skill',
+    method: 'DELETE',
+    type: 'object',
+    parameters: [
+      param.path('id', 'ID of skill to be deleted', 'string'),
+    ],
+    responseMessages: [swe.invalid('input')],
+    nickname : 'deleteSkill'
+  },
+
+  action: function (req, res) {
+    var id = req.params.id;
+    var options = {};
+    var params = {};
+
+    if (!id) throw swe.invalid('id');
+
+    var errLabel = 'Route: DELETE /skills/{id}';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
+
+    Skill.deleteSkill(params, options, callback);
   }
 };

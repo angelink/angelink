@@ -3,6 +3,7 @@
 // ## Module Dependencies
 var _ = require('lodash');
 var url = require('url');
+var crypto = require('crypto');
 
 // ## Default Response Object
 
@@ -40,6 +41,15 @@ exports.existsInQuery = function (req, key) {
   return url.parse(req.url, true).query[key] !== undefined;
 };
 
+exports.createId = function (obj) {
+  var shasum = crypto.createHash('sha1');
+    
+  shasum.update(JSON.stringify(obj), 'utf8');
+  var id = shasum.digest('hex').slice(0, 6);
+
+  return id;
+};
+
 exports.normalizeString = function (string) {
   var res = string.toLowerCase().trim();
   return res;
@@ -47,7 +57,7 @@ exports.normalizeString = function (string) {
 
 exports.urlSafeString = function (string) {
   var res = string.toLowerCase().trim();
-  res = res.replace(/([^\w-_])/, '-');
+  res = res.replace(/([^\w-_])/gi, '-');
   return res;
 };
 
