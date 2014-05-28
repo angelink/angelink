@@ -46,17 +46,24 @@ module.exports = function (subpath, cfg) {
     .addPut(users.updateById)
     .addDelete(users.deleteUser)
     .addDelete(users.deleteAllUsers)
-  //   .addPut(users.resetUsers)
 
     // Skill Model and Methods
     .addGet(skills.list)
     .addGet(skills.findById)
     .addPost(skills.addSkill)
     .addPost(skills.addSkills)
+    .addPut(skills.updateById)
+    .addDelete(skills.deleteSkill)
+    .addDelete(skills.deleteAllSkills)
 
     // Location Model and Methods
-    .addGet(locations.find)
+    .addGet(locations.list)
+    .addGet(locations.findById)
     .addPost(locations.addLocation)
+    .addPost(locations.addLocations)
+    .addPut(locations.updateById)
+    .addDelete(locations.deleteLocation)
+    .addDelete(locations.deleteAllLocations)
     
     // Company Model and Methods
     .addGet(companies.list)

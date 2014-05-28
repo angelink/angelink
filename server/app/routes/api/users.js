@@ -16,7 +16,7 @@ var swe = sw.errors;
 var _prepareParams = function (req) {
   var params = req.body;
 
-  params.userId = req.params.userId || req.body.userId;
+  params.id = req.params.id || req.body.id;
 
   return params;
 };
@@ -92,7 +92,7 @@ exports.addUser = {
       $ref: 'User'
     },
     parameters : [
-      param.form('userId', 'User UUID', 'string', true),
+      param.form('id', 'User UUID', 'string', true),
       param.form('firstname', 'User firstname', 'string', true),
       param.form('lastname', 'User lastname', 'string', true),
       param.form('email', 'User email', 'string', false),
@@ -134,14 +134,14 @@ exports.addUsers = {
   
   spec: {
     path : '/users/batch',
-    notes : 'adds a user to the graph',
+    notes : 'adds users to the graph',
     summary : 'Add multiple users to the graph',
     method: 'POST',
     type : 'object',
     parameters : [
-      param.form('users', 'Array of user object JSON strings', 'array', true),
+      param.form('list', 'Array of user object JSON strings', 'array', true),
     ],
-    responseMessages : [swe.invalid('users')],
+    responseMessages : [swe.invalid('list')],
     nickname : 'addUsers'
   },
 
@@ -150,13 +150,13 @@ exports.addUsers = {
     var params = req.body;
     var errLabel = 'Route: POST /users';
     var callback = _.partial(_callback, res, errLabel);
-    var users = JSON.parse(params.users);
+    var list = JSON.parse(params.list);
 
-    if (!users.length) throw swe.invalid('users');
+    if (!list.length) throw swe.invalid('list');
 
     // @TODO 
     // should probably check to see if all user objects contain the minimum
-    // required properties (userId, firstname, lastname, etc) and stop if not.
+    // required properties (id, firstname, lastname, etc) and stop if not.
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
@@ -169,7 +169,7 @@ exports.addUsers = {
       return collection[next].data;
     };
 
-    User.createMany({users:users}, options, function (err, results) {
+    User.createMany({list:list}, options, function (err, results) {
       _.each(results, function (user, index, results) {
         var nextUser = getNextUser(index, results.length, results);
 
@@ -206,30 +206,30 @@ exports.deleteAllUsers = {
 };
 
 
-// Route: GET '/users/:userId'
+// Route: GET '/users/:id'
 exports.findById = {
   
   spec: {
-    path: '/users/{userId}',
+    path: '/users/{id}',
     notes: 'Returns a user based on ID',
     summary: 'Find user by ID',
     method: 'GET',
     type: 'object',
     parameters : [
-      param.path('userId', 'ID of user that needs to be fetched', 'string'),
+      param.path('id', 'ID of user that needs to be fetched', 'string'),
     ],
-    responseMessages : [swe.invalid('userId'), swe.notFound('user')],
+    responseMessages : [swe.invalid('id'), swe.notFound('user')],
     nickname : 'getUserById'
   },
 
   action: function (req, res) {
-    var userId = req.params.userId;
+    var id = req.params.id;
     var options = {};
     var params = {};
 
-    if (!userId) throw swe.invalid('userId');
+    if (!id) throw swe.invalid('id');
 
-    var errLabel = 'Route: GET /users/{userId}';
+    var errLabel = 'Route: GET /users/{id}';
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
@@ -239,11 +239,11 @@ exports.findById = {
   }
 };
 
-// Route: POST '/users/:userId'
+// Route: POST '/users/:id'
 exports.updateById = {
 
   spec: {
-    path: '/users/{userId}',
+    path: '/users/{id}',
     notes: 'Updates an existing user',
     summary: 'Update a user',
     method: 'POST',
@@ -252,7 +252,7 @@ exports.updateById = {
       $ref: 'User'
     },
     parameters : [
-      param.path('userId', 'ID of user that needs to be fetched', 'string'),
+      param.path('id', 'ID of user that needs to be fetched', 'string'),
       param.form('firstname', 'User firstname', 'string', true),
       param.form('lastname', 'User lastname', 'string', true),
       param.form('email', 'User email', 'string', false),
@@ -264,13 +264,13 @@ exports.updateById = {
   },
 
   action: function (req, res) {
-    var userId = req.params.userId;
+    var id = req.params.id;
     var options = {};
     var params = {};
 
-    if (!userId) throw swe.invalid('userId');
+    if (!id) throw swe.invalid('id');
 
-    var errLabel = 'Route: POST /users/{userId}';
+    var errLabel = 'Route: POST /users/{id}';
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
@@ -280,30 +280,30 @@ exports.updateById = {
   }
 };
 
-// Route: DELETE '/users/:userId'
+// Route: DELETE '/users/:id'
 exports.deleteUser = {
 
   spec: {
-    path: '/users/{userId}',
+    path: '/users/{id}',
     notes: 'Deletes an existing user and his/her relationships',
     summary: 'Delete a user',
     method: 'DELETE',
     type: 'object',
     parameters: [
-      param.path('userId', 'ID of user to be deleted', 'string'),
+      param.path('id', 'ID of user to be deleted', 'string'),
     ],
     responseMessages: [swe.invalid('input')],
     nickname : 'deleteUser'
   },
 
   action: function (req, res) {
-    var userId = req.params.userId;
+    var id = req.params.id;
     var options = {};
     var params = {};
 
-    if (!userId) throw swe.invalid('userId');
+    if (!id) throw swe.invalid('id');
 
-    var errLabel = 'Route: DELETE /users/{userId}';
+    var errLabel = 'Route: DELETE /users/{id}';
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
