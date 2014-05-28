@@ -3,18 +3,13 @@
 // ## Module Dependencies
 var _ = require('lodash');
 var Architect = require('neo4j-architect');
-var neo4j = require('neo4j');
+var db = require('../db');
 var QueryBuilder = require('../neo4j-qb/qb.js');
 var utils = require('../utils');
 
 Architect.init();
 
 var Construct = Architect.Construct;
-var db = new neo4j.GraphDatabase(
-    process.env.NEO4J_URL ||
-    process.env.GRAPHENEDB_URL ||
-    'http://localhost:7474'
-);
 
 // Presently only schema properties are being used in the query builder. 
 // The value doesn't matter right now.
