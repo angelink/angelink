@@ -5,6 +5,9 @@ var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
 
+// ## Collections
+var Users = require('../../collections/users');
+
 // ## Models
 var User = require('../../models/users');
 
@@ -62,7 +65,9 @@ exports.list = {
       $ref: 'User'
     },
     produces: ['application/json'],
-    parameters : [],
+    parameters : [
+      param.query('type', 'Can be "all" or "users". Defaults to "users"', 'string', false),
+    ],
     responseMessages: [swe.notFound('users')],
     nickname : 'getUsers'
   },
@@ -74,7 +79,12 @@ exports.list = {
     
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    User.getAll(null, options, callback);
+    if (req.query.type === 'all') {
+      User.getAll(null, options, callback);
+    } else {
+      // User.getAll(null, options, callback);
+      Users.get(null, options, callback);
+    }
   }
 };
 
