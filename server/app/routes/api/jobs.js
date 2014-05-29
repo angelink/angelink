@@ -7,6 +7,9 @@ var utils = require('../../utils');
 
 // ## Models
 var Job = require('../../models/jobs');
+// var Salary = require('../../models/salaries');
+// var Equity = require('../../models/equities');
+// var Company = require('../../models/companies');
 
 var param = sw.params;
 var swe = sw.errors;
@@ -81,7 +84,10 @@ exports.addJob = {
     parameters : [
       param.form('id', 'Job JUID', 'string', true),
       param.form('title', 'Job title', 'string', true),
-      param.form('created', 'Job created', 'string', true)
+      param.form('created', 'Job created', 'string', true),
+      param.form('salary', 'stringified salary object', 'object', true),
+      param.form('equity', 'stringified equity object', 'object', true),
+      // param.form('company', 'stringified company object', 'object', true)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addJob'
@@ -97,6 +103,32 @@ exports.addJob = {
     params = _prepareParams(req);
 
     Job.create(params, options, callback);
+    
+    // Job.create(params, options, function(err, result){
+    //   var jobNode = result.data;
+    //   var salary = JSON.parse(params.salary);
+    //   var equity = JSON.parse(params.equity);
+    //   // var company = JSON.parse(params.company);
+    //   salary.id = utils.createId(salary);
+    //   equity.id = utils.createId(equity);
+    //   // company.id = utils.createId(company);
+    //   Salary.create(salary, options, function(err, result){
+    //     var salaryNode = result.data;
+    //     jobNode.hasSalary(salaryNode, function(err, result){
+    //       Equity.create(equity, options, function(err, result){
+    //         var equityNode = result.data;
+    //         jobNode.hasEquity(equityNode, function(err, result){
+    //           // Company.create(company, options, function(err, result){
+    //           //   var companyNode = result.data;
+    //           //   jobNode.atCompany(companyNode, function(err, result){
+    //               callback(err, result);
+    //             // });
+    //           // });
+    //         });
+    //       });
+    //     });
+    //   });
+    // });
   }
 };
 
