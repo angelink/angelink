@@ -138,6 +138,17 @@ Job.prototype.hasSalary = function (toSalary, callback) {
   db.query(qs, {from: that.nodeId, to: toSalary.nodeId}, callback);
 };
 
+Job.prototype.hasEquity = function (toEquity, callback) {
+  var that = this;
+  var query = [];
+  
+  query.push('START a=node({from}), b=node({to})');
+  query.push('CREATE UNIQUE (a)-[:HAS_EQUITY]->(b)');
+  var qs = query.join('\n');
+
+  db.query(qs, {from: that.nodeId, to: toEquity.nodeId}, callback);
+};
+
 // static methods
 Job.create = create.done();
 Job.createMany = createMany.done();

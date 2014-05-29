@@ -11,6 +11,8 @@ var companies = require('./api/companies');
 var jobs = require('./api/jobs');
 var models = require('../models/swagger');
 var skills = require('./api/skills');
+var salaries = require('./api/salaries');
+var equities = require('./api/equities');
 
 module.exports = function (subpath, cfg) {
 
@@ -78,6 +80,24 @@ module.exports = function (subpath, cfg) {
     .addPut(jobs.updateById)
     .addDelete(jobs.deleteJob)
     .addDelete(jobs.deleteAllJobs)
+
+    // Salary Model and Methods
+    .addGet(salaries.list)
+    .addGet(salaries.findById)
+    .addPost(salaries.addSalary)
+    .addPost(salaries.addSalaries)
+    .addPut(salaries.updateById)
+    .addDelete(salaries.deleteSalary)
+    .addDelete(salaries.deleteAllSalaries)
+
+    // Equity Model and Methods
+    .addGet(equities.list)
+    .addGet(equities.findById)
+    .addPost(equities.addEquity)
+    .addPost(equities.addEquities)
+    .addPut(equities.updateById)
+    .addDelete(equities.deleteEquity)
+    .addDelete(equities.deleteAllEquities)
     ;
 
   // swagger.configureDeclaration('users', {
