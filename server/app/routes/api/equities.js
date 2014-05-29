@@ -17,13 +17,11 @@ var swe = sw.errors;
 var _prepareParams = function (req) {
   var params = req.body;
 
-  params.id = req.params.id || req.body.id;
+  params.id = (req.params && req.params.id) || (req.body && req.body.id);
 
-  var equityMaxString = String(params.equityMax);
-  var equityMinString = String(params.equityMin);
-  // Create id from city
-  if (equityMaxString && equityMinString) {
-    params.id = utils.urlSafeString(equityMaxString + equityMinString);
+  // Create ID if it doesn't exist
+  if (!params.id) {
+    params.id = utils.createId(params);
   }
 
   return params;

@@ -17,14 +17,11 @@ var swe = sw.errors;
 var _prepareParams = function (req) {
   var params = req.body;
 
-  params.id = req.params.id || req.body.id;
+  params.id = (req.params && req.params.id) || (req.body && req.body.id);
 
-  var currencyString = String(params.currency);
-  var salaryMaxString = String(params.salaryMax);
-  var salaryMinString = String(params.salaryMin);
-  // Create id from city
-  if (currencyString && salaryMaxString && salaryMinString) {
-    params.id = utils.urlSafeString(currencyString + salaryMaxString + salaryMinString);
+  // Create ID if it doesn't exist
+  if (!params.id) {
+    params.id = utils.createId(params);
   }
 
   return params;
