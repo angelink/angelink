@@ -4,12 +4,15 @@
 var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
+var when = require('when');
+var nodefn = require('when/node');
 
 // ## Collections
 var Users = require('../../collections/users');
 
 // ## Models
 var User = require('../../models/users');
+var Skill = require('../../models/skills');
 
 var param = sw.params;
 var swe = sw.errors;
@@ -108,7 +111,7 @@ exports.addUser = {
       param.form('email', 'User email', 'string', false),
       param.form('linkedInToken', 'LinkedIn OAuth Token', 'string', false),
       param.form('profileImage', 'User profile image url', 'string', false),
-      param.form('skills', 'User skills', 'array', false),
+      param.form('skills', 'User skills. Should be an array of stringified skill objects.', 'array', false),
       param.form('roles', 'User past and present roles', 'array', false),
       param.form('location', 'User\'s current location', 'object', false)
     ],
@@ -125,17 +128,15 @@ exports.addUser = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    User.create(params, options, callback);
-
-    // The below method uses the neo4j module's db.createNode method
-    // It works but is limiting because you cannot add labels.
-
-    // var params = _prepareParams(req);
-    // var node = db.createNode(params);
-    // var errLabel = 'Route: POST /users';
-    // var callback = _.partial(_callback, res, errLabel);
-
-    // node.save(callback);
+    when.join(
+      User.create(params, options),
+      Skill.createMany({list:JSON.parse(params.skills)}, options)
+    ).then(function (results) {
+      var userResults = results[0];
+      var skillsResults = results[1];
+      
+      callback(null, userResults.results, userResults.queries);
+    });
   }
 };
 
@@ -176,14 +177,14 @@ exports.addUsers = {
         next = 0;
       }
 
-      return collection[next].data;
+      return collection[next].node;
     };
 
     User.createMany({list:list}, options, function (err, results) {
       _.each(results, function (user, index, results) {
         var nextUser = getNextUser(index, results.length, results);
 
-        user.data.knows(nextUser, function (err, res) {
+        user.node.knows(nextUser, function (err, res) {
           console.log(err, res);
         });
       });

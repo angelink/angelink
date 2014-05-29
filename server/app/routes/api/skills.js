@@ -17,15 +17,15 @@ var _prepareParams = function (req) {
 
   params.id = (req.params && req.params.id) || (req.body && req.body.id);
 
-  // Create normalized name
-  if (params.name) {
-    params.normalized = utils.urlSafeString(params.name);
-  }
+  // // Create normalized name
+  // if (params.name) {
+  //   params.normalized = utils.urlSafeString(params.name);
+  // }
 
-  // Create ID if it doesn't exist
-  if (!params.id) {
-    params.id = utils.createId(params);
-  }
+  // // Create ID if it doesn't exist
+  // if (!params.id) {
+  //   params.id = utils.createId(params);
+  // }
 
   return params;
 };
@@ -115,7 +115,9 @@ exports.addSkill = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Skill.create(params, options, callback);
+    Skill.create(params, options).done(function (results) {
+      callback(null, results.results, results.queries);
+    });
   }
 };
 
@@ -154,7 +156,11 @@ exports.addSkills = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Skill.createMany({list:list}, options, callback);
+    Skill.createMany({list:list}, options).done(function (results) {
+      callback(null, results);
+    });
+
+    // Skill.createMany({list:list}, options, callback);
   }
 };
 

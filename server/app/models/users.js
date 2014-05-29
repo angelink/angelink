@@ -6,6 +6,7 @@ var Architect = require('neo4j-architect');
 var db = require('../db');
 var QueryBuilder = require('../neo4j-qb/qb.js');
 var utils = require('../utils');
+var when = require('when');
 
 Architect.init();
 
@@ -78,7 +79,27 @@ var _createManySetup = function (params, callback) {
 
 // ## Constructed Functions
 
-var create = new Construct(_create, _singleUser);
+// var create = function (params, options, callback) {
+//   var func = new Construct(_create, _singleUser);
+  
+//   // Do any data cleaning/prep here
+
+//   func.done().call(this, params, options, callback);
+// };
+
+var create = function (params, options) {
+  var func = new Construct(_create, _singleUser);
+  var promise = when.promise(function (resolve) {
+
+    // @NOTE Do any data cleaning/prep here...
+    
+    func.done().call(null, params, options, function (err, results, queries) {
+      resolve({results: results, queries: queries});
+    });
+  });
+
+  return promise;
+};
 
 // create many new users
 var createMany = new Construct(_createManySetup).map(create);
@@ -136,7 +157,7 @@ User.prototype.hasSkill = function (toSkill, callback) {
 
 // static methods:
 
-User.create = create.done();
+User.create = create;
 User.createMany = createMany.done();
 User.deleteUser = deleteUser.done();
 User.deleteAllUsers = deleteAllUsers.done();

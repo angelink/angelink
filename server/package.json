@@ -12,9 +12,10 @@
     "neo4j-swagger-ui": "0.0.14",
     "passport": "^0.2.0",
     "passport-linkedin-oauth2": "^1.1.1",
+    "request": "^2.36.0",
     "send": "~0.1.4",
     "swagger-node-express": "^2.0.3",
-    "when": "~2.7.0"
+    "when": "^3.2.2"
   },
   "devDependencies": {
     "connect-livereload": "~0.3.2",
