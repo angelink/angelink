@@ -100,8 +100,8 @@ Loc.create = create.done();
 Loc.createMany = createMany.done();
 Loc.deleteLocation = deleteLoc.done();
 Loc.deleteAllLocations = deleteAllLocs.done();
-Loc.getById = getById.done();
 Loc.getAll = getAll.done();
+Loc.getById = getById.done();
 Loc.update = update.done();
 
 module.exports = Loc;

@@ -69,6 +69,10 @@ module.exports = function (subpath, cfg) {
     .addGet(companies.list)
     .addGet(companies.findById)
     .addPost(companies.addCompany)
+    .addPost(companies.addCompanies)
+    .addPut(companies.updateById)
+    .addDelete(companies.deleteCompany)
+    .addDelete(companies.deleteAllCompanies)
 
     // Job Model and Methods
     .addGet(jobs.list)

@@ -17,7 +17,7 @@ var swe = sw.errors;
 var _prepareParams = function (req) {
   var params = req.body;
 
-  params.id = req.params.id || req.body.id;
+  params.id = (req.params && req.params.id) || (req.body && req.body.id);
 
   // Create id from city
   if (params.city) {
@@ -99,7 +99,7 @@ exports.addLocation = {
       $ref: 'Location'
     },
     parameters : [
-      param.query('city', 'City', 'string', true),
+      param.form('city', 'City', 'string', true),
     ],
     responseMessages : [swe.invalid('city')],
     nickname : 'addLocation'
@@ -147,8 +147,8 @@ exports.addLocations = {
     // @TODO 
     // should probably check to see if all location objects contain the minimum
     // required properties and stop if not.
-    list = _.map(list, function (loc) {
-      return _prepareParams({body: loc});
+    list = _.map(list, function (data) {
+      return _prepareParams({body: data});
     });
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
@@ -209,8 +209,6 @@ exports.findById = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
-
-    console.log(params);
 
     Loc.getById(params, options, callback);
   }

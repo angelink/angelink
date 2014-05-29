@@ -10,6 +10,10 @@ module.exports = {
     name: {
       type: 'string',
       description: 'Name of Company'
+    },
+    normalized: {
+      type: 'string',
+      description: 'Normalized company name'
     }
   }
 };
