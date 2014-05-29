@@ -12,27 +12,26 @@ Architect.init();
 var Construct = Architect.Construct;
 
 var schema = {
-  currency: String,
-  salaryMax: String,
-  salaryMin: String
+  equityMax: String,
+  equityMin: String
 };
 
-var qb = new QueryBuilder('Salary', schema);
+var qb = new QueryBuilder('Equity', schema);
 
 // ## Model
 
-var Salary = function(_data) {
+var Equity = function(_data) {
   _.extend(this, _data);
   //get the unique node id
   this.nodeId = +this.self.split('/').pop();
 };
 
-Salary.prototype.modelName = 'Salary';
+Equity.prototype.modelName = 'Equity';
 
 // ## Results Functions
 
-var _singleSalary = _.partial(utils.formatSingleResponse, Salary);
-var _manySalaries = _.partial(utils.formatManyResponse, Salary);
+var _singleEquity = _.partial(utils.formatSingleResponse, Equity);
+var _manyEquities = _.partial(utils.formatManyResponse, Equity);
 
 // ## Query Functions
 // Should be combined with results functions using _.partial()
@@ -59,27 +58,27 @@ var _createManySetup = function (params, callback) {
   }
 };
 
-var create = new Construct(_create, _singleSalary);
+var create = new Construct(_create, _singleEquity);
 
 var createMany = new Construct(_createManySetup).map(create);
 
-var getById = new Construct(_matchById).query().then(_singleSalary);
+var getById = new Construct(_matchById).query().then(_singleEquity);
 
-var getAll = new Construct(_matchAll, _manySalaries);
+var getAll = new Construct(_matchAll, _manyEquities);
 
-var update = new Construct(_update, _singleSalary);
+var update = new Construct(_update, _singleEquity);
 
-var deleteSalary = new Construct(_delete);
+var deleteEquity = new Construct(_delete);
 
-var deleteAllSalaries = new Construct(_deleteAll);
+var deleteAllEquities = new Construct(_deleteAll);
 
 // static methods
-Salary.create = create.done();
-Salary.createMany = createMany.done();
-Salary.deleteLocation = deleteSalary.done();
-Salary.deleteAllSalaries = deleteAllSalaries.done();
-Salary.getById = getById.done();
-Salary.getAll = getAll.done();
-Salary.update = update.done();
+Equity.create = create.done();
+Equity.createMany = createMany.done();
+Equity.deleteLocation = deleteEquity.done();
+Equity.deleteAllEquities = deleteAllEquities.done();
+Equity.getById = getById.done();
+Equity.getAll = getAll.done();
+Equity.update = update.done();
 
-module.exports = Salary;
+module.exports = Equity;
