@@ -110,15 +110,16 @@ User.prototype.knows = function (toUser, callback) {
   db.query(qs, {from: that.nodeId, to: toUser.nodeId}, callback);
 };
 
-User.prototype.joined = function (toUsers, callback) {
+User.prototype.joined = function (callback) {
   var that = this;
   var query = [];
   
-  query.push('START a=node({from}), b=node({to})');
+  query.push('MATCH (a) WHERE id(a) = {from}');
+  query.push('(b:Users)');
   query.push('CREATE UNIQUE (a)-[:JOINED {date:timestamp()}]->(b)');
   var qs = query.join('\n');
 
-  db.query(qs, {from: that.nodeId, to: toUsers.nodeId}, callback);
+  db.query(qs, {from: that.nodeId}, callback);
 };
 
 User.prototype.hasSkill = function (toSkill, callback) {
