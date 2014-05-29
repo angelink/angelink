@@ -58,12 +58,6 @@ var _create = (function () {
   return qb.makeMerge(['normalized'], onCreate);
 })();
 
-var _update = qb.makeUpdate(['id']);
-
-var _delete = qb.makeDelete(['id']);
-
-var _deleteAll = qb.makeDelete();
-
 var _createManySetup = function (params, callback) {
   if (params.list && _.isArray(params.list)) {
     callback(null, _.map(params.list, function (data) {
@@ -73,6 +67,14 @@ var _createManySetup = function (params, callback) {
     callback(null, []);
   }
 };
+
+var _delete = qb.makeDelete(['id']);
+
+var _deleteAll = qb.makeDelete();
+
+var _update = qb.makeUpdate(['id']);
+
+// ## Constructed Functions
 
 // create a new company
 var create = new Construct(_create, _singleCompany);

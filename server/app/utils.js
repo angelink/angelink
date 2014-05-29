@@ -83,6 +83,7 @@ exports.formatManyResponse = function (Model, results, callback) {
 
   var list = _.map(results, function (result) {
     var _data = result[modelName.toLowerCase()]._data;
+
     return new Model(_data);
   });
 
