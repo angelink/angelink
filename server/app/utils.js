@@ -9,10 +9,9 @@ var crypto = require('crypto');
 
 var defaultResponseObject = {
   object: '', // String descriptor for data type, either model name or list 
-  data: null // Null, Object, Array
 };
 
-exports.defaultResponseObject = defaultResponseObject;
+// exports.defaultResponseObject = defaultResponseObject;
 
 // ## Utility Functions
 
@@ -70,7 +69,7 @@ exports.formatSingleResponse = function (Model, results, callback) {
   if (results.length) {
     var _data = results[0][modelName.toLowerCase()]._data;
 
-    response.data = new Model(_data);
+    response.node = new Model(_data);
     callback(null, response);
   } else {
     callback(null, response);
@@ -87,7 +86,7 @@ exports.formatManyResponse = function (Model, results, callback) {
     return new Model(_data);
   });
 
-  response.data = list;
+  response.list = list;
   response.object = 'list';
   callback(null, response);
 };
