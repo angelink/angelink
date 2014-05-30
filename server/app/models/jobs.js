@@ -6,6 +6,7 @@ var Architect = require('neo4j-architect');
 var db = require('../db');
 var QueryBuilder = require('../neo4j-qb/qb.js');
 var utils = require('../utils');
+var when = require('when');
 
 Architect.init();
 
@@ -43,37 +44,83 @@ var _matchAll = qb.makeMatch();
 
 var _create = qb.makeMerge(['id']);
 
-// var _createRelationship = qb.makeRelate();
-
 var _update = qb.makeUpdate(['id']);
 
 var _delete = qb.makeDelete(['id']);
 
 var _deleteAll = qb.makeDelete();
 
-var _createManySetup = function (params, callback) {
-  if (params.list && _.isArray(params.list)) {
-    callback(null, _.map(params.list, function (job) {
-      return _.pick(job, Object.keys(schema));
-    }));
-  } else {
-    callback(null, []);
-  }
-};
+// var _createManySetup = function (params, callback) {
+//   if (params.list && _.isArray(params.list)) {
+//     callback(null, _.map(params.list, function (job) {
+//       return _.pick(job, Object.keys(schema));
+//     }));
+//   } else {
+//     callback(null, []);
+//   }
+// };
 
+// ## Helper Functions
+var _prepareParams = function (params) {
+  // Create normalized name
+  if (params.name) {
+    params.normalized = utils.urlSafeString(params.name);
+  }
+
+  // Create ID if it doesn't exist
+  if (!params.id) {
+    params.id = utils.createId(params);
+  }
+
+  return params;
+};
 
 // ## Constructed Functions
 
-// create a new user
-var create = new Construct(_create, _singleJob);
+var create = function (params, options) {
+  var func = new Construct(_create, _singleJob);
+  var promise = when.promise(function (resolve) {
 
-var createMany = new Construct(_createManySetup).map(create);
+    // @NOTE Do any data cleaning/prep here...
+    
+    func.done().call(null, params, options, function (err, results, queries) {
+      resolve({results: results, queries: queries});
+    });
+  });
+
+  return promise;
+};
+
+var createMany = function (params, options) {
+  var promises = [];
+  
+  _.each(params.list, function (data) {
+    var filtered = _.pick(data, Object.keys(schema));
+    var promise = create(filtered, options);
+
+    promises.push(promise);
+  });
+
+  return when.all(promises);
+};
+
+// create a new user
+// var create = new Construct(_create, _singleJob);
+
+// var createMany = new Construct(_createManySetup).map(create);
 
 var getById = new Construct(_matchByJUID).query().then(_singleJob);
 
 var getAll = new Construct(_matchAll, _manyJobs);
 
-var update = new Construct(_update, _singleJob);
+// var update = new Construct(_update, _singleJob);
+var update = function (params, options, callback) {
+  var func = new Construct(_update, _singleJob);
+
+  params = _prepareParams(params);
+
+  func.done().call(this, params, options, callback);
+};
 
 // delete a user by id
 var deleteJob = new Construct(_delete);
@@ -150,12 +197,12 @@ Job.prototype.hasEquity = function (toEquity, callback) {
 };
 
 // static methods
-Job.create = create.done();
-Job.createMany = createMany.done();
+Job.create = create;
+Job.createMany = createMany;
 Job.deleteJob = deleteJob.done();
 Job.deleteAllJobs = deleteAllJobs.done();
 Job.getById = getById.done();
 Job.getAll = getAll.done();
-Job.update = update.done();
+Job.update = update;
 
 module.exports = Job;

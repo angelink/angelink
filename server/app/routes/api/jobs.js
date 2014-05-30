@@ -4,12 +4,13 @@
 var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
+var when = require('when');
 
 // ## Models
 var Job = require('../../models/jobs');
-// var Salary = require('../../models/salaries');
-// var Equity = require('../../models/equities');
-// var Company = require('../../models/companies');
+var Salary = require('../../models/salaries');
+var Equity = require('../../models/equities');
+var Company = require('../../models/companies');
 
 var param = sw.params;
 var swe = sw.errors;
@@ -18,7 +19,7 @@ var swe = sw.errors;
 var _prepareParams = function (req) {
   var params = req.body;
 
-  params.userId = req.params.userId || req.body.userId;
+  params.id = (req.params && req.params.id) || (req.body && req.body.id);
 
   return params;
 };
@@ -86,8 +87,8 @@ exports.addJob = {
       param.form('title', 'Job title', 'string', true),
       param.form('created', 'Job created', 'string', true),
       param.form('salary', 'stringified salary object', 'object', true),
-      param.form('equity', 'stringified equity object', 'object', true),
-      // param.form('company', 'stringified company object', 'object', true)
+      param.form('equity', 'stringified equity object', 'object', false),
+      param.form('company', 'stringified company object', 'object', false)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addJob'
@@ -96,13 +97,31 @@ exports.addJob = {
   action: function(req, res) {
     var options = {};
     var params = {};
-    var errLabel = 'Route: POST /users';
+    var errLabel = 'Route: POST /jobs';
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Job.create(params, options, callback);
+    when.join(
+      Job.create(params, options),
+      Salary.create(JSON.parse(params.salary), options)
+      // Equity.create(JSON.parse(params.equity), options)
+    ).then(function (results) {
+      var jobResults = results[0];
+      var salaryResults = results[1];
+      var equityResults = results[2];
+      console.log(results, 'results');
+      console.log(jobResults, 'jobResults');
+      console.log(salaryResults, 'salaryResults');
+      jobResults.results.node.hasSalary(salaryResults.results.node, function(err, results){
+        callback(null, results);
+      });
+    });
+  }
+};
+
+    // Job.create(params, options, callback);
     
     // Job.create(params, options, function(err, result){
     //   var jobNode = result.data;
@@ -129,8 +148,8 @@ exports.addJob = {
     //     });
     //   });
     // });
-  }
-};
+//   }
+// };
 
 // Route: POST '/jobs/batch'
 exports.addJobs = {
@@ -153,9 +172,9 @@ exports.addJobs = {
     var params = req.body;
     var errLabel = 'Route: POST /jobs/batch';
     var callback = _.partial(_callback, res, errLabel);
-    var jobs = JSON.parse(params.list);
+    var list = JSON.parse(params.list);
 
-    if (!jobs.length) throw swe.invalid('jobs');
+    if (!list.length) throw swe.invalid('list');
 
     // @TODO 
     // should probably check to see if all user objects contain the minimum
@@ -163,7 +182,9 @@ exports.addJobs = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Job.createMany({list:jobs}, options, callback);
+    Job.createMany({list:list}, options).done(function(results){
+      callback(null, results);
+    });
 
     // ## test relationship creation for new Job node
     // var getNextJob = function (index, length, collection) {
