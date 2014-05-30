@@ -1,7 +1,10 @@
 'use strict';
 
-var passport = require('passport');
+
+// ## Module Dependencies
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+var passport = require('passport');
+var request = require('request');
 
 var Config = require('../config/index.js');
 var cfg = new Config().getSync();
@@ -17,7 +20,9 @@ exports.init = function () {
 
       console.log('profile', profile._json);
 
-      // Need to save the token to databases and/or client session/JWT
+      // Need to save the token and user info to databases
+
+
 
       // asynchronous verification, for effect...
       process.nextTick(function () {
