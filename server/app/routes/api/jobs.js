@@ -87,8 +87,8 @@ exports.addJob = {
       param.form('title', 'Job title', 'string', true),
       param.form('created', 'Job created', 'string', true),
       param.form('salary', 'stringified salary object', 'object', true),
-      param.form('equity', 'stringified equity object', 'object', false),
-      param.form('company', 'stringified company object', 'object', false)
+      param.form('equity', 'stringified equity object', 'object', true),
+      param.form('company', 'stringified company object', 'object', true)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addJob'
@@ -105,18 +105,27 @@ exports.addJob = {
 
     when.join(
       Job.create(params, options),
-      Salary.create(JSON.parse(params.salary), options)
-      // Equity.create(JSON.parse(params.equity), options)
+      Salary.create(JSON.parse(params.salary), options),
+      Equity.create(JSON.parse(params.equity), options),
+      Company.create(JSON.parse(params.company), options)
     ).then(function (results) {
       var jobResults = results[0];
       var salaryResults = results[1];
       var equityResults = results[2];
-      console.log(results, 'results');
-      console.log(jobResults, 'jobResults');
-      console.log(salaryResults, 'salaryResults');
-      jobResults.results.node.hasSalary(salaryResults.results.node, function(err, results){
-        callback(null, results);
+      var companyResults = results[3];
+      // console.log(results, 'results');
+      // console.log(jobResults, 'jobResults');
+      // console.log(salaryResults, 'salaryResults');
+      jobResults.results.node.hasSalary(salaryResults.results.node, function(err){
+        if (err) throw err;
       });
+      jobResults.results.node.hasEquity(equityResults.results.node, function(err){
+        if (err) throw err;
+      });
+      jobResults.results.node.atCompany(companyResults.results.node, function(err){
+        if (err) throw err;
+      });
+      callback(null, results);
     });
   }
 };

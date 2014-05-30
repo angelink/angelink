@@ -114,7 +114,9 @@ exports.addCompany = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Company.create(params, options, callback);
+    Company.create(params, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 
@@ -153,7 +155,9 @@ exports.addCompanies = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Company.createMany({list:list}, options, callback);
+    Company.createMany({list:list}, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 
@@ -249,7 +253,9 @@ exports.updateById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Company.update(params, options, callback);
+    Company.update(params, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 

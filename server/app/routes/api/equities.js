@@ -20,9 +20,9 @@ var _prepareParams = function (req) {
   params.id = (req.params && req.params.id) || (req.body && req.body.id);
 
   // Create ID if it doesn't exist
-  if (!params.id) {
-    params.id = utils.createId(params);
-  }
+  // if (!params.id) {
+  //   params.id = utils.createId(params);
+  // }
 
   return params;
 };
@@ -115,7 +115,9 @@ exports.addEquity = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Equity.create(params, options, callback);
+    Equity.create(params, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 
@@ -154,7 +156,9 @@ exports.addEquities = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Equity.createMany({list:list}, options, callback);
+    Equity.createMany({list:list}, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 
@@ -252,7 +256,9 @@ exports.updateById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Equity.update(params, options, callback);
+    Equity.update(params, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 

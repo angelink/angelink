@@ -258,7 +258,9 @@ exports.updateById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Salary.update(params, options, callback);
+    Salary.update(params, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 
