@@ -11,6 +11,7 @@ var Job = require('../../models/jobs');
 var Salary = require('../../models/salaries');
 var Equity = require('../../models/equities');
 var Company = require('../../models/companies');
+var Loc = require('../../models/locations');
 
 var param = sw.params;
 var swe = sw.errors;
@@ -88,7 +89,8 @@ exports.addJob = {
       param.form('created', 'Job created', 'string', true),
       param.form('salary', 'stringified salary object', 'object', true),
       param.form('equity', 'stringified equity object', 'object', true),
-      param.form('company', 'stringified company object', 'object', true)
+      param.form('company', 'stringified company object', 'object', true),
+      param.form('loc', 'stringified location object', 'object', true)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addJob'
@@ -107,12 +109,14 @@ exports.addJob = {
       Job.create(params, options),
       Salary.create(JSON.parse(params.salary), options),
       Equity.create(JSON.parse(params.equity), options),
-      Company.create(JSON.parse(params.company), options)
+      Company.create(JSON.parse(params.company), options),
+      Loc.create(JSON.parse(params.loc), options)
     ).then(function (results) {
       var jobResults = results[0];
       var salaryResults = results[1];
       var equityResults = results[2];
       var companyResults = results[3];
+      var locResults = results[4];
       // console.log(results, 'results');
       // console.log(jobResults, 'jobResults');
       // console.log(salaryResults, 'salaryResults');
@@ -123,6 +127,9 @@ exports.addJob = {
         if (err) throw err;
       });
       jobResults.results.node.atCompany(companyResults.results.node, function(err){
+        if (err) throw err;
+      });
+      jobResults.results.node.atLocation(locResults.results.node, function(err){
         if (err) throw err;
       });
       callback(null, results);
