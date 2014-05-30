@@ -2,142 +2,130 @@
 
 // ## Module Dependencies
 var _ = require('lodash');
-var Role = require('./neo4j/role.js');
 var Architect = require('neo4j-architect');
+// var db = require('../db');
+var QueryBuilder = require('../neo4j-qb/qb.js');
+var utils = require('../utils');
+var when = require('when');
 
 Architect.init();
 
 var Construct = Architect.Construct;
-var Cypher = Architect.Cypher;
+
+var schema = {
+  name: String
+};
+
+var qb = new QueryBuilder('Role', schema);
+
+// ## Model
+
+var Role = function(_data) {
+  _.extend(this, _data);
+  //get the unique node id
+  this.nodeId = +this.self.split('/').pop();
+};
+
+Role.prototype.modelName = 'Role';
 
 // ## Results Functions
-// To be combined with queries using _.partial()
 
-// return a single user
-var _singleRole = function (results, callback) {
-  if (results.length) {
-    callback(null, new Role(results[0].role));
-  } else {
-    callback(null, null);
-  }
-};
-
-// return many users
-var _manyRoles = function (results, callback) {
-  var roles = _.map(results, function (result) {
-    return new Role(result.role);
-  });
-
-  callback(null, roles);
-};
-
+var _singleRole = _.partial(utils.formatSingleResponse, Role);
+var _manyRoles = _.partial(utils.formatManyResponse, Role);
 
 // ## Query Functions
 // Should be combined with results functions using _.partial()
 
-var _matchBy = function (keys, params, callback) {
-  var cypherParams = _.pick(params, keys);
+var _matchById = qb.makeMatch(['id']);
 
-  var query = [
-    'MATCH (role:Role)',
-    Cypher.where('role', keys),
-    'RETURN role'
-  ].join('\n');
+var _matchAll = qb.makeMatch();
 
-  console.log('_matchBy query', query);
+var _create = qb.makeMerge(['id']);
 
-  callback(null, query, cypherParams);
+var _update = qb.makeUpdate(['id']);
+
+var _delete = qb.makeDelete(['id']);
+
+var _deleteAll = qb.makeDelete();
+
+// var _createManySetup = function (params, callback) {
+//   if (params.list && _.isArray(params.list)) {
+//     callback(null, _.map(params.list, function (data) {
+//       return _.pick(data, Object.keys(schema));
+//     }));
+//   } else {
+//     callback(null, []);
+//   }
+// };
+
+// ## Helper functions
+var _prepareParams = function (params) {
+  // Create ID if it doesn't exist
+  if (!params.id) {
+    params.id = utils.createId(params);
+  }
+
+  return params;
 };
 
-// var _matchByCUID = _.partial(_matchBy, ['id']);
+// ## Constructured functions
+var create = function (params, options) {
+  var func = new Construct(_create, _singleRole);
+  var promise = when.promise(function (resolve) {
 
-var _matchAll = _.partial(_matchBy, []);
+    // @NOTE Do any data cleaning/prep here...
 
-// creates the user with cypher
-var _create = function (params, callback) {
-  var cypherParams = {
-    name: params.name,
-    description: params.description
-  };
+    // make sure params is what we expect it to be
+    params = _prepareParams(params);
 
-  var query = [
-    'MERGE (role:Role {name: {name}, description: {description}})',
-    'RETURN role'
-  ].join('\n');
+    func.done().call(null, params, options, function (err, results, queries) {
+      resolve({results: results, queries: queries});
+    });
+  });
 
-  console.log('create query', query);
-
-  callback(null, query, cypherParams);
+  return promise;
 };
 
-// update the user with cypher
-// var _update = function (params, callback) {
+// var create = new Construct(_create, _singleSalary);
 
-//   var cypherParams = {
-//     id : params.id,
-//     firstname : params.firstname,
-//     lastname : params.lastname,
-//   };
+// var createMany = new Construct(_createManySetup).map(create);
+var createMany = function (params, options) {
+  var promises = [];
+  
+  _.each(params.list, function (data) {
+    var filtered = _.pick(data, Object.keys(schema));
+    var promise = create(filtered, options);
 
-//   var query = [
-//     'MATCH (user:User {id:{id}})',
-//     'SET user.firstname = {firstname}',
-//     'SET user.lastname = {lastname}',
-//     'RETURN user'
-//   ].join('\n');
+    promises.push(promise);
+  });
 
-//   callback(null, query, cypherParams);
-// };
+  return when.all(promises);
+};
 
-// delete the user and any relationships with cypher
-// var _delete = function (params, callback) {
-//   var cypherParams = {
-//     id: params.id
-//   };
-
-//   var query = [
-//     'MATCH (company:Company {id:{id}})',
-//     'OPTIONAL MATCH (company)-[r]-()',
-//     'DELETE company, r',
-//   ].join('\n');
-
-//   callback(null, query, cypherParams);
-// };
-
-// delete all users
-// var _deleteAll = function (params, callback) {
-//   var cypherParams = {};
-
-//   var query = [
-//     'MATCH (company:Company)',
-//     'OPTIONAL MATCH (company)-[r]-()',
-//     'DELETE user, r',
-//   ].join('\n');
-
-//   callback(null, query, cypherParams);
-// };
-
-// create a new user
-var create = new Construct(_create, _singleRole);
-
-// var getById = new Construct(_matchByCUID).query().then(_singleCompany);
+var getById = new Construct(_matchById).query().then(_singleRole);
 
 var getAll = new Construct(_matchAll, _manyRoles);
 
-// get a user by id and update their properties
-// var update = new Construct(_update, _singleUser);
+// var update = new Construct(_update, _singleSalary);
+var update = function (params, options, callback) {
+  var func = new Construct(_update, _singleRole);
 
-// delete a user by id
-// var deleteCompany = new Construct(_delete);
+  params = _prepareParams(params);
 
-// delete a user by id
-// var deleteAllCompanies = new Construct(_deleteAll);
-
-// export exposed functions
-module.exports = {
-  // getById: getById.done(),
-  create: create.done(),
-  getAll: getAll.done(),
-  // deleteCompany: deleteCompany.done(),
-  // deleteAllCompanies: deleteAllCompanies.done(),
+  func.done().call(this, params, options, callback);
 };
+
+var deleteRole = new Construct(_delete);
+
+var deleteAllRoles = new Construct(_deleteAll);
+
+// static methods
+Role.create = create;
+Role.createMany = createMany;
+Role.deleteRole = deleteRole.done();
+Role.deleteAllRoles = deleteAllRoles.done();
+Role.getById = getById.done();
+Role.getAll = getAll.done();
+Role.update = update;
+
+module.exports = Role;

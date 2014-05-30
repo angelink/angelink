@@ -146,7 +146,7 @@ Job.prototype.atLocation = function (toLocation, callback) {
   var query = [];
   
   query.push('START a=node({from}), b=node({to})');
-  query.push('CREATE UNIQUE (a)-[:AT]->(b)');
+  query.push('CREATE UNIQUE (a)-[:AT_LOCATION]->(b)');
   var qs = query.join('\n');
 
   db.query(qs, {from: that.nodeId, to: toLocation.nodeId}, callback);

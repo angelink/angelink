@@ -12,6 +12,7 @@ var Salary = require('../../models/salaries');
 var Equity = require('../../models/equities');
 var Company = require('../../models/companies');
 var Loc = require('../../models/locations');
+var Role = require('../../models/roles');
 
 var param = sw.params;
 var swe = sw.errors;
@@ -90,7 +91,8 @@ exports.addJob = {
       param.form('salary', 'stringified salary object', 'object', true),
       param.form('equity', 'stringified equity object', 'object', true),
       param.form('company', 'stringified company object', 'object', true),
-      param.form('loc', 'stringified location object', 'object', true)
+      param.form('loc', 'stringified location object', 'object', true),
+      param.form('roles', 'stringified roles array', 'object', true)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addJob'
@@ -110,15 +112,17 @@ exports.addJob = {
       Salary.create(JSON.parse(params.salary), options),
       Equity.create(JSON.parse(params.equity), options),
       Company.create(JSON.parse(params.company), options),
-      Loc.create(JSON.parse(params.loc), options)
+      Loc.create(JSON.parse(params.loc), options),
+      Role.createMany({list:JSON.parse(params.roles)}, options)
     ).then(function (results) {
       var jobResults = results[0];
       var salaryResults = results[1];
       var equityResults = results[2];
       var companyResults = results[3];
       var locResults = results[4];
+      var roleResults = results[5];
       // console.log(results, 'results');
-      // console.log(jobResults, 'jobResults');
+      // console.log(roleResults, 'roleResults');
       // console.log(salaryResults, 'salaryResults');
       jobResults.results.node.hasSalary(salaryResults.results.node, function(err){
         if (err) throw err;
@@ -132,6 +136,11 @@ exports.addJob = {
       jobResults.results.node.atLocation(locResults.results.node, function(err){
         if (err) throw err;
       });
+      for (var i=0; i<roleResults.length; i++){
+        jobResults.results.node.hasRole(roleResults[i].results.node, function(err){
+          if (err) throw err;
+        });
+      }
       callback(null, results);
     });
   }
