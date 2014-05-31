@@ -19,10 +19,10 @@ var _prepareParams = function (req) {
 
   params.id = (req.params && req.params.id) || (req.body && req.body.id);
 
-  // Create ID if it doesn't exist
-  if (!params.id) {
-    params.id = utils.createId(params);
-  }
+  // // Create ID if it doesn't exist
+  // if (!params.id) {
+  //   params.id = utils.createId(params);
+  // }
 
   return params;
 };
@@ -94,7 +94,7 @@ exports.addSalary = {
     notes : 'adds a salary to the graph',
     summary : 'Add a new salary to the graph',
     method: 'POST',
-    type : 'array',
+    type : 'object',
     items : {
       $ref: 'Salary'
     },
@@ -116,7 +116,9 @@ exports.addSalary = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Salary.create(params, options, callback);
+    Salary.create(params, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 
@@ -155,7 +157,9 @@ exports.addSalaries = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Salary.createMany({list:list}, options, callback);
+    Salary.createMany({list:list}, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 
@@ -254,7 +258,9 @@ exports.updateById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Salary.update(params, options, callback);
+    Salary.update(params, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 
