@@ -19,6 +19,24 @@ angular.module('n4j.pages', ['ui.router.compat', 'n4j.pages.controllers', 'n4j.p
         data: {
           bodyId: 'about'
         }
+      })
+
+      .state('landing', {
+        url: '/landing',
+        templateUrl: 'pages/templates/landing.tpl.html',
+        controller: 'LandingCtrl',
+        data: {
+          bodyId: 'landing'
+        }
+      })
+
+      .state('profile', {
+        url: '/profile',
+        templateUrl: 'pages/templates/profile.tpl.html',
+        controller: 'ProfileCtrl',
+        data: {
+          bodyId: 'profile'
+        }
       });
   });
 
