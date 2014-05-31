@@ -20,7 +20,7 @@ var Construct = Architect.Construct;
 // Presently only schema properties are being used in the query builder. 
 // The value doesn't matter right now.
 var schema = {
-  id: String,
+  id: String, // linkedIn ID
   firstname: String,
   lastname: String,
   email: String,
@@ -109,7 +109,7 @@ var create = function (params, options) {
 
     // Create the (User)->(Users) relationship
     if (_res.node.data.linkedInToken) {
-      _res.node.joined();
+      _res.node.joined(_.noop);
     }
     
     return results;
