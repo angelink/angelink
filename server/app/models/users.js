@@ -11,6 +11,7 @@ var when = require('when');
 
 // ## Models
 var Skill = require('./skills');
+var Loc = require('./locations');
 
 Architect.init();
 
@@ -117,24 +118,28 @@ var create = function (params, options) {
   // Create the Users skills
   var p2 = Skill.createMany(params.skills, options);
 
-  var p3 = when.join(p1,p2);
+  var p3 = Loc.create(params.location, options);
 
-  // Things to do once users and skills have been created
-  p3.then(function (results) {
+  var all = when.join(p1,p2,p3);
+
+  // Things to do once users, skills, location, etc have been created
+  all.then(function (results) {
     var userResults = results[0];
     var skillResults = results[1];
+    var locResults = results[2];
     var user = userResults.results.node;
 
     var skills = _.map(skillResults, function (res) {
       return res.results.node;
     });
 
-    user.hasSkill(skills, _.noop());
+    user.hasSkill(skills, _.noop);
+    user.atLocation(locResults.results.node, _.noop);
 
     return results;
   });
 
-  return p3;
+  return all;
 };
 
 // create many new users
@@ -243,6 +248,16 @@ User.prototype.joined = function (callback) {
  * @param callback {func}
  */
 User.prototype.knows = _.partial(_hasRelationship, {label: 'KNOWS'});
+
+
+/**
+ * Builds and executes a query to create a relationship between this user
+ * and his/her location
+ *
+ * @param nodes {object} a location node
+ * @param callback {func}
+ */
+User.prototype.atLocation = _.partial(_hasRelationship, {label: 'AT_LOCATION'});
 
 
 // static methods:

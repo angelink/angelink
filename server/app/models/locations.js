@@ -92,6 +92,11 @@ var create = function (params, options) {
 
     // @NOTE Do any data cleaning/prep here...
 
+    // There is a good chance that 'params' is stringified JSON object so parse it.
+    if (typeof params === 'string') {
+      params = JSON.parse(params);
+    }
+
     // make sure params is what we expect it to be
     params = _prepareParams(params);
 
