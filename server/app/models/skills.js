@@ -123,10 +123,17 @@ var create = function (params, options) {
 // create many new skills
 //
 // Returns a promise
-var createMany = function (params, options) {
+var createMany = function (list, options) {
   var promises = [];
+
+  if (!list) return;
+
+  // There is a good chance that 'list' is stringified JSON array so parse it.
+  if (typeof list === 'string') {
+    list = JSON.parse(list);
+  }
   
-  _.each(params.list, function (data) {
+  _.each(list, function (data) {
     var filtered = _.pick(data, Object.keys(schema));
     var promise = create(filtered, options);
 

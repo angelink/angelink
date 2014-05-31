@@ -5,7 +5,6 @@ var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
 var when = require('when');
-var nodefn = require('when/node');
 
 // ## Collections
 var Users = require('../../collections/users');
@@ -129,13 +128,17 @@ exports.addUser = {
     params = _prepareParams(req);
 
     when.join(
-      User.create(params, options),
-      Skill.createMany({list:JSON.parse(params.skills)}, options)
+      User.create(params, options)
+      // Skill.createMany(params.skills, options)
     ).then(function (results) {
-      var userResults = results[0];
-      var skillsResults = results[1];
+      console.log('134', results);
+      // var userResults = results[0];
+      // var skillsResults = results[1];
+
+      // Create the user skills
+      // User.
       
-      callback(null, userResults.results, userResults.queries);
+      // callback(null, userResults.results, userResults.queries);
     });
   }
 };

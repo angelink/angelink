@@ -4,7 +4,7 @@
 // ## Module Dependencies
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 var passport = require('passport');
-var request = require('request');
+// var request = require('request');
 
 var Config = require('../config/index.js');
 var cfg = new Config().getSync();
