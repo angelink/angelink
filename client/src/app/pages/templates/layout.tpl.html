@@ -1,0 +1,31 @@
+<!-- Main App Layout View -->
+
+<!-- <div snap-drawer>
+  <ul>
+    <li>Menu Item</li>
+    <li>Menu Item</li>
+    <li>Menu Item</li>
+  </ul>
+</div>
+
+<div snap-content snap-options="snapOpts" class="scrollable">
+  <div ui-view="list"></div>
+  <div ui-view="detail"></div>
+</div> -->
+
+<header class="header">
+  <div class="container">
+    <h4 class="branding">Relay</h4>
+  </div>
+</header>
+
+<div class="main layout-2col">
+  <div ui-view="detail" class="browse-detail col1"></div>
+  <div class="col2 browse-list">
+    <ul>
+      <li>List Item</li>
+      <li>List Item</li>
+      <li>List Item</li>
+    </ul>
+  </div>
+</div>

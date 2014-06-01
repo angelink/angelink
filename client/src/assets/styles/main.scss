@@ -25,10 +25,14 @@
 // --------------------------------------------
 @import "partials/sticky-footer";
 
+html {
+  height: 100%;
+}
+
 body {
   background: $bgBody;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #444;
+  color: $darkGray;
 }
 
 .browsehappy {
@@ -40,6 +44,9 @@ body {
 
 
 // Import App Styling
+@import "partials/browse";
+@import "partials/drawer";
 @import "partials/home";
+@import "partials/layout";
 @import "partials/login";
 @import "partials/tagger";

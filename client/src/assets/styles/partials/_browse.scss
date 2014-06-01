@@ -1,0 +1,36 @@
+.header {
+  background: $bgHeader;
+  border-bottom: 1px solid $gray;
+
+  .branding {
+    font-size: 14px;
+  }
+}
+
+.main {
+  // width: 100%;
+  // display: flex;
+  // flex-flow: row wrap;
+
+  .browse-list, .browse-detail {
+    padding: 20px 0;
+  }
+
+  .browse-list {
+    // flex: 1 auto;
+    // height: 100%;
+    background: $bgList;
+    
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+  }
+
+  .browse-detail {
+    background: $bgDetail;
+    border-left: 1px solid darken($lightGray, 10%);
+    // flex: 3 0px;
+  }
+}

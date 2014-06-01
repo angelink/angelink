@@ -7,7 +7,9 @@
 var path = require('path');
 
 var config = {};
+
 var PORT = process.env.PORT || 3000;
+var API_VERSION = 'v0';
 
 // ## Development Environment Configurations
 config.development = {
@@ -34,6 +36,8 @@ config.development = {
 
     // base url for site
     baseUrl: process.env.BASE_URL || 'http://127.0.0.1:' + PORT,
+
+    apiBasePath: '/api/' + API_VERSION,
 
     // Port to be passed to node's `net.Server#listen()`
     port: PORT
@@ -63,6 +67,8 @@ config.production = {
 
     // base url for site
     baseUrl: process.env.BASE_URL || 'http://127.0.0.1:' + PORT,
+
+    apiBasePath: '/api/' + API_VERSION,
 
     // Port to be passed to node's `net.Server#listen()`
     port: process.env.PORT || 3000

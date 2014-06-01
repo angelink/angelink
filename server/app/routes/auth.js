@@ -25,6 +25,8 @@ module.exports = function (server) {
   
   server.get('/auth/linkedin', function (req, res, next) {
 
+    // state is used for security during authentication
+    // @see http://developer.linkedin.com/documents/authentication
     var state = generateState(req.sessionID);
 
     // save state to session

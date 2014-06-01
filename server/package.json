@@ -1,5 +1,5 @@
 {
-  "name": "particle-express-seed",
+  "name": "traverged",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
@@ -7,10 +7,15 @@
     "ect": "~0.5.6",
     "express": "~3.4.8",
     "lodash": "~2.4.1",
+    "neo4j": "^1.1.0",
+    "neo4j-architect": "^0.1.1",
+    "neo4j-swagger-ui": "0.0.14",
     "passport": "^0.2.0",
     "passport-linkedin-oauth2": "^1.1.1",
+    "request": "^2.36.0",
     "send": "~0.1.4",
-    "when": "~2.7.0"
+    "swagger-node-express": "^2.0.3",
+    "when": "^3.2.2"
   },
   "devDependencies": {
     "connect-livereload": "~0.3.2",

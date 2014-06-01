@@ -1,10 +1,21 @@
 // Colors
-$lightestGray: #fafafa;
-$lightGray: #e5e5e5;
+$lightestGray: #F8F7F4;
+$lighterGray: #F3F1ED;
+$lightGray: #E9E7E2;
+$gray: #91908D;
+$darkGray: #555451;
+$darkerGray: #4B4A47;
 $blue: #348eda;
-  
+
+
 // Color Assignments  
-$bgBody: $lightestGray;
+$bgBody: $lighterGray;
+$bgDetail: $lightestGray;
+$bgDrawer: $darkerGray;
+$bgHeader: white;
+$bgList: $lighterGray;
+
+
 
 // Footer Height (for Sticky Footer)
 $footerHeight: 60px;

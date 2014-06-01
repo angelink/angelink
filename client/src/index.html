@@ -26,6 +26,7 @@
 
     <!-- build:css styles/app.vendor.css -->
     <!-- bower:css -->
+    <link rel="stylesheet" href="components/angular-snap/angular-snap.css" />
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -44,35 +45,7 @@
       <script src="json3/lib/json3.min.js"></script>
     <![endif]-->
     
-    <div id="realm">
-      <div class="header">
-        <div class="container">
-          <ul class="nav nav-pills pull-right">
-            <li class="active"><a ng-href="#">Home</a></li>
-            <li><a ng-href="/about">About</a></li>
-            <li><a ng-href="#">Contact</a></li>
-            <li><a ng-href="/landing">Landing</a></li>
-            <li><a ng-href="/profile">Profile</a></li>
-          </ul>
-          <h4 class="text-muted">
-            <a href="http://github.com/dremonkey/n4j-angular-seed">github.com/dremonkey/n4j-angular-seed</a>
-          </h4>
-        </div>
-      </div>
-
-      <!-- AngularJS Content -->
-      <div ui-view></div>
-    </div>
-
-    <footer class="footer">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-12">
-            <p>♥ for the Yeoman team whose yo angular generator was used to begin this</p>
-          </div>
-        </div>
-      </div>
-    </footer>
+    <div id="realm" ui-view></div>
 
     <!-- build:js scripts/app.vendor.js -->
     <!-- bower:js -->
@@ -89,6 +62,8 @@
     <script src="components/gsap/src/uncompressed/TweenMax.js"></script>
     <script src="components/ng-Fx/dist/ng-Fx.js"></script>
     <script src="components/restangular/dist/restangular.min.js"></script>
+    <script src="components/snapjs/snap.js"></script>
+    <script src="components/angular-snap/angular-snap.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -102,10 +77,16 @@
 
     <!-- pages module -->
     <script src="app/pages/module.js"></script>
+    
     <script src="app/pages/controllers/base.ctrl.js"></script>
     <script src="app/pages/controllers/home.ctrl.js"></script>
+<<<<<<< HEAD
     <script src="app/pages/controllers/landing.ctrl.js"></script>
     <script src="app/pages/controllers/profile.ctrl.js"></script>
+=======
+    <script src="app/pages/controllers/browse.ctrl.js"></script>
+
+>>>>>>> fe4abb3e2d2b77a53f4a40080a6fe606859615ce
     <script src="app/pages/directives/home.dir.js"></script>
     <script src="app/pages/directives/tagger.dir.js"></script>
     <!-- endbuild -->
