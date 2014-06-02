@@ -3,7 +3,8 @@
 var request = require('request')
   , helpers = require('./dbjobshelpers.js');
 
-var url = 'https://api.angel.co/1/jobs';
+// var url = 'https://api.angel.co/1/jobs';
+var url = 'https://api.angel.co/1//tags/1692/jobs';
 request({uri : url}, function(err, res, body){
   if (err) console.error(err);
   var jobs = JSON.parse(body).jobs;

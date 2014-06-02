@@ -13,6 +13,7 @@ var Equity = require('../../models/equities');
 var Company = require('../../models/companies');
 var Loc = require('../../models/locations');
 var Role = require('../../models/roles');
+var Skill = require('../../models/skills');
 
 var param = sw.params;
 var swe = sw.errors;
@@ -92,7 +93,8 @@ exports.addJob = {
       param.form('equity', 'stringified equity object', 'object', true),
       param.form('company', 'stringified company object', 'object', true),
       param.form('loc', 'stringified location object', 'object', true),
-      param.form('roles', 'stringified roles array', 'object', true)
+      param.form('roles', 'stringified array of role objects', 'object', true),
+      param.form('skills', 'stringified array of skill objects', 'object', true)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addJob'
@@ -113,7 +115,8 @@ exports.addJob = {
       Equity.create(JSON.parse(params.equity), options),
       Company.create(JSON.parse(params.company), options),
       Loc.create(JSON.parse(params.loc), options),
-      Role.createMany({list:JSON.parse(params.roles)}, options)
+      Role.createMany({list:JSON.parse(params.roles)}, options),
+      Skill.createMany(params.skills, options)
     ).then(function (results) {
       var jobResults = results[0];
       var salaryResults = results[1];
@@ -121,9 +124,10 @@ exports.addJob = {
       var companyResults = results[3];
       var locResults = results[4];
       var roleResults = results[5];
+      var skillResults = results[6];
       // console.log(results, 'results');
       // console.log(roleResults, 'roleResults');
-      // console.log(salaryResults, 'salaryResults');
+      console.log(skillResults, 'skillResults');
       jobResults.results.node.hasSalary(salaryResults.results.node, function(err){
         if (err) throw err;
       });
@@ -141,40 +145,15 @@ exports.addJob = {
           if (err) throw err;
         });
       }
+      for (var j=0; j<skillResults.length; j++){
+        jobResults.results.node.requiresSkill(skillResults[j].results.node, function(err){
+          if (err) throw err;
+        });
+      }
       callback(null, results);
     });
   }
 };
-
-    // Job.create(params, options, callback);
-    
-    // Job.create(params, options, function(err, result){
-    //   var jobNode = result.data;
-    //   var salary = JSON.parse(params.salary);
-    //   var equity = JSON.parse(params.equity);
-    //   // var company = JSON.parse(params.company);
-    //   salary.id = utils.createId(salary);
-    //   equity.id = utils.createId(equity);
-    //   // company.id = utils.createId(company);
-    //   Salary.create(salary, options, function(err, result){
-    //     var salaryNode = result.data;
-    //     jobNode.hasSalary(salaryNode, function(err, result){
-    //       Equity.create(equity, options, function(err, result){
-    //         var equityNode = result.data;
-    //         jobNode.hasEquity(equityNode, function(err, result){
-    //           // Company.create(company, options, function(err, result){
-    //           //   var companyNode = result.data;
-    //           //   jobNode.atCompany(companyNode, function(err, result){
-    //               callback(err, result);
-    //             // });
-    //           // });
-    //         });
-    //       });
-    //     });
-    //   });
-    // });
-//   }
-// };
 
 // Route: POST '/jobs/batch'
 exports.addJobs = {
