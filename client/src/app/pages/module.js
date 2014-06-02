@@ -27,9 +27,7 @@ angular.module('n4j.pages')
       // Everything in app should be authenticated
       .state('app', {
         abstract: true,
-
         url: '/app',
-
         template: '<ui-view class="layout"/>'
 
         // resolve: {
@@ -41,23 +39,18 @@ angular.module('n4j.pages')
 
       .state('app.recommended', {
         abstract: true,
-
         url: '^/recommended',
-
         templateUrl: 'pages/templates/layout.tpl.html',
-
         controller: 'BrowseCtrl'
       })
 
       .state('app.recommended.list', {
         url: '',
-
         templateUrl: 'pages/templates/list.tpl.html'
       })
 
       .state('app.recommended.detail', {
         url: '/:id',
-
         views: {
           'detail': {
             templateUrl: 'pages/templates/detail.tpl.html',
@@ -65,12 +58,12 @@ angular.module('n4j.pages')
         }
       })
 
-      .state('landing', {
-        url: '/landing',
-        templateUrl: 'pages/templates/landing.tpl.html',
-        controller: 'LandingCtrl',
+      .state('login', {
+        url: '/login',
+        templateUrl: 'pages/templates/login.tpl.html',
+        controller: 'AuthCtrl',
         data: {
-          bodyId: 'landing'
+          bodyId: 'auth'
         }
       })
 

@@ -64,9 +64,10 @@ body {
 }
 
 // Import App Styling
+@import "partials/auth";
 @import "partials/browse";
 @import "partials/drawer";
 @import "partials/home";
 @import "partials/layout";
-@import "partials/login";
 @import "partials/tagger";
+@import "partials/zocial";
