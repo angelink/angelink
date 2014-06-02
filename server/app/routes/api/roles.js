@@ -5,8 +5,9 @@ var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
 
+
 // ## Models
-var Company = require('../../models/companies');
+var Role = require('../../models/roles');
 
 var param = sw.params;
 var swe = sw.errors;
@@ -18,10 +19,10 @@ var _prepareParams = function (req) {
 
   params.id = (req.params && req.params.id) || (req.body && req.body.id);
 
-  // Create normalized name from name
-  if (params.name) {
-    params.normalized = utils.normalizeString(params.name);
-  }
+  // // Create ID if it doesn't exist
+  // if (!params.id) {
+  //   params.id = utils.createId(params);
+  // }
 
   return params;
 };
@@ -35,7 +36,7 @@ var _prepareParams = function (req) {
 // Example:
 //
 // action: function(req, res) {
-//   var errLabel = 'Route: POST /companies';
+//   var errLabel = 'Route: POST /locations';
 //   var callback = _.partial(_callback, res, errLabel);
 // }
 var _callback = function (res, errLabel, err, results, queries) {
@@ -54,152 +55,150 @@ var _callback = function (res, errLabel, err, results, queries) {
 // ## API Specs
 
 
-// Route: GET '/companies'
+// Route: GET '/salaries'
 exports.list = {
 
   spec: {
-    description : 'List all companies',
-    path : '/companies',
+    description : 'List all roles',
+    path : '/roles',
     method: 'GET',
-    summary : 'Find all companies',
-    notes : 'Returns all companies',
-    type: 'array',
+    summary : 'Find all roles',
+    notes : 'Returns all roles',
+    type: 'object',
     items: {
-      $ref: 'Company'
+      $ref: 'Role'
     },
     produces: ['application/json'],
     parameters : [],
-    responseMessages: [swe.notFound('companies')],
-    nickname : 'getCompany'
+    responseMessages: [swe.notFound('roles')],
+    nickname : 'getRoles'
   },
 
   action: function (req, res) {
     var options = {};
-    var errLabel = 'Route: GET /companies';
+    var errLabel = 'Route: GET /roles';
     var callback = _.partial(_callback, res, errLabel);
     
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Company.getAll(null, options, callback);
+    Role.getAll(null, options, callback);
   }
 };
 
 
-// Route: POST '/companies'
-exports.addCompany = {
+// Route: POST '/roles'
+exports.addRole = {
   
   spec: {
-    path : '/companies',
-    notes : 'adds a company to the graph',
-    summary : 'Add a new company to the graph',
+    path : '/roles',
+    notes : 'adds a role to the graph',
+    summary : 'Add a new role to the graph',
     method: 'POST',
-    type : 'array',
+    type : 'object',
     items : {
-      $ref: 'Company'
+      $ref: 'Role'
     },
     parameters : [
-      param.form('name', 'Company name. A normalized name will be created from this.', 'string', true),
-      param.form('id', 'Company AngelList ID.', 'string', false),
+      param.form('name', 'name', 'string', true)
     ],
-    responseMessages : [swe.invalid('name')],
-    nickname : 'addCompany'
+    responseMessages : [swe.invalid('role')],
+    nickname : 'addRole'
   },
 
   action: function(req, res) {
     var options = {};
     var params = {};
-    var errLabel = 'Route: POST /companies';
+    var errLabel = 'Route: POST /roles';
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Company.create(params, options).done(function(results){
+    Role.create(params, options).done(function(results){
       callback(null, results);
     });
   }
 };
 
 
-// Route: POST '/companies/batch'
-exports.addCompanies = {
+// Route: POST '/roles/batch'
+exports.addRoles = {
   
   spec: {
-    path : '/companies/batch',
-    notes : 'add companies to the graph',
-    summary : 'Add multiple companies to the graph',
+    path : '/roles/batch',
+    notes : 'add roles to the graph',
+    summary : 'Add multiple roles to the graph',
     method: 'POST',
     type : 'object',
     parameters : [
-      param.form('list', 'Array of company object JSON strings', 'array', true),
+      param.form('list', 'Array of roles object JSON strings', 'array', true),
     ],
     responseMessages : [swe.invalid('list')],
-    nickname : 'addCompanies'
+    nickname : 'addRoles'
   },
 
   action: function(req, res) {
     var options = {};
     var params = req.body;
-    var errLabel = 'Route: POST /companies/batch';
+    var errLabel = 'Route: POST /roles/batch';
     var callback = _.partial(_callback, res, errLabel);
     var list = JSON.parse(params.list);
 
     if (!list.length) throw swe.invalid('list');
 
     // @TODO 
-    // should probably check to see if all company objects contain the minimum
+    // should probably check to see if all location objects contain the minimum
     // required properties and stop if not.
-    list = _.map(list, function (data) {
-      return _prepareParams({body: data});
+    list = _.map(list, function (salary) {
+      return _prepareParams({body: salary});
     });
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Company.createMany({list:list}, options).done(function(results){
+    Role.createMany({list:list}, options).done(function(results){
       callback(null, results);
     });
   }
 };
 
-
-// Route: DELETE '/companies'
-exports.deleteAllCompanies = {
+// Route: DELETE '/roles'
+exports.deleteAllRoles = {
   spec: {
-    path: '/companies',
-    notes: 'Deletes all companies and their relationships',
-    summary: 'Delete all companies',
+    path: '/roles',
+    notes: 'Deletes all roles and their relationships',
+    summary: 'Delete all roles',
     method: 'DELETE',
     type: 'object',
-    nickname : 'deleteAllCompanies'
+    nickname : 'deleteAllRoles'
   },
 
   action: function (req, res) {
     var options = {};
-    var errLabel = 'Route: DELETE /companies';
+    var errLabel = 'Route: DELETE /roles';
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Company.deleteAllCompanies(null, options, callback);
+    Role.deleteAllRoles(null, options, callback);
   }
 };
 
 
-// Route: GET '/companies/:id'
+// Route: GET '/roles/:id'
 exports.findById = {
   
   spec: {
-    description : 'find a company',
-    path : '/companies/{id}',
-    notes : 'Returns a company based on id',
-    summary : 'Find company by id',
+    description : 'find a role',
+    path : '/roles/{id}',
+    notes : 'Returns a role based on id',
+    summary : 'Find role by id',
     method: 'GET',
     parameters : [
-      param.path('id', 'ID of company that needs to be fetched', 'string'),
+      param.path('id', 'ID of role that needs to be fetched', 'string'),
     ],
-    type : 'Company',
-    responseMessages : [swe.invalid('id'), swe.notFound('company')],
-    nickname : 'getCompanyById'
+    type : 'Role',
+    responseMessages : [swe.invalid('id'), swe.notFound('role')],
+    nickname : 'getRoleById'
   },
 
   action: function (req, res) {
@@ -209,35 +208,37 @@ exports.findById = {
 
     if (!id) throw swe.invalid('id');
 
-    var errLabel = 'Route: GET /companies/{id}';
+    var errLabel = 'Route: GET /roles/{id}';
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Company.getById(params, options, callback);
+    console.log(params);
+
+    Role.getById(params, options, callback);
   }
 };
 
 
-// Route: POST '/companies/:id'
+// Route: POST '/roles/:id'
 exports.updateById = {
 
   spec: {
-    path: '/companies/{id}',
-    notes: 'Updates an existing company',
-    summary: 'Update a company',
+    path: '/roles/{id}',
+    notes: 'Updates an existing role',
+    summary: 'Update a role',
     method: 'POST',
     type: 'object',
     items: {
-      $ref: 'Company'
+      $ref: 'Role'
     },
     parameters : [
-      param.path('id', 'ID of company that needs to be fetched', 'string'),
-      param.form('name', 'Company name. A normalized name will be created from this.', 'string', true),
+      param.path('id', 'ID of salary that needs to be fetched', 'string'),
+      param.form('name', 'name', 'string', true)
     ],
     responseMessages : [swe.invalid('input')],
-    nickname : 'updateCompany'
+    nickname : 'updateRole'
   },
 
   action: function (req, res) {
@@ -247,32 +248,32 @@ exports.updateById = {
 
     if (!id) throw swe.invalid('id');
 
-    var errLabel = 'Route: POST /companies/{id}';
+    var errLabel = 'Route: POST /roles/{id}';
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Company.update(params, options).done(function(results){
+    Role.update(params, options).done(function(results){
       callback(null, results);
     });
   }
 };
 
-// Route: DELETE '/companies/:id'
-exports.deleteCompany = {
+// Route: DELETE '/roles/:id'
+exports.deleteRole = {
 
   spec: {
-    path: '/companies/{id}',
-    notes: 'Deletes an existing company and its relationships',
-    summary: 'Delete a company',
+    path: '/roles/{id}',
+    notes: 'Deletes an existing role and its relationships',
+    summary: 'Delete a role',
     method: 'DELETE',
     type: 'object',
     parameters: [
-      param.path('id', 'ID of company to be deleted', 'string'),
+      param.path('id', 'ID of role to be deleted', 'string'),
     ],
     responseMessages: [swe.invalid('input')],
-    nickname : 'deleteCompany'
+    nickname : 'deleteRole'
   },
 
   action: function (req, res) {
@@ -282,12 +283,12 @@ exports.deleteCompany = {
 
     if (!id) throw swe.invalid('id');
 
-    var errLabel = 'Route: DELETE /companies/{id}';
+    var errLabel = 'Route: DELETE /roles/{id}';
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Company.deleteCompany(params, options, callback);
+    Role.deleteSalary(params, options, callback);
   }
 };

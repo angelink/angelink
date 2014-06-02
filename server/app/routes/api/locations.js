@@ -114,7 +114,9 @@ exports.addLocation = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Loc.create(params, options, callback);
+    Loc.create(params, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 
@@ -153,7 +155,9 @@ exports.addLocations = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Loc.createMany({list:list}, options, callback);
+    Loc.createMany({list:list}, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 
@@ -248,7 +252,9 @@ exports.updateById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Loc.update(params, options, callback);
+    Loc.update(params, options).done(function(results){
+      callback(null, results);
+    });
   }
 };
 

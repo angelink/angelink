@@ -4,15 +4,12 @@
 var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
-var when = require('when');
-var nodefn = require('when/node');
 
 // ## Collections
 var Users = require('../../collections/users');
 
 // ## Models
 var User = require('../../models/users');
-var Skill = require('../../models/skills');
 
 var param = sw.params;
 var swe = sw.errors;
@@ -128,14 +125,17 @@ exports.addUser = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    when.join(
-      User.create(params, options),
-      Skill.createMany({list:JSON.parse(params.skills)}, options)
-    ).then(function (results) {
-      var userResults = results[0];
-      var skillsResults = results[1];
+    User.create(params, options).done(function (results) {
+      var _results = [];
+      var _queries = [];
+
+      results = _.flatten(results);
+      _.each(results, function (res) {
+        _results.push(res.results);
+        _queries.push(res.queries);
+      });
       
-      callback(null, userResults.results, userResults.queries);
+      callback(null, _results, _queries);
     });
   }
 };

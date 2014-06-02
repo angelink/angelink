@@ -4,9 +4,78 @@
 var _ = require('lodash');
 var statement = require('./statement');
 var util = require('util');
+var utils = require('../utils');
 
+// @TODO refactor so the 'name' is 'label'
+
+// ## Helpers
+
+var _create = function (label, identifier, index, params) {
+  var queryStr = '';
+  var paramsMap = {};
+
+  label = utils.capitalize(label);
+  
+  var pattern = _.map(params, function (val, key) {
+
+    // create a unique key...
+    // this will be needed later in order to assign the proper values to the 
+    // correct variable in the query
+    paramsMap[key+index] = val;
+
+    return util.format('%s:{%s}', key, key+index);
+  });
+
+  queryStr = util.format('CREATE (%s:%s {%s})', identifier, label, pattern);
+
+  return {
+    queryString: queryStr,
+    paramsMap: paramsMap
+  };
+};
 
 // ## Exports
+
+// UNUSED / UNTESTED
+//
+// @param obj {object or array} 
+// - object: has properties object.label, object.keys, object.params
+// - array: a list of objects with properties described above
+exports.create = function (obj) {
+  var list = null;
+  var query = [];
+  var queryStr = '';
+  var identifiers = [];
+  var paramsMap = {};
+
+  // Must be an array or object
+  if (typeof obj !== 'object') return '';
+
+  // If an object, then put it into an array else assign to list
+  list = Array.isArray(obj) && obj || [obj];
+  
+  _.each(list, function (data, index) {
+    var label = data.label; // node label
+    var params = data.params; // properties to save (assumes that data has been cleaned aleady)
+    // var identifier = utils.createId(params).toLowerCase(); // unique identifier
+    var identifier = 'var' + index;
+
+    identifiers.push(identifier); // save identifiers
+    
+    var result = _create(label, identifier, index, params);
+    
+    query.push(result.queryString);
+    paramsMap = _.extend(paramsMap, result.paramsMap);
+  });
+
+  query.push(util.format('RETURN %s', identifiers.join(', ')));
+  queryStr = query.join('\n');
+
+  return {
+    queryString: queryStr,
+    paramsMap: paramsMap
+  };
+};
 
 exports.del = function (name, keys) {
   var query = [];
