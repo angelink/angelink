@@ -46,7 +46,7 @@ exports.init = function () {
         json: params
       };
       
-      // Need to save the token and user info to databases
+      // Save the token and user info to databases
       request(options, function (err, res, body) {
 
         if (err) {

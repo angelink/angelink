@@ -12,7 +12,7 @@ module.exports = {
   },
 
   js: {
-    files: ['<%= paths.client.tld %>/app/{,*/}*.js'],
+    files: ['<%= paths.client.tld %>/app/**/*.js'],
     tasks: [
       'newer:jshint:app',
     ]
@@ -37,4 +37,4 @@ module.exports = {
     files: ['<%= paths.client.tld %>/app/**/*.tpl.html'],
     tasks: ['clean:ngtemplates', 'ngtemplates:serve']
   }
-}
+};
