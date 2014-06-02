@@ -1,11 +1,15 @@
 'use strict';
 
 angular.module('n4j.pages', [
+  'highcharts-ng',
   'ngAnimate',
+  'snap',
+  'ui.bootstrap',
   'ui.router.compat',
+
+  // app modules
   'n4j.pages.controllers',
   'n4j.pages.directives',
-  'snap'
 ]);
 
 angular.module('n4j.pages')
@@ -40,20 +44,15 @@ angular.module('n4j.pages')
 
         url: '^/recommended',
 
-        templateUrl: 'pages/templates/layout.tpl.html'
+        templateUrl: 'pages/templates/layout.tpl.html',
+
+        controller: 'BrowseCtrl'
       })
 
       .state('app.recommended.list', {
         url: '',
 
         templateUrl: 'pages/templates/list.tpl.html'
-
-        // views: {
-        //   'list': {
-        //     templateUrl: 'pages/templates/detail.tpl.html',
-        //     controller: 'BrowseCtrl'
-        //   }
-        // }
       })
 
       .state('app.recommended.detail', {
@@ -62,7 +61,6 @@ angular.module('n4j.pages')
         views: {
           'detail': {
             templateUrl: 'pages/templates/detail.tpl.html',
-            controller: 'BrowseCtrl'
           }
         }
       })

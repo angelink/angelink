@@ -13,19 +13,54 @@
   <div ui-view="detail"></div>
 </div> -->
 
-<header class="header">
+<!-- <header class="header">
   <div class="container">
     <h4 class="branding">Relay</h4>
   </div>
-</header>
+</header> -->
 
 <div class="main layout-2col">
   <div ui-view="detail" class="browse-detail col1"></div>
-  <div class="col2 browse-list">
-    <ul>
-      <li>List Item</li>
-      <li>List Item</li>
-      <li>List Item</li>
-    </ul>
+  <div class="col2">
+    <div class="browse-list">
+      <header class="header">
+        <h2>Recommended</h2>
+        <div class="list-type btn-group">
+          <label class="btn btn-transparent btn-sm" ng-model="listType" btn-radio="'Recommended'">
+            <i class="fa fa-list"></i>
+          </label>
+          <label class="btn btn-transparent btn-sm" ng-model="listType" btn-radio="'Liked'">
+            <i class="fa fa-star"></i>
+          </label>
+        </div>
+      </header>
+      <ul class="jobs recommended">
+        <li ng-repeat="job in jobs" class="job">
+          <div class="meta top">
+            <span class="company">{{job.company}}</span>
+            <!-- <span class="posted">{{job.posted | date: "medium"}}</span> -->
+          </div>
+          <h3 class="title">{{job.title}}</h3>
+          <ul class="meta bottom">
+            <li class="salary">
+              <span class="label">Salary:</span>
+              <span class="salary-min">{{job.salary.min | currency: "$"}}</span>
+              -
+              <span class="salary-max">{{job.salary.max | currency: "$"}}</span>
+            </li>
+            <li>
+              <div class="btn-group">
+                <label class="btn btn-transparent btn-xs">
+                  <i class="fa fa-star"></i>
+                </label>
+                <label class="btn btn-transparent btn-xs">
+                  <i class="fa fa-thumbs-down"></i>
+                </label>
+              </div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
