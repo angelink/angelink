@@ -1,18 +1,20 @@
-<div class='row text-center align-middle'>
-  
-  <div ng-controller="ProfileCtrl">
+<div ng-controller="ProfileCtrl" style='display: flex;align-items: center;justify-content: center; flex-direction:column; min-height:100%; height:100%;'>
+  <div style='margin:15px'>
     <img src='http://cartwa.com/Puppies_files/PuppyIcon.jpg'/>
-    <h1>Hi {{user.firstname}}.</h1>
-    <h3>Add your skills so we can get to know you.</h3>
-    <div class=''>
-      <tagger ng-model="skills.value" options="skills.options" placeholder="Select your skills"></tagger>
-    </div>
-    <div>
-      <a href='#' class='btn btn-default' ng-click='submitSkills()'> --> </a>
-    </div>
-    <!-- <div>
-      <pre>{{ empty | json }}</pre>
-    </div> -->
   </div>
-  
+  <div>
+    <p>Hi {{user.firstname}}.</p>
+  </div>
+  <div>
+    <p>Add your skills so we can get to know you.<p>
+  </div>
+  <div style='margin:15px'>
+    <tagger ng-model="skills.value" options="skills.options" placeholder="Select your skills"></tagger>
+  </div>
+  <div style='margin:15px'>
+    <a href='#' class='btn btn-default' ng-click='submitSkills()'> --> </a>
+  </div>
+  <!-- <div>
+    <pre>{{ empty | json }}</pre>
+  </div> -->
 </div>

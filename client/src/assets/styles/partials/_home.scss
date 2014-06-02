@@ -1,1 +1,26 @@
-#home {}
+#home {
+
+  .main {
+    background: transparent url('../images/sf.jpg') no-repeat 0 0;
+    @include background-size("cover");
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+
+    h1 {
+      
+    }
+
+  }
+
+}
