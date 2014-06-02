@@ -1,0 +1,12 @@
+{
+  "name": "dbupdate",
+  "version": "0.0.1",
+  "description": "obtain data from angelList",
+  "main": "dbretrieve.js",
+  "repository": "",
+  "license": "Proprietary",
+  "private": true,
+  "dependencies": {
+    "request": "~2.36.0"
+  }
+}
