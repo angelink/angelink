@@ -1,36 +1,207 @@
-.header {
-  background: $bgHeader;
-  border-bottom: 1px solid $gray;
+// .header {
+//   background: $bgHeader;
+//   border-bottom: 1px solid $gray;
 
-  .branding {
-    font-size: 14px;
-  }
-}
+//   .branding {
+//     font-size: 14px;
+//   }
+// }
 
 .main {
-  // width: 100%;
-  // display: flex;
-  // flex-flow: row wrap;
-
-  .browse-list, .browse-detail {
-    padding: 20px 0;
-  }
 
   .browse-list {
-    // flex: 1 auto;
-    // height: 100%;
+    position: relative;
     background: $bgList;
+    width: 100%;
+
+    & > .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      
+      width: 100%;
+      height: 50px;
+      padding: 0 20px;
+
+      background: $bgListHeader;
+      border-bottom: 1px solid darken($bgListHeader, 5%);
+
+      h2 {
+        font-size: 14px;
+        margin: 0;
+        padding: 0;
+        color: darken($bgListHeader, 15%);
+      }
+
+      .list-type {  
+        right: -10px;
+        
+
+        .btn {
+          color: darken($bgListHeader, 15%);
+        }
+
+        .btn.active {
+          color: $darkGray;
+        }
+
+        .fa {
+          font-size: 12px;
+        } 
+      }
+    }
     
-    ul {
-      margin: 0;
+    .jobs {
+      bottom: 0;
+      left: 0;
+      overflow: auto;
+      position: absolute;
+      right: 0;
+      top: 50px;
+
       padding: 0;
       list-style: none;
+      color: darken($gray, 10%);
+
+      .job {
+        padding: 20px;
+
+        .title {
+          font-size: 0.9em;
+          margin-top: 0;
+          margin-bottom: 5px;
+        }
+
+        .meta {
+          &.top {
+            font-size: 0.7em;
+            color: darken($bgListHeader, 20%);
+            
+            .company {}
+
+            .posted {
+              display: block;
+              float: right;
+            }
+          }
+          
+          &.bottom {
+            font-size: 0.8em;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+
+            li {
+              margin: 5px 0;
+            }
+
+            .salary {
+              .label {
+                color: darken($bgListHeader, 20%);
+                padding: 0;
+                font-weight: normal;
+                font-size: inherit;
+              }
+            }
+
+            .btn {
+              font-size: 10px;
+              background: darken($bgListHeader, 5%);
+              border: 1px solid darken($bgListHeader, 7%);
+
+              i {
+                color: darken($bgListHeader, 15%);
+              }
+            }
+          }
+        }
+      }
     }
   }
 
   .browse-detail {
+    position: relative;
+    display: flex;
+    flex-direction: column;
     background: $bgDetail;
     border-left: 1px solid darken($lightGray, 10%);
-    // flex: 3 0px;
+    width: 100%;
+    min-height: 100vh;
+    justify-content: space-between;
+
+    .header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 20px;
+      
+      width: 100%;
+      height: 50px;
+
+      @include background(linear-gradient(180deg, $bgDetail, rgba($bgDetail, 0.8)));
+
+      h1 {
+        font-size: 18px;
+        line-height: 18px;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+      }
+
+      .posted {
+        margin: 0;
+        line-height: 18px;
+        color: darken($bgDetail, 10%);
+
+        .date {
+          font-weight: bold;
+          color: darken($bgDetail, 15%);
+        }
+      }
+    }
+
+    .description {
+      bottom: 0;
+      left: 0;
+      overflow: auto;
+      position: absolute;
+      right: 0;
+      top: 0;
+      padding: 60px 10px;
+
+      .panel {
+        .panel-heading {
+          .btn {
+            font-size: 10px;
+            font-weight: bold;
+            color: $gray;
+          }
+        }
+      }
+    }
+
+    .footer {
+      position: relative;
+      z-index: 10;
+      width: inherit;
+      display: flex;
+      align-items: center;
+      color: $gray;
+      height: 50px;
+      background: $darkGray;
+      text-align: center;
+      border-top: 1px solid darken($darkGray, 5%);
+
+      .btn-group {
+        margin: 0 auto;
+      }
+    }
+
+    .container {
+      width: 100%;
+    }
   }
 }

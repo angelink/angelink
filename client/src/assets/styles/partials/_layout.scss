@@ -4,29 +4,60 @@ html, body, #realm {
   min-height: 100%;
 }
 
+// .header {
+//   display: flex;
+//   align-items: center;
+// }
+
+// ## Two Column Layout with scrollable content
 .layout {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  min-height: 100vh;
+
+  .layout-2col {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+  }
+
+  .col1, .col2 {
+    .scrollable {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+  }
+
+  .col1 {}
+
+  .col2 {
+    display: flex;
+    flex: 0;
+    order: -1;
+    flex: 0 0 250px;
+  }
+
 }
 
-.header {
+// ## Grid System
+.grid {
   display: flex;
-  align-items: center;
+
+  .grid-cell {
+    padding: 10px;
+    flex: 1;
+  }
 }
 
-.layout-2col {
-  display: flex;
-  flex: 1;
-  flex-direction: row;
-  align-items: stretch;
-}
 
-.col1 {}
-
-.col2 {
-  display: flex;
-  flex: 0;
-  order: -1;
-  flex: 0 0 30em;
+.panel {
+  
+  .panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;    
+  }
 }

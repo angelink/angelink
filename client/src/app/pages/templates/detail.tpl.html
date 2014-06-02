@@ -1,7 +1,79 @@
-<div class="container">
-  <div class="row">
-    <div class="col-sm-12">
-      <p>All sorts of details View</p>
+<header class="header">
+  <h1>Software Engineer @ IFTTT</h1>
+  <p class="posted">Job posted on <span class="date">{{ "June 14, 2014" | date: "medium"}}</span></p>
+</header>
+
+<div class="description">
+  <div class="grid">
+    <div class="grid-cell">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">General Information</h4>
+        </div>
+        <div class="panel-body"></div>
+      </div>
+    </div>
+    <div class="grid-cell">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">Compensation</h4>
+        </div>
+        <div class="panel-body"></div>
+      </div>
+    </div>
+    <div class="grid-cell">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">Skill Comparison</h4>
+        </div>
+        <div class="panel-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="grid-cell stats">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">AngelList Stats</h4>
+          <div class="btn-group">
+            <label class="btn btn-default btn-sm" ng-model="chartDateRange" btn-radio="'day'">Day</label>
+            <label class="btn btn-default btn-sm" ng-model="chartDateRange" btn-radio="'week'">Week</label>
+            <label class="btn btn-default btn-sm" ng-model="chartDateRange" btn-radio="'month'">Month</label>
+          </div>
+        </div>
+        <div class="panel-body">
+          <highchart config="chartConfig"></highchart>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="grid-cell">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">Company</h4>
+        </div>
+        <div class="panel-body"></div>
+      </div>
     </div>
   </div>
 </div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="btn-group">
+          <label class="btn btn-transparent btn-lg">
+            <i class="fa fa-star"></i>
+          </label>
+          <label class="btn btn-transparent btn-lg">
+            <i class="fa fa-thumbs-down"></i>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
