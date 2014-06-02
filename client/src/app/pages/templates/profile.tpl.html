@@ -1,0 +1,18 @@
+<div class='row text-center align-middle'>
+  
+  <div ng-controller="ProfileCtrl">
+    <img src='http://cartwa.com/Puppies_files/PuppyIcon.jpg'/>
+    <h1>Hi {{user.firstname}}.</h1>
+    <h3>Add your skills so we can get to know you.</h3>
+    <div class=''>
+      <tagger ng-model="skills.value" options="skills.options" placeholder="Select your skills"></tagger>
+    </div>
+    <div>
+      <a href='#' class='btn btn-default' ng-click='submitSkills()'> --> </a>
+    </div>
+    <!-- <div>
+      <pre>{{ empty | json }}</pre>
+    </div> -->
+  </div>
+  
+</div>

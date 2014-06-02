@@ -63,6 +63,24 @@ angular.module('n4j.pages')
             templateUrl: 'pages/templates/detail.tpl.html',
           }
         }
+      })
+
+      .state('landing', {
+        url: '/landing',
+        templateUrl: 'pages/templates/landing.tpl.html',
+        controller: 'LandingCtrl',
+        data: {
+          bodyId: 'landing'
+        }
+      })
+
+      .state('profile', {
+        url: '/profile',
+        templateUrl: 'pages/templates/profile.tpl.html',
+        controller: 'ProfileCtrl',
+        data: {
+          bodyId: 'profile'
+        }
       });
   });
 
