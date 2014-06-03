@@ -158,7 +158,7 @@ var createMany = function (list, options) {
 var getById = function (params, options) {
   var func = new Construct(_matchByJUID).query().then(_singleJob);
   
-  console.log('jobs', Array.isArray(params));
+  // console.log('jobs', Array.isArray(params));
   var clone = _.clone(params);
 
   return when.promise(function (resolve) {

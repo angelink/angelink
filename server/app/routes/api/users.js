@@ -228,6 +228,7 @@ exports.findById = {
     type: 'object',
     parameters : [
       param.path('id', 'ID of user that needs to be fetched', 'string'),
+      param.query('optionalNodes', 'Can be "skills", "companies", "location" etc. Defaults to none', 'string', false)
     ],
     responseMessages : [swe.invalid('id'), swe.notFound('user')],
     nickname : 'getUserById'
@@ -246,7 +247,13 @@ exports.findById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    User.getById(params, options, callback);
+    if (req.query.optionalNodes) {
+      params.related = JSON.parse(req.query.optionalNodes);
+    }
+
+    User.getById(params, options).then(function (results) {
+      callback(null, results.results, results.queries);
+    });
   }
 };
 
@@ -362,8 +369,6 @@ exports.rateJob = {
     params.userId = req.params.userId;
     params.jobId = req.params.jobId;
     params.like = req.body.like;
-
-    console.log(params);
 
     User.rateJob(params, options).done(function (results) {
       var _results = [];
