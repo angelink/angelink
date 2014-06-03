@@ -20,6 +20,12 @@ var generateState = function (sessionID) {
   return state;
 };
 
+var setSignedUserCookie = function (user, res) {
+
+  // remove the linkedin token from the user object for security...
+  delete user.linkedInToken;
+  res.cookie('user', user, { signed: true });
+};
 
 module.exports = function (server) {
   
@@ -35,23 +41,29 @@ module.exports = function (server) {
     // save state to session
     req.session.state = state;
 
-    console.log(req.session);
-
     passport.authenticate('linkedin', {
       state: state
     })(req, res, next);
   });
   
 
-  server.get('/auth/linkedin/callback', function (req, res) {
+  server.get('/auth/linkedin/callback', function (req, res, next) {
 
     // Check state before auth redirect to prevent CRSF
     if (req.query.state === req.session.state) {
-      if (req.session.referer.indexOf('login')) {
-        res.redirect('/recommended/123');
-      } else {
-        res.redirect(req.session.referer);
-      }
+
+      passport.authenticate('linkedin', function (err, user) {
+
+        // set user cookie
+        setSignedUserCookie(user, res);
+
+        if (req.session.referer.indexOf('login')) {
+          res.redirect('/recommended');
+        } else {
+          res.redirect(req.session.referer);
+        }
+
+      })(req, res, next);
     }
   });
 };
