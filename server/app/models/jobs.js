@@ -50,27 +50,12 @@ var _delete = qb.makeDelete(['id']);
 
 var _deleteAll = qb.makeDelete();
 
-// var _createManySetup = function (params, callback) {
-//   if (params.list && _.isArray(params.list)) {
-//     callback(null, _.map(params.list, function (job) {
-//       return _.pick(job, Object.keys(schema));
-//     }));
-//   } else {
-//     callback(null, []);
-//   }
-// };
 
 // ## Helper Functions
 var _prepareParams = function (params) {
-  // Create normalized name
-  if (params.name) {
-    params.normalized = utils.urlSafeString(params.name);
-  }
 
-  // Create ID if it doesn't exist
-  if (!params.id) {
-    params.id = utils.createId(params);
-  }
+  // make sure that params.id is an integer
+  params.id = +params.id;
 
   return params;
 };
@@ -109,7 +94,13 @@ var createMany = function (params, options) {
 
 // var createMany = new Construct(_createManySetup).map(create);
 
-var getById = new Construct(_matchByJUID).query().then(_singleJob);
+var getById = function (params, options, callback) {
+  var func = new Construct(_matchByJUID).query().then(_singleJob);
+
+  params = _prepareParams(params);
+
+  func.done().call(this, params, options, callback);
+};
 
 var getAll = new Construct(_matchAll, _manyJobs);
 
@@ -201,7 +192,7 @@ Job.create = create;
 Job.createMany = createMany;
 Job.deleteJob = deleteJob.done();
 Job.deleteAllJobs = deleteAllJobs.done();
-Job.getById = getById.done();
+Job.getById = getById;
 Job.getAll = getAll.done();
 Job.update = update;
 

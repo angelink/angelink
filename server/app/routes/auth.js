@@ -29,8 +29,13 @@ module.exports = function (server) {
     // @see http://developer.linkedin.com/documents/authentication
     var state = generateState(req.sessionID);
 
+    // save the referer
+    req.session.referer = req.header('Referer') || '/';
+
     // save state to session
     req.session.state = state;
+
+    console.log(req.session);
 
     passport.authenticate('linkedin', {
       state: state
@@ -38,14 +43,15 @@ module.exports = function (server) {
   });
   
 
-  server.get('/auth/linkedin/callback', function (req, res, next) {
+  server.get('/auth/linkedin/callback', function (req, res) {
 
     // Check state before auth redirect to prevent CRSF
     if (req.query.state === req.session.state) {
-      passport.authenticate('linkedin', {
-        successRedirect: '/',
-        failureRedirect: '/login'
-      })(req, res, next);
+      if (req.session.referer.indexOf('login')) {
+        res.redirect('/recommended/123');
+      } else {
+        res.redirect(req.session.referer);
+      }
     }
   });
 };
