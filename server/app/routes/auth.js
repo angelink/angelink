@@ -24,7 +24,10 @@ var setSignedUserCookie = function (user, res) {
 
   // remove the linkedin token from the user object for security...
   delete user.linkedInToken;
-  res.cookie('user', user, { signed: true });
+  res.cookie('user', user, {
+    signed: true,
+    maxAge: 15 * 24 * 60 * 60 * 1000
+  });
 };
 
 module.exports = function (server) {
@@ -41,9 +44,21 @@ module.exports = function (server) {
     // save state to session
     req.session.state = state;
 
-    passport.authenticate('linkedin', {
-      state: state
-    })(req, res, next);
+    // if user cookie is set, redirect... 
+    if (req.signedCookies.user) {
+      if (req.session.referer.indexOf('login')) {
+        res.redirect('/recommended');
+      } else {
+        res.redirect(req.session.referer);
+      }
+    }
+
+    // otherwise authenticate
+    else {
+      passport.authenticate('linkedin', {
+        state: state
+      })(req, res, next);
+    }
   });
   
 
