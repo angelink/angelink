@@ -4,16 +4,16 @@
 var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
-var when = require('when');
+// var when = require('when');
 
 // ## Models
 var Job = require('../../models/jobs');
-var Salary = require('../../models/salaries');
-var Equity = require('../../models/equities');
-var Company = require('../../models/companies');
-var Loc = require('../../models/locations');
-var Role = require('../../models/roles');
-var Skill = require('../../models/skills');
+// var Salary = require('../../models/salaries');
+// var Equity = require('../../models/equities');
+// var Company = require('../../models/companies');
+// var Loc = require('../../models/locations');
+// var Role = require('../../models/roles');
+// var Skill = require('../../models/skills');
 
 var param = sw.params;
 var swe = sw.errors;
@@ -89,12 +89,12 @@ exports.addJob = {
       param.form('id', 'Job JUID', 'string', true),
       param.form('title', 'Job title', 'string', true),
       param.form('created', 'Job created', 'string', true),
-      param.form('salary', 'stringified salary object', 'object', true),
-      param.form('equity', 'stringified equity object', 'object', true),
-      param.form('company', 'stringified company object', 'object', true),
-      param.form('loc', 'stringified location object', 'object', true),
-      param.form('roles', 'stringified array of role objects', 'object', true),
-      param.form('skills', 'stringified array of skill objects', 'object', true)
+      param.form('salary', 'stringified salary object', 'object', false),
+      param.form('equity', 'stringified equity object', 'object', false),
+      param.form('company', 'stringified company object', 'object', false),
+      param.form('loc', 'stringified location object', 'object', false),
+      param.form('roles', 'stringified array of role objects', 'object', false),
+      param.form('skills', 'stringified array of skill objects', 'object', false)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'addJob'
@@ -109,49 +109,62 @@ exports.addJob = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    when.join(
-      Job.create(params, options),
-      Salary.create(JSON.parse(params.salary), options),
-      Equity.create(JSON.parse(params.equity), options),
-      Company.create(JSON.parse(params.company), options),
-      Loc.create(JSON.parse(params.loc), options),
-      Role.createMany({list:JSON.parse(params.roles)}, options),
-      Skill.createMany(params.skills, options)
-    ).then(function (results) {
-      var jobResults = results[0];
-      var salaryResults = results[1];
-      var equityResults = results[2];
-      var companyResults = results[3];
-      var locResults = results[4];
-      var roleResults = results[5];
-      var skillResults = results[6];
-      // console.log(results, 'results');
-      // console.log(roleResults, 'roleResults');
-      // console.log(skillResults, 'skillResults');
-      jobResults.results.node.hasSalary(salaryResults.results.node, function(err){
-        if (err) throw err;
+    Job.create(params, options).done(function (results) {
+      var _results = [];
+      var _queries = [];
+
+      results = _.flatten(results);
+      _.each(results, function (res) {
+        _results.push(res.results);
+        _queries.push(res.queries);
       });
-      jobResults.results.node.hasEquity(equityResults.results.node, function(err){
-        if (err) throw err;
-      });
-      jobResults.results.node.atCompany(companyResults.results.node, function(err){
-        if (err) throw err;
-      });
-      jobResults.results.node.atLocation(locResults.results.node, function(err){
-        if (err) throw err;
-      });
-      for (var i=0; i<roleResults.length; i++){
-        jobResults.results.node.hasRole(roleResults[i].results.node, function(err){
-          if (err) throw err;
-        });
-      }
-      for (var j=0; j<skillResults.length; j++){
-        jobResults.results.node.requiresSkill(skillResults[j].results.node, function(err){
-          if (err) throw err;
-        });
-      }
-      callback(null, results);
+      
+      callback(null, _results, _queries);
     });
+
+    // when.join(
+    //   Job.create(params, options),
+    //   Salary.create(JSON.parse(params.salary), options),
+    //   Equity.create(JSON.parse(params.equity), options),
+    //   Company.create(JSON.parse(params.company), options),
+    //   Loc.create(JSON.parse(params.loc), options),
+    //   Role.createMany({list:JSON.parse(params.roles)}, options),
+    //   Skill.createMany(params.skills, options)
+    // ).then(function (results) {
+    //   var jobResults = results[0];
+    //   var salaryResults = results[1];
+    //   var equityResults = results[2];
+    //   var companyResults = results[3];
+    //   var locResults = results[4];
+    //   var roleResults = results[5];
+    //   var skillResults = results[6];
+    //   // console.log(results, 'results');
+    //   // console.log(roleResults, 'roleResults');
+    //   // console.log(skillResults, 'skillResults');
+    //   jobResults.results.node.hasSalary(salaryResults.results.node, function(err){
+    //     if (err) throw err;
+    //   });
+    //   jobResults.results.node.hasEquity(equityResults.results.node, function(err){
+    //     if (err) throw err;
+    //   });
+    //   jobResults.results.node.atCompany(companyResults.results.node, function(err){
+    //     if (err) throw err;
+    //   });
+    //   jobResults.results.node.atLocation(locResults.results.node, function(err){
+    //     if (err) throw err;
+    //   });
+    //   for (var i=0; i<roleResults.length; i++){
+    //     jobResults.results.node.hasRole(roleResults[i].results.node, function(err){
+    //       if (err) throw err;
+    //     });
+    //   }
+    //   for (var j=0; j<skillResults.length; j++){
+    //     jobResults.results.node.requiresSkill(skillResults[j].results.node, function(err){
+    //       if (err) throw err;
+    //     });
+    //   }
+    //   callback(null, results);
+    // });
   }
 };
 
@@ -186,7 +199,7 @@ exports.addJobs = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
-    Job.createMany({list:list}, options).done(function(results){
+    Job.createMany(list, options).done(function(results){
       callback(null, results);
     });
 

@@ -5,8 +5,17 @@ var _ = require('lodash');
 var Architect = require('neo4j-architect');
 var db = require('../db');
 var QueryBuilder = require('../neo4j-qb/qb.js');
+var util = require('util');
 var utils = require('../utils');
 var when = require('when');
+
+// ## Models
+var Salary = require('./salaries');
+var Equity = require('./equities');
+var Company = require('./companies');
+var Loc = require('./locations');
+var Role = require('./roles');
+var Skill = require('./skills');
 
 Architect.init();
 
@@ -64,7 +73,7 @@ var _prepareParams = function (params) {
 
 var create = function (params, options) {
   var func = new Construct(_create, _singleJob);
-  var promise = when.promise(function (resolve) {
+  var p1 = when.promise(function (resolve) {
 
     // @NOTE Do any data cleaning/prep here...
     
@@ -73,13 +82,57 @@ var create = function (params, options) {
     });
   });
 
-  return promise;
+  //Create related nodes from params
+  var p2 = Salary.create(JSON.parse(params.salary), options);
+  var p3 = Equity.create(JSON.parse(params.equity), options);
+  var p4 = Company.create(JSON.parse(params.company), options);
+  var p5 = Loc.create(JSON.parse(params.loc), options);
+  var p6 = Role.createMany(JSON.parse(params.roles), options);
+  var p7 = Skill.createMany(JSON.parse(params.skills), options);
+
+  var all = when.join(p1,p2,p3,p4,p5,p6,p7);
+
+  all.then(function (results) {
+    var jobResults = results[0];
+    var salaryResults = results[1];
+    var equityResults = results[2];
+    var companyResults = results[3];
+    var locResults = results[4];
+    var roleResults = results[5];
+    var skillResults = results[6];
+
+    var jobNode = jobResults.results.node;
+
+    var skills = _.map(skillResults, function (res) {
+      return res.results.node;
+    });
+    var roles = _.map(roleResults, function (res) {
+      return res.results.node;
+    });
+
+    jobNode.hasSalary(salaryResults.results.node, _.noop);
+    jobNode.hasEquity(equityResults.results.node, _.noop);
+    jobNode.atCompany(companyResults.results.node, _.noop);
+    jobNode.atLocation(locResults.results.node, _.noop);
+    jobNode.requiresSkill(skills, _.noop);
+    jobNode.hasRole(roles, _.noop);
+
+    return results;
+  });
+
+  return all;
 };
 
-var createMany = function (params, options) {
+var createMany = function (list, options) {
   var promises = [];
   
-  _.each(params.list, function (data) {
+  if (!list) return;
+
+  if (typeof list === 'string') {
+    list = JSON.parse(list);
+  }
+
+  _.each(list, function (data) {
     var filtered = _.pick(data, Object.keys(schema));
     var promise = create(filtered, options);
 
@@ -121,71 +174,123 @@ var deleteAllJobs = new Construct(_deleteAll);
 
 // ## Building relationships
 
-Job.prototype.hasRole = function (toRole, callback) {
+var _hasRelationship = function (rel, to, callback) {
+  
+  if (!rel.label) throw new Error('You must give this relationship a label');
+  
+  var label = rel.label;
+  var props = rel.props || {};
   var that = this;
   var query = [];
-  
-  query.push('START a=node({from}), b=node({to})');
-  query.push('CREATE UNIQUE (a)-[:HAS_ROLE]->(b)');
-  var qs = query.join('\n');
+  var qs = '';
+  var toArr = [];
+  var cypherParams = {};
 
-  db.query(qs, {from: that.nodeId, to: toRole.nodeId}, callback);
+  // Make sure to is an array
+  if (!Array.isArray(to)) toArr.push(to);
+  else toArr = to;
+
+  // Build the cypherParams
+  cypherParams.from = that.nodeId; // add the 'from' nodeID
+
+  _.each(toArr, function (toNode, index) {
+    var ident = 'ident_' + index;
+
+    cypherParams[ident] = toNode.nodeId;
+
+    // @NOTE 
+    // MATCH statement must come before CREATE
+    //
+    // START may be deprecated soon... starting with Neo4J 2.0 so using 
+    // MATCH + WHERE is the recommended way to find a node by nodeId
+  
+    // query.unshift('START a=node({from}), b=node({to})');
+    query.unshift(util.format('MATCH (%s) WHERE id(%s) = {%s}', ident, ident, ident));
+    query.push(util.format('CREATE UNIQUE (a)-[:%s %s]->(%s)', label, JSON.stringify(props), ident));
+  });
+
+  // add the user node to the front
+  query.unshift('MATCH (a) WHERE id(a) = {from}');
+
+  qs = query.join('\n');
+
+  db.query(qs, cypherParams, callback);
 };
 
-Job.prototype.atLocation = function (toLocation, callback) {
-  var that = this;
-  var query = [];
+
+// Job.prototype.hasRole = function (toRole, callback) {
+//   var that = this;
+//   var query = [];
   
-  query.push('START a=node({from}), b=node({to})');
-  query.push('CREATE UNIQUE (a)-[:AT_LOCATION]->(b)');
-  var qs = query.join('\n');
+//   query.push('START a=node({from}), b=node({to})');
+//   query.push('CREATE UNIQUE (a)-[:HAS_ROLE]->(b)');
+//   var qs = query.join('\n');
 
-  db.query(qs, {from: that.nodeId, to: toLocation.nodeId}, callback);
-};
+//   db.query(qs, {from: that.nodeId, to: toRole.nodeId}, callback);
+// };
 
-Job.prototype.requiresSkill = function (toSkill, callback) {
-  var that = this;
-  var query = [];
+Job.prototype.hasRole = _.partial(_hasRelationship, {label:'HAS_ROLE'});
+Job.prototype.atLocation = _.partial(_hasRelationship, {label:'AT_LOCATION'});
+Job.prototype.requiresSkill = _.partial(_hasRelationship, {label:'REQUIRES_SKILL'});
+Job.prototype.atCompany = _.partial(_hasRelationship, {label:'AT_COMPANY'});
+Job.prototype.hasSalary = _.partial(_hasRelationship, {label:'HAS_SALARY'});
+Job.prototype.hasEquity = _.partial(_hasRelationship, {label:'HAS_EQUITY'});
+
+
+// Job.prototype.atLocation = function (toLocation, callback) {
+//   var that = this;
+//   var query = [];
   
-  query.push('START a=node({from}), b=node({to})');
-  query.push('CREATE UNIQUE (a)-[:REQUIRES_SKILL]->(b)');
-  var qs = query.join('\n');
+//   query.push('START a=node({from}), b=node({to})');
+//   query.push('CREATE UNIQUE (a)-[:AT_LOCATION]->(b)');
+//   var qs = query.join('\n');
 
-  db.query(qs, {from: that.nodeId, to: toSkill.nodeId}, callback);
-};
+//   db.query(qs, {from: that.nodeId, to: toLocation.nodeId}, callback);
+// };
 
-Job.prototype.atCompany = function (toCompany, callback) {
-  var that = this;
-  var query = [];
+// Job.prototype.requiresSkill = function (toSkill, callback) {
+//   var that = this;
+//   var query = [];
   
-  query.push('START a=node({from}), b=node({to})');
-  query.push('CREATE UNIQUE (a)-[:AT_COMPANY]->(b)');
-  var qs = query.join('\n');
+//   query.push('START a=node({from}), b=node({to})');
+//   query.push('CREATE UNIQUE (a)-[:REQUIRES_SKILL]->(b)');
+//   var qs = query.join('\n');
 
-  db.query(qs, {from: that.nodeId, to: toCompany.nodeId}, callback);
-};
+//   db.query(qs, {from: that.nodeId, to: toSkill.nodeId}, callback);
+// };
 
-Job.prototype.hasSalary = function (toSalary, callback) {
-  var that = this;
-  var query = [];
+// Job.prototype.atCompany = function (toCompany, callback) {
+//   var that = this;
+//   var query = [];
   
-  query.push('START a=node({from}), b=node({to})');
-  query.push('CREATE UNIQUE (a)-[:HAS_SALARY]->(b)');
-  var qs = query.join('\n');
+//   query.push('START a=node({from}), b=node({to})');
+//   query.push('CREATE UNIQUE (a)-[:AT_COMPANY]->(b)');
+//   var qs = query.join('\n');
 
-  db.query(qs, {from: that.nodeId, to: toSalary.nodeId}, callback);
-};
+//   db.query(qs, {from: that.nodeId, to: toCompany.nodeId}, callback);
+// };
 
-Job.prototype.hasEquity = function (toEquity, callback) {
-  var that = this;
-  var query = [];
+// Job.prototype.hasSalary = function (toSalary, callback) {
+//   var that = this;
+//   var query = [];
   
-  query.push('START a=node({from}), b=node({to})');
-  query.push('CREATE UNIQUE (a)-[:HAS_EQUITY]->(b)');
-  var qs = query.join('\n');
+//   query.push('START a=node({from}), b=node({to})');
+//   query.push('CREATE UNIQUE (a)-[:HAS_SALARY]->(b)');
+//   var qs = query.join('\n');
 
-  db.query(qs, {from: that.nodeId, to: toEquity.nodeId}, callback);
-};
+//   db.query(qs, {from: that.nodeId, to: toSalary.nodeId}, callback);
+// };
+
+// Job.prototype.hasEquity = function (toEquity, callback) {
+//   var that = this;
+//   var query = [];
+  
+//   query.push('START a=node({from}), b=node({to})');
+//   query.push('CREATE UNIQUE (a)-[:HAS_EQUITY]->(b)');
+//   var qs = query.join('\n');
+
+//   db.query(qs, {from: that.nodeId, to: toEquity.nodeId}, callback);
+// };
 
 // static methods
 Job.create = create;

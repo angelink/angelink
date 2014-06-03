@@ -89,10 +89,16 @@ var create = function (params, options) {
 // var create = new Construct(_create, _singleSalary);
 
 // var createMany = new Construct(_createManySetup).map(create);
-var createMany = function (params, options) {
+var createMany = function (list, options) {
   var promises = [];
+
+  if (!list) return;
+
+  if (typeof list === 'string'){
+    list = JSON.parse(list);
+  }
   
-  _.each(params.list, function (data) {
+  _.each(list, function (data) {
     var filtered = _.pick(data, Object.keys(schema));
     var promise = create(filtered, options);
 
