@@ -3,6 +3,8 @@
 angular.module('n4j.pages', [
   'highcharts-ng',
   'ngAnimate',
+  'ngResource',
+  'restangular',
   'snap',
   'ui.bootstrap',
   'ui.router.compat',
@@ -10,10 +12,11 @@ angular.module('n4j.pages', [
   // app modules
   'n4j.pages.controllers',
   'n4j.pages.directives',
+  'n4j.pages.services',
 ]);
 
 angular.module('n4j.pages')
-  .config(function ($stateProvider) {
+  .config(function ($stateProvider, RestangularProvider) {
     $stateProvider
       .state('home', {
         url: '/',
@@ -53,6 +56,7 @@ angular.module('n4j.pages')
         url: '/:id',
         views: {
           'detail': {
+            controller: 'BrowseDetailCtrl',
             templateUrl: 'pages/templates/detail.tpl.html',
           }
         }
@@ -75,7 +79,31 @@ angular.module('n4j.pages')
           bodyId: 'profile'
         }
       });
+
+    // ## Restangular Configurations
+    RestangularProvider.setBaseUrl('/api/v0');
+    
+    RestangularProvider.setDefaultHeaders({
+      /* jshint camelcase:false */
+      api_key: 'special-key'
+    });
+
+    RestangularProvider.addResponseInterceptor(function (data, operation) {
+      var extracted = null;
+      
+      if (operation === 'getList') {
+        extracted = data.list;
+      } else if (operation === 'get') {
+        extracted = data.node.data;
+        extracted.nodeId = data.node.nodeId;
+      } else {
+        extracted = data;
+      }
+
+      return extracted;
+    });
   });
 
 angular.module('n4j.pages.controllers', []);
 angular.module('n4j.pages.directives', []);
+angular.module('n4j.pages.services', []);

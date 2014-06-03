@@ -66,6 +66,11 @@
       .job {
         padding: 20px;
 
+        &:hover, &.active {
+          cursor: pointer;
+          background: $bgListSelected
+        }
+
         .title {
           font-size: 0.9em;
           margin-top: 0;

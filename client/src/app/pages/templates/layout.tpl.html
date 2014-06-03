@@ -35,10 +35,9 @@
         </div>
       </header>
       <ul class="jobs recommended">
-        <li ng-repeat="job in jobs" class="job">
+        <li ng-repeat="job in jobs" class="job" ng-click="goTo(job)">
           <div class="meta top">
             <span class="company">{{job.company}}</span>
-            <!-- <span class="posted">{{job.posted | date: "medium"}}</span> -->
           </div>
           <h3 class="title">{{job.title}}</h3>
           <ul class="meta bottom">
@@ -50,10 +49,10 @@
             </li>
             <li>
               <div class="btn-group">
-                <label class="btn btn-transparent btn-xs">
+                <label class="btn btn-transparent btn-xs" ng-click="like(job.id); $event.stopPropagation()">
                   <i class="fa fa-star"></i>
                 </label>
-                <label class="btn btn-transparent btn-xs">
+                <label class="btn btn-transparent btn-xs" ng-click="dislike(job.id); $event.stopPropagation()">
                   <i class="fa fa-thumbs-down"></i>
                 </label>
               </div>
