@@ -17,7 +17,7 @@ angular.module('n4j.pages')
 
     // $scope.snapOpts = {
     //   disable: 'right'
-    // };    
+    // };
 
     $scope.goTo = function (job) {
       $scope.currentJob = job;
