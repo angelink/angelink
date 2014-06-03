@@ -17,7 +17,16 @@ var Construct = Architect.Construct;
 var schema = {
   id: String,
   name: String,
-  normalized: String
+  normalized: String,
+  logoUrl: String,
+  quality: String,
+  productDesc: String,
+  highConcept: String,
+  followerCount: String,
+  companyUrl: String,
+  companySize: String,
+  twitterUrl: String,
+  blogUrl: String
 };
 
 // The first variable is the label and should be exactly the same as

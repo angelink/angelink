@@ -127,7 +127,7 @@ exports.addJob = {
       var skillResults = results[6];
       // console.log(results, 'results');
       // console.log(roleResults, 'roleResults');
-      console.log(skillResults, 'skillResults');
+      // console.log(skillResults, 'skillResults');
       jobResults.results.node.hasSalary(salaryResults.results.node, function(err){
         if (err) throw err;
       });
