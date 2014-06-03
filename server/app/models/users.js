@@ -12,6 +12,7 @@ var when = require('when');
 // ## Models
 var Skill = require('./skills');
 var Loc = require('./locations');
+var Job = require('./jobs');
 
 Architect.init();
 
@@ -145,8 +146,23 @@ var create = function (params, options) {
 // create many new users
 var createMany = new Construct(_createManySetup).map(create);
 
-var getById = new Construct(_matchByUUID).query().then(_singleUser);
+// var getById = new Construct(_matchByUUID).query().then(_singleUser);
 // var getById = new Construct(_matchByUUID, _singleUser);
+var getById = function (params, options) {
+  var func = new Construct(_matchByUUID).query().then(_singleUser);
+  var clone = _.clone(params);
+
+  return when.promise(function (resolve) {
+
+    if (!clone.id && clone.userId) clone.id = clone.userId;
+
+    console.log('users', clone);
+
+    func.done().call(null, clone, options, function (err, results, queries) {
+      resolve({results: results, queries: queries});
+    });
+  });
+};
 
 var getAll = new Construct(_matchAll, _manyUsers);
 
@@ -158,6 +174,40 @@ var deleteUser = new Construct(_delete);
 
 // delete a user by id
 var deleteAllUsers = new Construct(_deleteAll);
+
+var rateJob = function (params, options) {
+
+  console.log(params);
+  console.log(params.userId);
+  console.log(params.jobId);
+  var p1 = User.getById(params, options);
+  var p2 = Job.getById(params, options);
+  console.log(p1, 'p1');
+  console.log(p2, 'p2');
+
+  var all = when.join(p1,p2);
+
+  // Things to do once users, skills, location, etc have been created
+  all.then(function (results) {
+    var userResults = results[0];
+    var jobResults = results[1];
+
+    console.log('results', userResults, jobResults);
+
+    var user = userResults.results.node;
+    var job = jobResults.results.node;
+
+    if (JSON.parse(params.like) === true){
+      user.likes(job, _.noop);
+    } else if (JSON.parse(params.like) === false){
+      user.dislikes(job, _.noop);
+    }
+
+    return results;
+  });
+
+  return all;
+};
 
 // relationships:
 
@@ -259,6 +309,9 @@ User.prototype.knows = _.partial(_hasRelationship, {label: 'KNOWS'});
  */
 User.prototype.atLocation = _.partial(_hasRelationship, {label: 'AT_LOCATION'});
 
+User.prototype.likes = _.partial(_hasRelationship, {label: 'LIKES'});
+User.prototype.dislikes = _.partial(_hasRelationship, {label: 'DISLIKES'});
+
 
 // static methods:
 
@@ -266,8 +319,9 @@ User.create = create;
 User.createMany = createMany.done();
 User.deleteUser = deleteUser.done();
 User.deleteAllUsers = deleteAllUsers.done();
-User.getById = getById.done();
+User.getById = getById;
 User.getAll = getAll.done();
 User.update = update.done();
+User.rateJob = rateJob;
 
 module.exports = User;
