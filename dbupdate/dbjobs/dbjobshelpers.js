@@ -27,10 +27,16 @@ exports.parseObj= function(angel){
   output.id = angel.id;
   output.title = angel.title;
   output.created = angel.created_at;
-  output.company = JSON.stringify({
+  output.company = {
     name: angel.startup.name,
-    id: angel.startup.id
-  });
+    id: angel.startup.id,
+    logoUrl: angel.startup.logo_url,
+    quality: angel.startup.quality,
+    productDesc: angel.startup.product_desc,
+    highConcept: angel.startup.high_concept,
+    followerCount: angel.startup.follower_count,
+    companyUrl: angel.startup.company_url
+  };
   output.salary = JSON.stringify({
     currency: angel.currency_code,
     salaryMax: Number(angel.salary_max),
@@ -50,11 +56,14 @@ exports.parseObj= function(angel){
 exports.appendJob = function (job) {
   return function (err, res, body) {
     if (err) console.error(err);
-    job.companySize = JSON.parse(body).company_size;
+    body = JSON.parse(body);
+    job.company.companySize = body.company_size;
+    job.company.twitterUrl = body.twitter_url;
+    job.company.blogUrl = body.blog_url;
+    job.company = JSON.stringify(job.company);
     // fs.appendFile('db.txt', JSON.stringify(job) + '\n', function(err){
     //   if (err) console.error(err);
     // });
-    console.log(job);
     var options = {
       url: 'http://127.0.0.1:3000/api/v0/jobs',
       method: 'POST',

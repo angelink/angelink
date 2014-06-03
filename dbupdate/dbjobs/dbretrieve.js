@@ -10,7 +10,7 @@ request({uri : url}, function(err, res, body){
   var jobs = JSON.parse(body).jobs;
   for (var i=0; i<jobs.length; i++){
     var job = helpers.parseObj(jobs[i]);
-    var jobURL = 'https://api.angel.co/1/startups/' + job.company_id;
+    var jobURL = 'https://api.angel.co/1/startups/' + job.company.id;
     request({uri : jobURL}, helpers.appendJob(job));
   }  
 });
