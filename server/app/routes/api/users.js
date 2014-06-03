@@ -323,3 +323,59 @@ exports.deleteUser = {
     User.deleteUser(params, options, callback);
   }
 };
+
+// Route: POST '/users/:userid/jobs/:jobid'
+exports.rateJob = {
+
+  spec: {
+    path: '/users/{userId}/jobs/{jobId}',
+    notes: 'Like or dislike job entry',
+    summary: 'Rate job',
+    method: 'POST',
+    type: 'object',
+    items: {
+      $ref: 'User'
+    },
+    parameters : [
+      param.path('userId', 'ID of user', 'string'),
+      param.path('jobId', 'ID of job to be rated', 'string'),
+      param.form('like', 'Like status', 'boolean', true)
+    ],
+    responseMessages : [swe.invalid('input')],
+    nickname : 'rateJob'
+  },
+
+  action: function (req, res) {
+    var id = req.params.userId;
+    var jobId = req.params.jobId;
+    var options = {};
+    var params = {};
+
+    if (!id || !jobId) throw swe.invalid('id');
+
+    var errLabel = 'Route: POST /users/{userId}/jobs/{jobId}';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    // params = _prepareParams(req);
+
+    params.userId = req.params.userId;
+    params.jobId = req.params.jobId;
+    params.like = req.body.like;
+
+    console.log(params);
+
+    User.rateJob(params, options).done(function (results) {
+      var _results = [];
+      var _queries = [];
+
+      results = _.flatten(results);
+      _.each(results, function (res) {
+        _results.push(res.results);
+        _queries.push(res.queries);
+      });
+      
+      callback(null, _results, _queries);
+    });
+  }
+};

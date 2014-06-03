@@ -147,12 +147,28 @@ var createMany = function (list, options) {
 
 // var createMany = new Construct(_createManySetup).map(create);
 
-var getById = function (params, options, callback) {
+// var getById = function (params, options, callback) {
+//   var func = new Construct(_matchByJUID).query().then(_singleJob);
+
+//   params = _prepareParams(params);
+
+//   func.done().call(this, params, options, callback);
+// };
+
+var getById = function (params, options) {
   var func = new Construct(_matchByJUID).query().then(_singleJob);
+  
+  console.log('jobs', Array.isArray(params));
+  var clone = _.clone(params);
 
-  params = _prepareParams(params);
-
-  func.done().call(this, params, options, callback);
+  return when.promise(function (resolve) {
+    
+    if (!clone.id && clone.jobId) clone.id = clone.jobId;
+    
+    func.done().call(null, clone, options, function (err, results, queries) {
+      resolve({results: results, queries: queries});
+    });
+  });
 };
 
 var getAll = new Construct(_matchAll, _manyJobs);
