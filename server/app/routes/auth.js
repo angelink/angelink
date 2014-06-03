@@ -24,6 +24,7 @@ var setSignedUserCookie = function (user, res) {
 
   // remove the linkedin token from the user object for security...
   delete user.linkedInToken;
+  
   res.cookie('user', user, {
     signed: true,
     maxAge: 15 * 24 * 60 * 60 * 1000
@@ -31,6 +32,16 @@ var setSignedUserCookie = function (user, res) {
 };
 
 module.exports = function (server) {
+
+  server.get('/auth/logout', function (req, res) {
+    
+    // Delete session and user cookie
+    req.session = null;
+    res.clearCookie('user');
+
+    // send user back to index
+    res.redirect('/');
+  });
   
   server.get('/auth/linkedin', function (req, res, next) {
 
