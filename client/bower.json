@@ -1,5 +1,5 @@
 {
-  "name": "particle-angular-seed",
+  "name": "n4j-client",
   "version": "0.0.1",
   "dependencies": {
     "angular": "~1.2.10",
@@ -13,7 +13,7 @@
     "es5-shim": "~2.1.0",
     "lodash": "~2.4.1",
     "ng-Fx": "~0.3.3",
-    "restangular": "~1.2.2",
+    "restangular": "~1.4.0",
     "sass-bootstrap": "~3.0.2",
     "angular-snap": "~1.5.0",
     "highcharts-ng": "~0.0.6"
@@ -23,6 +23,7 @@
     "angular-scenario": "1.2.6"
   },
   "resolutions": {
-    "angular": "1.2.16"
+    "angular": "1.2.16",
+    "restangular": "~1.4.0"
   }
 }
