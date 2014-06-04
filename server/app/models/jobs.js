@@ -209,8 +209,6 @@ var getById = function (params, options) {
     });
   });
 
-  console.log(clone);
-
   // console.log(clone);
   if (!clone.related) {
     return p1;

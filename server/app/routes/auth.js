@@ -63,7 +63,7 @@ module.exports = function (server) {
           return;
         }
 
-        res.send(200, body.node);
+        res.send(200, {object: 'User', node: body.node});
       });
 
       return;
