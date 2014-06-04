@@ -261,7 +261,7 @@ exports.findById = {
     method: 'GET',
     parameters : [
       param.path('id', 'ID of job that needs to be fetched', 'string'),
-      param.query('optionalNodes', 'Can be array of "skills", "companies" etc. OR simply "all". Defaults to none', 'string', false)
+      param.query('optionalNodes', 'Can be array of "skills", "company" etc. OR simply "all". Defaults to none', 'string', false)
     ],
     type : 'Job',
     responseMessages : [swe.invalid('id'), swe.notFound('job')],
@@ -282,7 +282,11 @@ exports.findById = {
     params = _prepareParams(req);
 
     if (req.query.optionalNodes) {
-      params.related = JSON.parse(req.query.optionalNodes);
+      if (req.query.optionalNodes !== 'all') {
+        params.related = JSON.parse(req.query.optionalNodes);
+      } else {
+        params.related = 'all';
+      }
     }
 
     Job.getById(params, options).then(function (results) {

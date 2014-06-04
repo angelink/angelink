@@ -39,7 +39,6 @@ routes.swaggerui(server);
 
 // Forward remaining requests to index
 server.all('/*', function (req, res) {
-  console.log('index.html');
   res.sendfile('index.html', {root: server.get('views')});
 });
 

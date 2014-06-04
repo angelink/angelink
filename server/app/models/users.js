@@ -195,7 +195,6 @@ var getById = function (params, options) {
     });
   });
 
-  console.log(clone.related);
   if (!clone.related) {
     return p1;
   } else {

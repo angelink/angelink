@@ -4,6 +4,7 @@ angular.module('n4j.pages', [
   'highcharts-ng',
   'ngAnimate',
   'ngResource',
+  'ngCookies',
   'restangular',
   'snap',
   'ui.bootstrap',
@@ -17,6 +18,7 @@ angular.module('n4j.pages', [
 
 angular.module('n4j.pages')
   .config(function ($stateProvider, RestangularProvider) {
+
     $stateProvider
       .state('home', {
         url: '/',
@@ -31,13 +33,23 @@ angular.module('n4j.pages')
       .state('app', {
         abstract: true,
         url: '/app',
-        template: '<ui-view class="layout"/>'
+        template: '<ui-view class="layout"/>',
+        resolve: {
+          auth: function ($q, $window, $n4Auth) {
+            var deferred = $q.defer();
 
-        // resolve: {
-        //   auth: function () {
+            if (!$n4Auth.isLoggedIn()) {
+              // @NOTE 
+              // for some reason $state.go doesn't work here
+              // so we are using $window.location.href
+              $window.location.href = '/login';
+            } else {
+              deferred.resolve();
+            }
 
-        //   }
-        // }
+            return deferred.promise;
+          }
+        }
       })
 
       .state('app.recommended', {
@@ -68,6 +80,22 @@ angular.module('n4j.pages')
         controller: 'AuthCtrl',
         data: {
           bodyId: 'auth'
+        },
+        resolve: {
+          auth: function ($q, $window, $n4Auth) {
+            var deferred = $q.defer();
+
+            if ($n4Auth.isLoggedIn()) {
+              // @NOTE 
+              // for some reason $state.go doesn't work here
+              // so we are using $window.location.href
+              $window.location.href = '/profile';
+            } else {
+              deferred.resolve();
+            }
+
+            return deferred.promise;
+          }
         }
       })
 

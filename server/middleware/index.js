@@ -13,7 +13,7 @@ var middleware = function (server, config) {
 
   // setup encrypted session cookies
   if (config.server.secret) {
-    server.use(express.cookieParser());
+    server.use(express.cookieParser(config.server.secret));
     server.use(express.session({secret: config.server.secret}));
   }
 

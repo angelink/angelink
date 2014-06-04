@@ -248,7 +248,12 @@ exports.findById = {
     params = _prepareParams(req);
 
     if (req.query.optionalNodes) {
-      params.related = JSON.parse(req.query.optionalNodes);
+      if (req.query.optionalNodes !== 'all') {
+        params.related = JSON.parse(req.query.optionalNodes);
+      } else if (req.query.optionalNodes === 'all') {
+        // @TODO add locations
+        params.related = ['skills'];
+      }
     }
 
     User.getById(params, options).then(function (results) {
