@@ -246,7 +246,9 @@ exports.findById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    User.getById(params, options, callback);
+    User.getById(params, options).then(function (results) {
+      callback(null, results.results, results.queries);
+    });
   }
 };
 

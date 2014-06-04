@@ -58,7 +58,7 @@ module.exports = function (server) {
     // if user cookie is set, redirect... 
     if (req.signedCookies.user) {
       if (req.session.referer.indexOf('login')) {
-        res.redirect('/recommended');
+        res.redirect('/browse/list');
       } else {
         res.redirect(req.session.referer);
       }
@@ -80,11 +80,18 @@ module.exports = function (server) {
 
       passport.authenticate('linkedin', function (err, user) {
 
+        console.log('wtf is going on 2');
+
+        if (err) {
+          var errorMessage = new Error('Problem Authenticating with Linkedin');
+          return console.error(errorMessage, err);
+        }
+
         // set user cookie
         setSignedUserCookie(user, res);
 
         if (req.session.referer.indexOf('login')) {
-          res.redirect('/recommended');
+          res.redirect('/browse/list');
         } else {
           res.redirect(req.session.referer);
         }
