@@ -200,11 +200,16 @@ var getById = function (params, options) {
   var p1 =  when.promise(function (resolve) {
     
     if (!clone.id && clone.jobId) clone.id = clone.jobId;
+
+    // force id to be a number
+    clone.id = +clone.id;
     
     func.done().call(null, clone, options, function (err, results, queries) {
       resolve({results: results, queries: queries});
     });
   });
+
+  console.log(clone);
 
   // console.log(clone);
   if (!clone.related) {
@@ -236,6 +241,7 @@ var getById = function (params, options) {
     return p1.then(function (jobResults) {
       // console.log(userResults, 'USERRESULTS');
       var p = [];
+
       _.each(clone.related, function (value) {
         p.push(_queryRelationship(jobResults.results, value));
       });
