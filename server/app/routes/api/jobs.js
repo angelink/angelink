@@ -289,8 +289,6 @@ exports.findById = {
       }
     }
 
-    console.log(params);
-
     Job.getById(params, options).then(function (results) {
       callback(null, results.results, results.queries);
     });

@@ -12,8 +12,10 @@ var cfg = new Config().getSync();
 
 var getUser = function (params, callback) {
 
+  var baseUrl = cfg.server.baseUrl;
+
   var options = {
-    url: 'http://127.0.0.1:3000/api/v0/users/' + params.id,
+    url: baseUrl + '/api/v0/users/' + params.id,
     method: 'GET',
     headers: {
       'api_key': 'special-key'
