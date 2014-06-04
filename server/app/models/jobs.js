@@ -155,13 +155,49 @@ var createMany = function (list, options) {
 //   func.done().call(this, params, options, callback);
 // };
 
+var _queryRelationship = function (from, relationship) {
+
+  return when.promise(function (resolve){
+    var all = {
+      'company': 'AT_COMPANY',
+      'salary': 'HAS_SALARY',
+      'equity': 'HAS_EQUITY',
+      'skills': 'REQUIRES_SKILL',
+      'roles': 'HAS_ROLE'
+    };
+
+    var query = [];
+    var qs = '';
+    var cypherParams = {
+      id: from.node.data.id,
+    };
+
+    query.push(util.format('MATCH (a:%s {id:{id}})-[:%s]->(node)', from.object, all[relationship]));
+    query.push('RETURN node');
+
+    qs = query.join('\n');
+
+    // console.log(qs);
+
+    db.query(qs, cypherParams, function (err, results) {
+      results = _.map(results, function (result) {
+        return result.node._data;
+      });
+
+      var res = {};
+      res[relationship] = results;
+      resolve(res);
+    });
+  });
+};
+
 var getById = function (params, options) {
   var func = new Construct(_matchByJUID).query().then(_singleJob);
-  
+
   // console.log('jobs', Array.isArray(params));
   var clone = _.clone(params);
 
-  return when.promise(function (resolve) {
+  var p1 =  when.promise(function (resolve) {
     
     if (!clone.id && clone.jobId) clone.id = clone.jobId;
     
@@ -169,6 +205,57 @@ var getById = function (params, options) {
       resolve({results: results, queries: queries});
     });
   });
+
+  // console.log(clone);
+  if (!clone.related) {
+    return p1;
+  } else if (clone.related === 'all') {
+    return p1.then(function (jobResults) {
+      var related = ['company', 'salary', 'equity', 'skills', 'roles'];
+      var p = [];
+      _.each(related, function (value) {
+        p.push(_queryRelationship(jobResults.results, value));
+      });
+      // console.log(p, 'promise array');
+      
+      return when.all(p).then(function (relatedResults) {
+        // console.log(relatedResults, 'RELATED RESULTS');
+
+        _.each(relatedResults, function (related) {
+          _.extend(jobResults.results.node.data, related);
+        });
+
+        // console.log(jobResults);
+        // console.log('\n\n');
+        // console.log(jobResults.results.node.data);
+
+        return jobResults;
+      });
+    });
+  } else {
+    return p1.then(function (jobResults) {
+      // console.log(userResults, 'USERRESULTS');
+      var p = [];
+      _.each(clone.related, function (value) {
+        p.push(_queryRelationship(jobResults.results, value));
+      });
+      // console.log(p, 'promise array');
+      
+      return when.all(p).then(function (relatedResults) {
+        // console.log(relatedResults, 'RELATED RESULTS');
+
+        _.each(relatedResults, function (related) {
+          _.extend(jobResults.results.node.data, related);
+        });
+
+        // console.log(jobResults);
+        // console.log('\n\n');
+        // console.log(jobResults.results.node.data);
+
+        return jobResults;
+      });
+    });
+  }
 };
 
 var getAll = new Construct(_matchAll, _manyJobs);
