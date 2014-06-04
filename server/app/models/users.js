@@ -146,23 +146,177 @@ var create = function (params, options) {
 // create many new users
 var createMany = new Construct(_createManySetup).map(create);
 
-// var getById = new Construct(_matchByUUID).query().then(_singleUser);
-// var getById = new Construct(_matchByUUID, _singleUser);
+var _queryRelationship = function (from, relationship) {
+
+  return when.promise(function (resolve){
+
+    var all = {
+      'skills' : 'HAS_SKILL',
+      // for future node connections
+      // 'location' : 'AT_LOCATION',
+      // 'roles' : 'HAS_ROLE'
+    };
+
+    var query = [];
+    var qs = '';
+    var cypherParams = {
+      id: from.node.data.id,
+    };
+
+    query.push(util.format('MATCH (a:%s {id:{id}})-[:%s]->(node)', from.object, all[relationship]));
+    query.push('RETURN node');
+
+    qs = query.join('\n');
+
+    // console.log(qs);
+
+    db.query(qs, cypherParams, function (err, results) {
+      results = _.map(results, function (result) {
+        return result.node._data;
+      });
+
+      var res = {};
+      res[relationship] = results;
+      resolve(res);
+    });
+  });
+};
+
 var getById = function (params, options) {
   var func = new Construct(_matchByUUID).query().then(_singleUser);
   var clone = _.clone(params);
 
-  return when.promise(function (resolve) {
+  var p1 = when.promise(function (resolve) {
 
     if (!clone.id && clone.userId) clone.id = clone.userId;
-
-    console.log('users', clone);
 
     func.done().call(null, clone, options, function (err, results, queries) {
       resolve({results: results, queries: queries});
     });
   });
+
+  console.log(clone.related);
+  if (!clone.related) {
+    return p1;
+  } else {
+    return p1.then(function (userResults) {
+      // console.log(userResults, 'USERRESULTS');
+      var p = [];
+      _.each(clone.related, function (value) {
+        p.push(_queryRelationship(userResults.results, value));
+      });
+      // console.log(p, 'promise array');
+      
+      return when.all(p).then(function (relatedResults) {
+        // console.log(relatedResults, 'RELATED RESULTS');
+
+        _.each(relatedResults, function (related) {
+          _.extend(userResults.results.node.data, related);
+        });
+
+        console.log(userResults);
+        console.log('\n\n');
+        console.log(userResults.results.node.data);
+
+        return userResults;
+      });
+
+      
+      // return when.all
+
+      // _queryRelationship(userResults.results, clone.related).then(function (relatedResults) {
+      //   console.log('FINAL RESULTS, user and related');
+      //   console.log(userResults);
+      //   console.log(relatedResults);
+      //   console.log(relatedResults.concat(userResults));
+      //   return relatedResults.concat(userResults);
+      // });
+    });
+  }
+
 };
+
+// ## algorithm for finding recommedations for jobs
+var _queryRecommend = function (from) {
+  return when.promise(function (resolve){
+
+    var query = [];
+    var qs = '';
+    var cypherParams = {
+      id: from.node.data.id,
+    };
+
+    query.push(util.format('MATCH (user:%s {id:{id}}), (job:Job)', from.object));
+    query.push('WHERE NOT (user)-[:LIKES]->(job) AND NOT (user)-[:DISLIKES]->(job)');
+    query.push('RETURN job');
+    query.push('LIMIT 20');
+
+    qs = query.join('\n');
+
+    // console.log(qs);
+
+    db.query(qs, cypherParams, function (err, results) {
+      // console.log(results, 'LOOK AT ME!!!');
+      results = _.map(results, function (result) {
+        return result.job._data;
+      });
+
+      resolve({jobs:results});
+    });
+  });
+};
+
+var getRecommendations = function (params, options) {
+  var func = new Construct(_matchByUUID).query().then(_singleUser);
+  var clone = _.clone(params);
+
+  var p1 = when.promise(function (resolve) {
+
+    func.done().call(null, clone, options, function (err, results, queries) {
+      resolve({results: results, queries: queries});
+    });
+  });
+
+  return p1.then(function (userResults) {
+    // console.log(userResults);
+    var jobs = _queryRecommend(userResults.results);
+    // console.log(jobs, 'THESE ARE JOBS');
+
+    return jobs.then(function (jobResults) {
+      // console.log(jobResults, 'jobResults');
+      // console.log(jobResults.jobs[0].data.id, 'jobId');
+      var p = [];
+      _.each(jobResults.jobs, function (job) {
+        var jobParams = {
+          id: job.data.id,
+          related: 'all'
+        };
+        p.push(Job.getById(jobParams, null));
+      });
+
+      return when.all(p).then(function (jobs) {
+
+        var jobsArray = _.map(jobs, function (value) {
+          return value.results;
+        });
+
+        return jobsArray;
+      });
+    });
+  });
+
+};
+
+// var that = this;
+//   var query = [];
+//   var qs = '';
+  
+//   query.push('MATCH (a) WHERE id(a) = {from}');
+//   query.push('MATCH (b:Users)');
+//   query.push('CREATE UNIQUE (a)-[:JOINED {date:timestamp()}]->(b)');
+//   qs = query.join('\n');
+
+//   db.query(qs, {from: that.nodeId}, callback);
 
 var getAll = new Construct(_matchAll, _manyUsers);
 
@@ -177,13 +331,9 @@ var deleteAllUsers = new Construct(_deleteAll);
 
 var rateJob = function (params, options) {
 
-  console.log(params);
-  console.log(params.userId);
-  console.log(params.jobId);
+  // Promises returned by getById
   var p1 = User.getById(params, options);
   var p2 = Job.getById(params, options);
-  console.log(p1, 'p1');
-  console.log(p2, 'p2');
 
   var all = when.join(p1,p2);
 
@@ -192,10 +342,10 @@ var rateJob = function (params, options) {
     var userResults = results[0];
     var jobResults = results[1];
 
-    console.log('results', userResults, jobResults);
-
     var user = userResults.results.node;
     var job = jobResults.results.node;
+
+    // console.log(user, 'this is the user node');
 
     if (JSON.parse(params.like) === true){
       user.likes(job, _.noop);
@@ -323,5 +473,6 @@ User.getById = getById;
 User.getAll = getAll.done();
 User.update = update.done();
 User.rateJob = rateJob;
+User.getRecommendations = getRecommendations;
 
 module.exports = User;

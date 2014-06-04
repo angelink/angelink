@@ -228,6 +228,7 @@ exports.findById = {
     type: 'object',
     parameters : [
       param.path('id', 'ID of user that needs to be fetched', 'string'),
+      param.query('optionalNodes', 'Can be "skills", "companies", "location" etc. Defaults to none', 'string', false)
     ],
     responseMessages : [swe.invalid('id'), swe.notFound('user')],
     nickname : 'getUserById'
@@ -245,6 +246,10 @@ exports.findById = {
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
+
+    if (req.query.optionalNodes) {
+      params.related = JSON.parse(req.query.optionalNodes);
+    }
 
     User.getById(params, options).then(function (results) {
       callback(null, results.results, results.queries);
@@ -365,8 +370,6 @@ exports.rateJob = {
     params.jobId = req.params.jobId;
     params.like = req.body.like;
 
-    console.log(params);
-
     User.rateJob(params, options).done(function (results) {
       var _results = [];
       var _queries = [];
@@ -378,6 +381,45 @@ exports.rateJob = {
       });
       
       callback(null, _results, _queries);
+    });
+  }
+};
+
+// Route: GET '/users/:id/jobs'
+exports.getRecommendations = {
+  
+  spec: {
+    path: '/users/{id}/jobs',
+    notes: 'Returns recommended jobs to user',
+    summary: 'Recommended jobs',
+    method: 'GET',
+    type: 'object',
+    parameters : [
+      param.path('id', 'ID of user that needs to be fetched', 'string')
+    ],
+    responseMessages : [swe.invalid('id'), swe.notFound('user')],
+    nickname : 'getRecommendations'
+  },
+
+  action: function (req, res) {
+    var id = req.params.id;
+    var options = {};
+    var params = {};
+
+    params.id = req.params.id;
+
+    if (!id) throw swe.invalid('id');
+
+    var errLabel = 'Route: GET /users/{id}/jobs';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    // params = _prepareParams(req);
+
+    User.getRecommendations(params, options).then(function (results) {
+      // console.log(results);
+      // array of all latest 20 jobs recommended
+      callback(null, results);
     });
   }
 };

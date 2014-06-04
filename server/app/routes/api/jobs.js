@@ -261,6 +261,7 @@ exports.findById = {
     method: 'GET',
     parameters : [
       param.path('id', 'ID of job that needs to be fetched', 'string'),
+      param.query('optionalNodes', 'Can be array of "skills", "companies" etc. OR simply "all". Defaults to none', 'string', false)
     ],
     type : 'Job',
     responseMessages : [swe.invalid('id'), swe.notFound('job')],
@@ -280,7 +281,13 @@ exports.findById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    Job.getById(params, options, callback);
+    if (req.query.optionalNodes) {
+      params.related = JSON.parse(req.query.optionalNodes);
+    }
+
+    Job.getById(params, options).then(function (results) {
+      callback(null, results.results, results.queries);
+    });
   }
 };
 
