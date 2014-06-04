@@ -7,6 +7,9 @@
   "license": "Proprietary",
   "private": true,
   "dependencies": {
-    "request": "~2.36.0"
+    "request": "~2.36.0",
+    "cron": "~1.0.4",
+    "forever-monitor": "~1.2.3",
+    "lodash": "~2.4.1"
   }
 }
