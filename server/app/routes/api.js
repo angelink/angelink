@@ -49,6 +49,7 @@ module.exports = function (subpath, cfg) {
     .addDelete(users.deleteUser)
     .addDelete(users.deleteAllUsers)
     .addPost(users.rateJob)
+    .addGet(users.getRecommendations)
 
     // Skill Model and Methods
     .addGet(skills.list)
