@@ -155,7 +155,7 @@ var _queryRelationship = function (from, relationship) {
     var all = {
       'skills' : 'HAS_SKILL',
       // for future node connections
-      // 'location' : 'AT_LOCATION',
+      // 'location' : 'WANTS_LOCATION',
       // 'roles' : 'HAS_ROLE'
     };
 
@@ -215,9 +215,9 @@ var getById = function (params, options) {
           _.extend(userResults.results.node.data, related);
         });
 
-        console.log(userResults);
-        console.log('\n\n');
-        console.log(userResults.results.node.data);
+        // console.log(userResults);
+        // console.log('\n\n');
+        // console.log(userResults.results.node.data);
 
         return userResults;
       });
@@ -360,6 +360,62 @@ var rateJob = function (params, options) {
   return all;
 };
 
+var removeRelationships = function (params, options) {
+
+  var type = params.type;
+  var cypherParams = {};
+
+  // set the user id
+  cypherParams.id = params.id;
+
+  var rels = {
+    'skills': 'REQUIRES_SKILL',
+    'locations': 'WANTS_LOCATION'
+  };
+
+  var labels = {
+    'skill': 'Skill',
+    'locations': 'Location',
+  };
+
+  // Promises returned by getById
+  
+  // Example Query:
+  // match (a:User {id:{id}})-[r:HAS_SKILL]-(b:Skill)
+  // where b.normalized = {_0} 
+  // or b.normalized = {_1}
+  // or b.normalized = {_2}
+  // delete r
+
+  var query = [];
+  var qs = '';
+
+  query.push(util.format('a:User {id:{id}}-[r:%s]-(b:%s)', rels[type], labels[type]));
+
+  _.each(params.relationships, function (rel, i) {
+    var key = '_' + i;
+    var where = [];
+    
+    if (i === 0) where.push('where');
+    else where.push('or');
+
+    if (type === 'skills') {
+      cypherParams[key] = rel.normalized;
+      where.push(util.format('b.normalized = %s', '_' + i));
+      query.push(where.join(' '));
+    }
+  });
+
+  query.push('delete r');
+  qs = query.join('\n');
+
+  return when.promise(function (resolve) {
+    db.query(qs, cypherParams, function (err, results) {
+      resolve({results: results, options: options});
+    });
+  });
+};
+
 // relationships:
 
 /**
@@ -458,7 +514,7 @@ User.prototype.knows = _.partial(_hasRelationship, {label: 'KNOWS'});
  * @param nodes {object} a location node
  * @param callback {func}
  */
-User.prototype.atLocation = _.partial(_hasRelationship, {label: 'AT_LOCATION'});
+User.prototype.atLocation = _.partial(_hasRelationship, {label: 'WANTS_LOCATION'});
 
 User.prototype.likes = _.partial(_hasRelationship, {label: 'LIKES'});
 User.prototype.dislikes = _.partial(_hasRelationship, {label: 'DISLIKES'});
@@ -476,5 +532,6 @@ User.getAll = getAll.done();
 User.update = create;
 User.rateJob = rateJob;
 User.getRecommendations = getRecommendations;
+User.removeRelationships = removeRelationships;
 
 module.exports = User;

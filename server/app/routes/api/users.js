@@ -264,14 +264,14 @@ exports.findById = {
   }
 };
 
-// Route: POST '/users/:id'
+// Route: PUT '/users/:id'
 exports.updateById = {
 
   spec: {
     path: '/users/{id}',
     notes: 'Updates an existing user',
     summary: 'Update a user',
-    method: 'POST',
+    method: 'PUT',
     type: 'object',
     items: {
       $ref: 'User'
@@ -309,15 +309,13 @@ exports.updateById = {
     var id = req.params.id;
     var options = {};
     var params = {};
-    var errLabel = 'Route: POST /users';
+    var errLabel = 'Route: PUT /users/:id';
     var callback = _.partial(_callback, res, errLabel);
 
     if (!id) throw swe.invalid('id');
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
-
-    console.log(params);
 
     User.update(params, options).done(function (results) {
       var _results = [];
@@ -444,7 +442,7 @@ exports.getRecommendations = {
     var options = {};
     var params = {};
 
-    params.id = req.params.id;
+    // params.id = req.params.id;
 
     if (!id) throw swe.invalid('id');
 
@@ -452,9 +450,50 @@ exports.getRecommendations = {
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
-    // params = _prepareParams(req);
+    params = _prepareParams(req);
 
     User.getRecommendations(params, options).then(function (results) {
+      // console.log(results);
+      // array of all latest 20 jobs recommended
+      callback(null, results);
+    });
+  }
+};
+
+// Route: DELETE '/users/:id/relationships'
+exports.removeRelationships = {
+  spec: {
+    path: '/users/{id}/relationships',
+    notes: 'Deletes user relationships',
+    summary: 'Remove relationships',
+    method: 'DELETE',
+    type: 'object',
+    parameters : [
+      param.path('id', 'ID of user', 'string'),
+      param.form('skills', 'User skills. Should be an array of stringified skill objects.', 'array', false),
+      param.form('roles', 'User past and present roles', 'array', false),
+      param.form('location', 'User\'s current location', 'object', false)
+    ],
+    responseMessages : [swe.invalid('id'), swe.notFound('user')],
+    nickname : 'removeRelationships'
+  },
+
+  action: function (req, res) {
+    var id = req.params.id;
+    var options = {};
+    var params = {};
+
+    // params.id = req.params.id;
+
+    if (!id) throw swe.invalid('id');
+
+    var errLabel = 'Route: DELETE /users/{id}/relationships';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    params = _prepareParams(req);
+
+    User.removeRelationships(params, options).then(function (results) {
       // console.log(results);
       // array of all latest 20 jobs recommended
       callback(null, results);
