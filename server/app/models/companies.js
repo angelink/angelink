@@ -3,10 +3,16 @@
 // ## Module Dependencies
 var _ = require('lodash');
 var Architect = require('neo4j-architect');
-// var db = require('../db');
+var db = require('../db');
 var QueryBuilder = require('../neo4j-qb/qb.js');
+var util = require('util');
 var utils = require('../utils');
 var when = require('when');
+
+// ## Models
+var Follower = require('./followers');
+var Quality = require('./qualities');
+var Day = require('./days');
 
 Architect.init();
 
@@ -19,10 +25,10 @@ var schema = {
   name: String,
   normalized: String,
   logoUrl: String,
-  quality: String,
+  // quality: String,
   productDesc: String,
   highConcept: String,
-  followerCount: String,
+  // followerCount: String,
   companyUrl: String,
   companySize: String,
   twitterUrl: String,
@@ -93,11 +99,8 @@ var _prepareParams = function (params) {
 // ## Constructured functions
 var create = function (params, options) {
   var func = new Construct(_create, _singleCompany);
-  var promise = when.promise(function (resolve) {
+  var p1 = when.promise(function (resolve) {
 
-    // @NOTE Do any data cleaning/prep here...
-
-    // make sure params is what we expect it to be
     params = _prepareParams(params);
 
     func.done().call(null, params, options, function (err, results, queries) {
@@ -105,7 +108,35 @@ var create = function (params, options) {
     });
   });
 
-  return promise;
+  var p2 = Follower.create({'id': params.followerCount}, options);
+  var p3 = Quality.create({'id': params.quality}, options);
+
+  var all = when.join(p1, p2, p3);
+
+  all.then(function (results) {
+    var companyResults = results[0];
+    var followerResults = results[1];
+    var qualityResults = results[2];
+
+    var companyNode = companyResults.results.node;
+    var followerNode = followerResults.results.node;
+    var qualityNode = qualityResults.results.node;
+
+    companyNode.hasFollowers(followerNode, _.noop);
+    companyNode.hasQuality(qualityNode, _.noop);
+
+    var p4 = Day.create({'id': params.today}, options);
+
+    return p4.then(function (dayResult){
+      var dayNode = dayResult.results.node;
+      followerNode.onDay(dayNode, _.noop);
+      qualityNode.onDay(dayNode, _.noop);
+
+      return companyResults[0];
+    });
+  });
+
+  return all;
 };
 
 // create a new company
@@ -147,6 +178,105 @@ var deleteCompany = new Construct(_delete);
 // delete a company by id
 var deleteAllCompanies = new Construct(_deleteAll);
 
+var _queryStats = function (from, type) {
+  return when.promise(function (resolve) {
+
+    var query = [];
+    var qs = '';
+    var cypherParams = {
+      id: from.node.data.id
+    };
+    var relationship = {
+      quality: ':HAS_QUALITY',
+      followers: ':HAS_FOLLOWERS'
+    };
+
+    query.push(util.format('MATCH (:%s {id:{id}})-[%s]->(stat)-[:ON_DAY]->(day)', from.object, relationship[type]));
+    query.push('RETURN stat, day');
+    query.push('ORDER BY day.id');
+    query.push('LIMIT 30');
+
+    qs = query.join('\n');
+
+    db.query(qs, cypherParams, function (err, results){
+      // console.log(err, 'err');
+      // console.log(results, 'results');
+      // console.log(results[0].stat._data.data.id, 'results');
+      results = _.map(results, function(value){
+        return {
+          stat: value.stat._data.data.id,
+          day: value.day._data.data.id
+        };
+      });
+      // console.log(results[0].day._data);
+      resolve({companyStats: results});
+    });
+  });
+};
+
+var getStats = function (params, options) {
+  var func = new Construct(_matchById).query().then(_singleCompany);
+  var clone = _.clone(params);
+
+  var p1 = when.promise(function (resolve) {
+
+    func.done().call(null, clone, options, function (err, results, queries) {
+      resolve({results: results, queries: queries});
+    });
+  });
+
+  return p1.then(function (companyResults) {
+    return _queryStats(companyResults.results, clone.type);
+  });
+
+};
+
+var _hasRelationship = function (rel, to, callback) {
+  
+  if (!rel.label) throw new Error('You must give this relationship a label');
+  
+  var label = rel.label;
+  var props = rel.props || {};
+  var that = this;
+  var query = [];
+  var qs = '';
+  var toArr = [];
+  var cypherParams = {};
+
+  // Make sure to is an array
+  if (!Array.isArray(to)) toArr.push(to);
+  else toArr = to;
+
+  // Build the cypherParams
+  cypherParams.from = that.nodeId; // add the 'from' nodeID
+
+  _.each(toArr, function (toNode, index) {
+    var ident = 'ident_' + index;
+
+    cypherParams[ident] = toNode.nodeId;
+
+    // @NOTE 
+    // MATCH statement must come before CREATE
+    //
+    // START may be deprecated soon... starting with Neo4J 2.0 so using 
+    // MATCH + WHERE is the recommended way to find a node by nodeId
+  
+    // query.unshift('START a=node({from}), b=node({to})');
+    query.unshift(util.format('MATCH (%s) WHERE id(%s) = {%s}', ident, ident, ident));
+    query.push(util.format('CREATE UNIQUE (a)-[:%s %s]->(%s)', label, JSON.stringify(props), ident));
+  });
+
+  // add the user node to the front
+  query.unshift('MATCH (a) WHERE id(a) = {from}');
+
+  qs = query.join('\n');
+
+  db.query(qs, cypherParams, callback);
+};
+
+Company.prototype.hasFollowers = _.partial(_hasRelationship, {label:'HAS_FOLLOWERS'});
+Company.prototype.hasQuality = _.partial(_hasRelationship, {label:'HAS_QUALITY'});
+
 // static methods:
 
 Company.create = create;
@@ -156,5 +286,6 @@ Company.deleteAllCompanies = deleteAllCompanies.done();
 Company.getAll = getAll.done();
 Company.getById = getById.done();
 Company.update = update;
+Company.getStats = getStats;
 
 module.exports = Company;

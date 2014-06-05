@@ -78,6 +78,7 @@ module.exports = function (subpath, cfg) {
     .addPut(companies.updateById)
     .addDelete(companies.deleteCompany)
     .addDelete(companies.deleteAllCompanies)
+    .addGet(companies.getStatsById)
 
     // Job Model and Methods
     .addGet(jobs.list)

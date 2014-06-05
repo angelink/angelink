@@ -110,9 +110,10 @@ var create = function (params, options) {
       return res.results.node;
     });
 
+    console.log(companyResults[0]);
     jobNode.hasSalary(salaryResults.results.node, _.noop);
     jobNode.hasEquity(equityResults.results.node, _.noop);
-    jobNode.atCompany(companyResults.results.node, _.noop);
+    jobNode.atCompany(companyResults[0].results.node, _.noop);
     jobNode.atLocation(locResults.results.node, _.noop);
     jobNode.requiresSkill(skills, _.noop);
     jobNode.hasRole(roles, _.noop);

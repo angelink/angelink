@@ -291,3 +291,44 @@ exports.deleteCompany = {
     Company.deleteCompany(params, options, callback);
   }
 };
+
+// Route: GET '/companies/:id/stats/:type'
+exports.getStatsById = {
+  
+  spec: {
+    description : 'find a company\'s stats',
+    path : '/companies/{id}/stats/{type}',
+    notes : 'Returns a company\'s stats based on id',
+    summary : 'Find company\'s stats by id',
+    method: 'GET',
+    parameters : [
+      param.path('id', 'ID of company that needs to be fetched', 'string'),
+      param.path('type', 'Type of stats to be fetched, ("followers"/"quality").', 'string'),
+    ],
+    responseMessages : [swe.invalid('input')],
+    nickname : 'getCompanyStatsById'
+  },
+
+  action: function (req, res) {
+    var id = req.params.id;
+    var type = req.params.type;
+    var options = {};
+    var params = {};
+
+    if (!id || !type) throw swe.invalid('input');
+
+    var errLabel = 'Route: GET /companies/{id}/stats/{type}';
+    var callback = _.partial(_callback, res, errLabel);
+
+    options.neo4j = utils.existsInQuery(req, 'neo4j');
+    // params = _prepareParams(req);
+
+    params.id = id;
+    params.type = type;
+    params.like = req.body.like;
+
+    Company.getStats(params, options).then(function (results){
+      callback(null, results);
+    });
+  }
+};

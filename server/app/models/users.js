@@ -251,6 +251,7 @@ var _queryRecommend = function (from) {
     query.push('WHERE NOT (user)-[:LIKES]->(job) AND NOT (user)-[:DISLIKES]->(job)');
     query.push('RETURN job');
     query.push('LIMIT 20');
+    query.push('ORDER BY job.created');
 
     qs = query.join('\n');
 
