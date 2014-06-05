@@ -131,8 +131,10 @@ exports.addUser = {
 
       results = _.flatten(results);
       _.each(results, function (res) {
-        _results.push(res.results);
-        _queries.push(res.queries);
+        if (res) {
+          _results.push(res.results);
+          _queries.push(res.queries);
+        }
       });
       
       callback(null, _results, _queries);
@@ -276,30 +278,61 @@ exports.updateById = {
     },
     parameters : [
       param.path('id', 'ID of user that needs to be fetched', 'string'),
-      param.form('firstname', 'User firstname', 'string', true),
-      param.form('lastname', 'User lastname', 'string', true),
+      param.form('firstname', 'User firstname', 'string', false),
+      param.form('lastname', 'User lastname', 'string', false),
       param.form('email', 'User email', 'string', false),
       param.form('linkedInToken', 'LinkedIn OAuth Token', 'string', false),
       param.form('profileImage', 'User profile image url', 'string', false),
+      param.form('skills', 'User skills. Should be an array of stringified skill objects.', 'array', false),
+      param.form('roles', 'User past and present roles', 'array', false),
+      param.form('location', 'User\'s current location', 'object', false)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'updateUser'
   },
 
   action: function (req, res) {
+    // var id = req.params.id;
+    // var options = {};
+    // var params = {};
+
+    // if (!id) throw swe.invalid('id');
+
+    // var errLabel = 'Route: POST /users/{id}';
+    // var callback = _.partial(_callback, res, errLabel);
+
+    // options.neo4j = utils.existsInQuery(req, 'neo4j');
+    // params = _prepareParams(req);
+
+    // User.update(params, options, callback);
+
     var id = req.params.id;
     var options = {};
     var params = {};
+    var errLabel = 'Route: POST /users';
+    var callback = _.partial(_callback, res, errLabel);
 
     if (!id) throw swe.invalid('id');
-
-    var errLabel = 'Route: POST /users/{id}';
-    var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    User.update(params, options, callback);
+    console.log(params);
+
+    User.update(params, options).done(function (results) {
+      var _results = [];
+      var _queries = [];
+
+      results = _.flatten(results);
+      _.each(results, function (res) {
+        if (res) {
+          _results.push(res.results);
+          _queries.push(res.queries);
+        }
+      });
+      
+      callback(null, _results, _queries);
+    });
   }
 };
 

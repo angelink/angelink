@@ -66,7 +66,7 @@ var _create = (function () {
   return qb.makeMerge(['id'], onCreate);
 })();
 
-var _update = qb.makeUpdate(['id']);
+// var _update = qb.makeUpdate(['id']);
 
 var _delete = qb.makeDelete(['id']);
 
@@ -93,6 +93,8 @@ var _createManySetup = function (params, callback) {
 //   func.done().call(this, params, options, callback);
 // };
 
+
+// Create uses MERGE so it serves as both the create and update function
 var create = function (params, options) {
   var func = new Construct(_create, _singleUser);
   var p1 = when.promise(function (resolve) {
@@ -320,7 +322,7 @@ var getRecommendations = function (params, options) {
 var getAll = new Construct(_matchAll, _manyUsers);
 
 // get a user by id and update their properties
-var update = new Construct(_update, _singleUser);
+// var update = new Construct(_update, _singleUser);
 
 // delete a user by id
 var deleteUser = new Construct(_delete);
@@ -470,7 +472,8 @@ User.deleteUser = deleteUser.done();
 User.deleteAllUsers = deleteAllUsers.done();
 User.getById = getById;
 User.getAll = getAll.done();
-User.update = update.done();
+// User.update = update.done();
+User.update = create;
 User.rateJob = rateJob;
 User.getRecommendations = getRecommendations;
 

@@ -78,7 +78,7 @@ var _deleteAll = qb.makeDelete();
 // ## Helper functions
 var _prepareParams = function (params) {
   // Create ID if it doesn't exist
-  if (!params.id) {
+  if (params && !params.id) {
     params.id = utils.createId(params);
   }
 
@@ -87,6 +87,9 @@ var _prepareParams = function (params) {
 
 // ## Constructured functions
 var create = function (params, options) {
+
+  if (!params) return;
+
   var func = new Construct(_create, _singleLoc);
   var promise = when.promise(function (resolve) {
 
