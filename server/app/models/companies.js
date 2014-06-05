@@ -25,10 +25,10 @@ var schema = {
   name: String,
   normalized: String,
   logoUrl: String,
-  quality: String,
+  // quality: String,
   productDesc: String,
   highConcept: String,
-  followerCount: String,
+  // followerCount: String,
   companyUrl: String,
   companySize: String,
   twitterUrl: String,
@@ -132,7 +132,7 @@ var create = function (params, options) {
       followerNode.onDay(dayNode, _.noop);
       qualityNode.onDay(dayNode, _.noop);
 
-      return companyResults;
+      return companyResults[0];
     });
   });
 
@@ -177,6 +177,59 @@ var deleteCompany = new Construct(_delete);
 
 // delete a company by id
 var deleteAllCompanies = new Construct(_deleteAll);
+
+var _queryStats = function (from, type) {
+  return when.promise(function (resolve) {
+
+    var query = [];
+    var qs = '';
+    var cypherParams = {
+      id: from.node.data.id
+    };
+    var relationship = {
+      quality: ':HAS_QUALITY',
+      followers: ':HAS_FOLLOWERS'
+    };
+
+    query.push(util.format('MATCH (:%s {id:{id}})-[%s]->(stat)-[:ON_DAY]->(day)', from.object, relationship[type]));
+    query.push('RETURN stat, day');
+    query.push('ORDER BY day.id');
+    query.push('LIMIT 30');
+
+    qs = query.join('\n');
+
+    db.query(qs, cypherParams, function (err, results){
+      // console.log(err, 'err');
+      // console.log(results, 'results');
+      // console.log(results[0].stat._data.data.id, 'results');
+      results = _.map(results, function(value){
+        return {
+          stat: value.stat._data.data.id,
+          day: value.day._data.data.id
+        };
+      });
+      // console.log(results[0].day._data);
+      resolve({companyStats: results});
+    });
+  });
+};
+
+var getStats = function (params, options) {
+  var func = new Construct(_matchById).query().then(_singleCompany);
+  var clone = _.clone(params);
+
+  var p1 = when.promise(function (resolve) {
+
+    func.done().call(null, clone, options, function (err, results, queries) {
+      resolve({results: results, queries: queries});
+    });
+  });
+
+  return p1.then(function (companyResults) {
+    return _queryStats(companyResults.results, clone.type);
+  });
+
+};
 
 var _hasRelationship = function (rel, to, callback) {
   
@@ -233,5 +286,6 @@ Company.deleteAllCompanies = deleteAllCompanies.done();
 Company.getAll = getAll.done();
 Company.getById = getById.done();
 Company.update = update;
+Company.getStats = getStats;
 
 module.exports = Company;
