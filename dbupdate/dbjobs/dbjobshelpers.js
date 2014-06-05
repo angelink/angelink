@@ -35,7 +35,8 @@ exports.parseObj= function(angel){
     productDesc: angel.startup.product_desc,
     highConcept: angel.startup.high_concept,
     followerCount: angel.startup.follower_count,
-    companyUrl: angel.startup.company_url
+    companyUrl: angel.startup.company_url,
+    today: new Date().toISOString().slice(0,10)
   };
   output.salary = JSON.stringify({
     currency: angel.currency_code,

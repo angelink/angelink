@@ -3,10 +3,16 @@
 // ## Module Dependencies
 var _ = require('lodash');
 var Architect = require('neo4j-architect');
-// var db = require('../db');
+var db = require('../db');
 var QueryBuilder = require('../neo4j-qb/qb.js');
+var util = require('util');
 var utils = require('../utils');
 var when = require('when');
+
+// ## Models
+var Follower = require('./followers');
+var Quality = require('./qualities');
+var Day = require('./days');
 
 Architect.init();
 
@@ -93,11 +99,8 @@ var _prepareParams = function (params) {
 // ## Constructured functions
 var create = function (params, options) {
   var func = new Construct(_create, _singleCompany);
-  var promise = when.promise(function (resolve) {
+  var p1 = when.promise(function (resolve) {
 
-    // @NOTE Do any data cleaning/prep here...
-
-    // make sure params is what we expect it to be
     params = _prepareParams(params);
 
     func.done().call(null, params, options, function (err, results, queries) {
@@ -105,7 +108,35 @@ var create = function (params, options) {
     });
   });
 
-  return promise;
+  var p2 = Follower.create({'id': params.followerCount}, options);
+  var p3 = Quality.create({'id': params.quality}, options);
+
+  var all = when.join(p1, p2, p3);
+
+  all.then(function (results) {
+    var companyResults = results[0];
+    var followerResults = results[1];
+    var qualityResults = results[2];
+
+    var companyNode = companyResults.results.node;
+    var followerNode = followerResults.results.node;
+    var qualityNode = qualityResults.results.node;
+
+    companyNode.hasFollowers(followerNode, _.noop);
+    companyNode.hasQuality(qualityNode, _.noop);
+
+    var p4 = Day.create({'id': params.today}, options);
+
+    return p4.then(function (dayResult){
+      var dayNode = dayResult.results.node;
+      followerNode.onDay(dayNode, _.noop);
+      qualityNode.onDay(dayNode, _.noop);
+
+      return companyResults;
+    });
+  });
+
+  return all;
 };
 
 // create a new company
@@ -146,6 +177,52 @@ var deleteCompany = new Construct(_delete);
 
 // delete a company by id
 var deleteAllCompanies = new Construct(_deleteAll);
+
+var _hasRelationship = function (rel, to, callback) {
+  
+  if (!rel.label) throw new Error('You must give this relationship a label');
+  
+  var label = rel.label;
+  var props = rel.props || {};
+  var that = this;
+  var query = [];
+  var qs = '';
+  var toArr = [];
+  var cypherParams = {};
+
+  // Make sure to is an array
+  if (!Array.isArray(to)) toArr.push(to);
+  else toArr = to;
+
+  // Build the cypherParams
+  cypherParams.from = that.nodeId; // add the 'from' nodeID
+
+  _.each(toArr, function (toNode, index) {
+    var ident = 'ident_' + index;
+
+    cypherParams[ident] = toNode.nodeId;
+
+    // @NOTE 
+    // MATCH statement must come before CREATE
+    //
+    // START may be deprecated soon... starting with Neo4J 2.0 so using 
+    // MATCH + WHERE is the recommended way to find a node by nodeId
+  
+    // query.unshift('START a=node({from}), b=node({to})');
+    query.unshift(util.format('MATCH (%s) WHERE id(%s) = {%s}', ident, ident, ident));
+    query.push(util.format('CREATE UNIQUE (a)-[:%s %s]->(%s)', label, JSON.stringify(props), ident));
+  });
+
+  // add the user node to the front
+  query.unshift('MATCH (a) WHERE id(a) = {from}');
+
+  qs = query.join('\n');
+
+  db.query(qs, cypherParams, callback);
+};
+
+Company.prototype.hasFollowers = _.partial(_hasRelationship, {label:'HAS_FOLLOWERS'});
+Company.prototype.hasQuality = _.partial(_hasRelationship, {label:'HAS_QUALITY'});
 
 // static methods:
 
