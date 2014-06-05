@@ -69,3 +69,4 @@ var jobLive = new cronJob({
 
 jobTest.start();
 // jobLive.start();
+// dbretrieveLive();
