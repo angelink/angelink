@@ -391,19 +391,19 @@ exports.rateJob = {
 };
 
 // Route: GET '/users/:id/jobs'
-exports.getRecommendations = {
+exports.getLatest = {
   
   spec: {
     path: '/users/{id}/jobs',
-    notes: 'Returns recommended jobs to user',
-    summary: 'Recommended jobs',
+    notes: 'Returns latest jobs to user',
+    summary: 'Latest jobs',
     method: 'GET',
     type: 'object',
     parameters : [
       param.path('id', 'ID of user that needs to be fetched', 'string')
     ],
     responseMessages : [swe.invalid('id'), swe.notFound('user')],
-    nickname : 'getRecommendations'
+    nickname : 'getLatest'
   },
 
   action: function (req, res) {
@@ -421,9 +421,9 @@ exports.getRecommendations = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     // params = _prepareParams(req);
 
-    User.getRecommendations(params, options).then(function (results) {
+    User.getLatest(params, options).then(function (results) {
       // console.log(results);
-      // array of all latest 20 jobs recommended
+      // array of all latest 20 jobs
       callback(null, results);
     });
   }

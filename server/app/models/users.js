@@ -236,7 +236,7 @@ var getById = function (params, options) {
 };
 
 // ## algorithm for finding recommedations for jobs
-var _queryRecommend = function (from) {
+var _queryLatest = function (from) {
   return when.promise(function (resolve){
 
     var query = [];
@@ -266,7 +266,7 @@ var _queryRecommend = function (from) {
   });
 };
 
-var getRecommendations = function (params, options) {
+var getLatest = function (params, options) {
   var func = new Construct(_matchByUUID).query().then(_singleUser);
   var clone = _.clone(params);
 
@@ -279,7 +279,7 @@ var getRecommendations = function (params, options) {
 
   return p1.then(function (userResults) {
     // console.log(userResults);
-    var jobs = _queryRecommend(userResults.results);
+    var jobs = _queryLatest(userResults.results);
     // console.log(jobs, 'THESE ARE JOBS');
 
     return jobs.then(function (jobResults) {
@@ -473,6 +473,6 @@ User.getById = getById;
 User.getAll = getAll.done();
 User.update = update.done();
 User.rateJob = rateJob;
-User.getRecommendations = getRecommendations;
+User.getLatest = getLatest;
 
 module.exports = User;
