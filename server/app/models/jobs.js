@@ -203,9 +203,13 @@ var getById = function (params, options) {
     if (!clone.id && clone.jobId) clone.id = clone.jobId;
 
     // force id to be a number
-    clone.id = +clone.id;
+    // not sure why this is needed... and its causing probs
+    // clone.id = +clone.id;
     
+    // console.log(clone, 'CLONE');
+
     func.done().call(null, clone, options, function (err, results, queries) {
+      // console.log('211', results);
       resolve({results: results, queries: queries});
     });
   });
