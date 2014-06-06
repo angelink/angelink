@@ -69,6 +69,7 @@ exports.formatSingleResponse = function (Model, results, callback) {
   if (results.length) {
     var _data = results[0][modelName.toLowerCase()]._data;
 
+    // Create the Model so we have access to all the methods
     response.node = new Model(_data);
     callback(null, response);
   } else {
@@ -83,6 +84,7 @@ exports.formatManyResponse = function (Model, results, callback) {
   var list = _.map(results, function (result) {
     var _data = result[modelName.toLowerCase()]._data;
 
+    // Create the Model so we have access to all the methods
     return new Model(_data);
   });
 

@@ -431,7 +431,7 @@ exports.rateJob = {
 };
 
 // Route: GET '/users/:id/jobs'
-exports.getLatest = {
+exports.getLatestJobs = {
   
   spec: {
     path: '/users/{id}/jobs',
@@ -443,7 +443,7 @@ exports.getLatest = {
       param.path('id', 'ID of user that needs to be fetched', 'string')
     ],
     responseMessages : [swe.invalid('id'), swe.notFound('user')],
-    nickname : 'getLatest'
+    nickname : 'getLatestJobs'
   },
 
   action: function (req, res) {
@@ -461,7 +461,7 @@ exports.getLatest = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    User.getLatest(params, options).then(function (results) {
+    User.getLatestJobs(params, options).then(function (results) {
       // console.log(results);
       // array of all latest 20 jobs
       callback(null, results);

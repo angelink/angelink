@@ -250,76 +250,22 @@ var getById = function (params, options) {
 
 };
 
-// ## algorithm for finding recommedations for jobs
-var _queryLatest = function (from) {
-  return when.promise(function (resolve){
-
-    var query = [];
-    var qs = '';
-    var cypherParams = {
-      id: from.node.data.id,
-    };
-
-    query.push(util.format('MATCH (user:%s {id:{id}}), (job:Job)', from.object));
-    query.push('WHERE NOT (user)-[:LIKES]->(job) AND NOT (user)-[:DISLIKES]->(job)');
-    query.push('RETURN job');
-    query.push('LIMIT 20');
-    query.push('ORDER BY job.created');
-
-    qs = query.join('\n');
-
-    // console.log(qs);
-
-    db.query(qs, cypherParams, function (err, results) {
-      // console.log(results, 'LOOK AT ME!!!');
-      results = _.map(results, function (result) {
-        return result.job._data;
-      });
-
-      resolve({jobs:results});
-    });
-  });
-};
-
-var getLatest = function (params, options) {
+var getLatestJobs = function (params, options) {
   var func = new Construct(_matchByUUID).query().then(_singleUser);
   var clone = _.clone(params);
 
   var p1 = when.promise(function (resolve) {
-
     func.done().call(null, clone, options, function (err, results, queries) {
+      // console.log(results);
       resolve({results: results, queries: queries});
     });
   });
 
   return p1.then(function (userResults) {
-    // console.log(userResults);
-    var jobs = _queryLatest(userResults.results);
-    // console.log(jobs, 'THESE ARE JOBS');
-
-    return jobs.then(function (jobResults) {
-      // console.log(jobResults, 'jobResults');
-      // console.log(jobResults.jobs[0].data.id, 'jobId');
-      var p = [];
-      _.each(jobResults.jobs, function (job) {
-        var jobParams = {
-          id: job.data.id,
-          related: 'all'
-        };
-        p.push(Job.getById(jobParams, null));
-      });
-
-      return when.all(p).then(function (jobs) {
-
-        var jobsArray = _.map(jobs, function (value) {
-          return value.results;
-        });
-
-        return jobsArray;
-      });
+    return Job.getLatest(userResults.results.node).then(function (jobResults) {
+      return jobResults;
     });
   });
-
 };
 
 // var that = this;
@@ -562,6 +508,6 @@ User.update = create;
 User.rateJob = rateJob;
 // User.getRecommendations = getRecommendations;
 User.removeRelationships = removeRelationships;
-User.getLatest = getLatest;
+User.getLatestJobs = getLatestJobs;
 
 module.exports = User;
