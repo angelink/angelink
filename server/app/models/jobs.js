@@ -63,8 +63,8 @@ var _deleteAll = qb.makeDelete();
 // ## Helper Functions
 var _prepareParams = function (params) {
 
-  // make sure that params.id is an integer
-  params.id = +params.id;
+  // make sure that params.id is a string
+  params.id = String(params.id);
 
   return params;
 };

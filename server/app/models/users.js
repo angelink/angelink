@@ -439,6 +439,7 @@ var _hasRelationship = function (rel, to, callback) {
   _.each(toArr, function (toNode, index) {
     var ident = 'ident_' + index;
 
+    console.log(toNode)
     cypherParams[ident] = toNode.nodeId;
 
     // @NOTE 
