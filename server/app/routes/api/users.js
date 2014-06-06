@@ -4,6 +4,7 @@
 var _ = require('lodash');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
+var when = require('when');
 
 // ## Collections
 var Users = require('../../collections/users');
@@ -285,7 +286,7 @@ exports.updateById = {
       param.form('profileImage', 'User profile image url', 'string', false),
       param.form('skills', 'User skills. Should be an array of stringified skill objects.', 'array', false),
       param.form('roles', 'User past and present roles', 'array', false),
-      param.form('location', 'User\'s current location', 'object', false)
+      param.form('locations', 'User preferred job locations. Should be an array of stringified location objects. Either skills or locations is required.', 'object', false)
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'updateUser'
@@ -359,6 +360,14 @@ exports.deleteUser = {
 
     var errLabel = 'Route: DELETE /users/{id}';
     var callback = _.partial(_callback, res, errLabel);
+
+    console.log(req.session);
+
+    // if currentUser.id === id then do a logout first
+    if (req.session.passport.user.id === id) {
+      req.session = null;
+      res.clearCookie('user');
+    }
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
@@ -460,19 +469,19 @@ exports.getRecommendations = {
   }
 };
 
-// Route: DELETE '/users/:id/relationships'
+// Route: PUT '/users/:id/relationships'
 exports.removeRelationships = {
   spec: {
     path: '/users/{id}/relationships',
     notes: 'Deletes user relationships',
     summary: 'Remove relationships',
-    method: 'DELETE',
+    method: 'PUT',
     type: 'object',
     parameters : [
       param.path('id', 'ID of user', 'string'),
-      param.form('skills', 'User skills. Should be an array of stringified skill objects.', 'array', false),
-      param.form('roles', 'User past and present roles', 'array', false),
-      param.form('location', 'User\'s current location', 'object', false)
+      param.query('action', 'Action to perform on the relationships. Can be "delete" or "create". Defaults to "delete" because most relationships will be created via the create endpoint. Currently only handles "delete".', 'string', false),
+      param.form('skills', 'User skills. Should be an array of stringified skill objects. Either skills or locations is required.', 'array', false),
+      param.form('locations', 'User preferred job locations. Should be an array of stringified location objects. Either skills or locations is required.', 'object', false)
     ],
     responseMessages : [swe.invalid('id'), swe.notFound('user')],
     nickname : 'removeRelationships'
@@ -480,22 +489,47 @@ exports.removeRelationships = {
 
   action: function (req, res) {
     var id = req.params.id;
+    var action = req.query.action || 'delete';
     var options = {};
-    var params = {};
-
-    // params.id = req.params.id;
+    var promises = [];
 
     if (!id) throw swe.invalid('id');
+    if (!req.body.skills && !req.body.locations)
+      throw swe.invalid('parameters');
 
-    var errLabel = 'Route: DELETE /users/{id}/relationships';
+    var errLabel = 'Route: PUT /users/{id}/relationships';
     var callback = _.partial(_callback, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
-    params = _prepareParams(req);
 
-    User.removeRelationships(params, options).then(function (results) {
-      // console.log(results);
-      // array of all latest 20 jobs recommended
+    // Relationships allowed
+    var rels = ['skills', 'locations'];
+
+    // Loop through each passed in relationship and perform the required task
+    _.each(req.body, function (value, key) {
+
+      var params = {};
+
+      params.id = id;
+
+      if (_.contains(rels, key)) {
+        params.type = key;
+        params.relationships = value;
+
+        // Make sure there is actually data to process
+        if (value.length === 0) {
+          promises.push({}); // resolves immediately
+        } else {
+          if (action === 'delete') {
+            promises.push(User.removeRelationships(params, options));
+          } else if (action === 'create') {
+            // @TODO implement this
+          }
+        }
+      }
+    });
+
+    when.all(promises).then(function (results) {
       callback(null, results);
     });
   }

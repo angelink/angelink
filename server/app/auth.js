@@ -1,6 +1,5 @@
 'use strict';
 
-
 // ## Module Dependencies
 var _ = require('lodash');
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
@@ -31,13 +30,22 @@ var getUser = function (params, callback) {
       return;
     }
 
-    callback(err, body.node.data);
+    // If the user is not found then body will not have 
+    // a node property...
+    if (body.node) {
+      callback(err, body.node.data);
+    } else {
+      callback(err, null);
+    }
   });
 };
 
 var createOrUpdateUser = function (params, callback) {
+
+  var baseUrl = cfg.server.baseUrl;
+
   var options = {
-    url: 'http://127.0.0.1:3000/api/v0/users',
+    url: baseUrl + '/api/v0/users',
     method: 'POST',
     headers: {
       'api_key': 'special-key'
@@ -60,7 +68,6 @@ var createOrUpdateUser = function (params, callback) {
 
     var user = arr[0];
 
-    // return done(null, user.node.data);
     callback(err, user.node.data);
   });
 };
@@ -95,8 +102,13 @@ exports.init = function () {
 
         // if user doesn't exist or doesn't have a linkedin token...
         if (!user || !user.linkedInToken) {
-          createOrUpdateUser(params, function (user) {
-            return done(null, user);
+          createOrUpdateUser(params, function (err, user) {
+
+            if (err) {
+              console.error('Error creating user');
+            }
+
+            return done(err, user);
           });
         } else {
           return done(null, user);

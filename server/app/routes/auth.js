@@ -35,6 +35,21 @@ var setSignedUserCookie = function (user, res) {
   });
 };
 
+var _login = function (user, req, res, next) {
+  req.login(user, function (err) {
+
+    if (err) {
+      return next(err);
+    }
+
+    if (req.session.referer.indexOf('login')) {
+      res.redirect('/browse/list');
+    } else {
+      res.redirect(req.session.referer);
+    }
+  });
+};
+
 module.exports = function (server) {
 
   server.get('/auth/currentUser', function (req, res) {
@@ -89,6 +104,7 @@ module.exports = function (server) {
     // state is used for security during authentication
     // @see http://developer.linkedin.com/documents/authentication
     var state = generateState(req.sessionID);
+    var user = req.signedCookies.user;
 
     // save the referer
     req.session.referer = req.header('Referer') || '/';
@@ -96,13 +112,12 @@ module.exports = function (server) {
     // save state to session
     req.session.state = state;
 
-    // if user cookie is set, redirect... 
-    if (req.signedCookies.user) {
-      if (req.session.referer.indexOf('login')) {
-        res.redirect('/browse/list');
-      } else {
-        res.redirect(req.session.referer);
-      }
+    // if user cookie is set, login and redirect... 
+    if (user) {
+
+      // Because we are using a custom callback, we need to to establish 
+      // a session by calling req.login() which is done in the _login func
+      _login(user, req, res, next);
     }
 
     // otherwise authenticate
@@ -129,11 +144,10 @@ module.exports = function (server) {
         // set user cookie
         setSignedUserCookie(user, res);
 
-        if (req.session.referer.indexOf('login')) {
-          res.redirect('/browse/list');
-        } else {
-          res.redirect(req.session.referer);
-        }
+        // Because we are using a custom callback, we need to to establish 
+        // a session by calling req.login() which is done in the _login func
+        _login(user, req, res, next);
+        
 
       })(req, res, next);
     }

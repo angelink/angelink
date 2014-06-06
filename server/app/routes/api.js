@@ -50,7 +50,7 @@ module.exports = function (subpath, cfg) {
     .addDelete(users.deleteAllUsers)
     .addPost(users.rateJob)
     .addGet(users.getRecommendations)
-    .addDelete(users.removeRelationships)
+    .addPut(users.removeRelationships)
 
     // Skill Model and Methods
     .addGet(skills.list)

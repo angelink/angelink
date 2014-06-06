@@ -96,6 +96,7 @@ var _createManySetup = function (params, callback) {
 
 // Create uses MERGE so it serves as both the create and update function
 var create = function (params, options) {
+  var allPromises = [];
   var func = new Construct(_create, _singleUser);
   var p1 = when.promise(function (resolve) {
 
@@ -118,12 +119,18 @@ var create = function (params, options) {
     return results;
   });
 
+  allPromises.push(p1);
+
   // Create the Users skills
-  var p2 = Skill.createMany(params.skills, options);
+  if (params.skills) {
+    allPromises.push(Skill.createMany(params.skills, options));
+  }
 
-  var p3 = Loc.create(params.location, options);
-
-  var all = when.join(p1,p2,p3);
+  if (params.location) {
+    allPromises.push(Loc.create(params.location, options));
+  }
+  
+  var all = when.all(allPromises);
 
   // Things to do once users, skills, location, etc have been created
   all.then(function (results) {
@@ -136,8 +143,13 @@ var create = function (params, options) {
       return res.results.node;
     });
 
-    user.hasSkill(skills, _.noop);
-    user.atLocation(locResults.results.node, _.noop);
+    if (skillResults) {
+      user.hasSkill(skills, _.noop);
+    }
+
+    if (locResults) {
+      user.atLocation(locResults.results.node, _.noop);
+    }
 
     return results;
   });
@@ -201,8 +213,9 @@ var getById = function (params, options) {
     return p1;
   } else {
     return p1.then(function (userResults) {
-      // console.log(userResults, 'USERRESULTS');
+      
       var p = [];
+
       _.each(clone.related, function (value) {
         p.push(_queryRelationship(userResults.results, value));
       });
@@ -370,17 +383,31 @@ var removeRelationships = function (params, options) {
   cypherParams.id = params.id;
 
   var rels = {
-    'skills': 'REQUIRES_SKILL',
+    'skills': 'HAS_SKILL',
     'locations': 'WANTS_LOCATION'
   };
 
   var labels = {
-    'skill': 'Skill',
+    'skills': 'Skill',
     'locations': 'Location',
   };
 
-  // Promises returned by getById
-  
+  var query = [];
+  var qs = '';
+
+  // There is a good chance that params.relationship is JSON string when it gets here
+  // so parse this and turn it back into an object
+  if (typeof params.relationships === 'string') {
+    params.relationships = JSON.parse(params.relationships);
+  }
+
+  // If no relationships to change then stop early
+  if (!params.relationships.length) {
+    return when.promise(function (resolve) {
+      resolve({results: {}, options: options});
+    });
+  }
+
   // Example Query:
   // match (a:User {id:{id}})-[r:HAS_SKILL]-(b:Skill)
   // where b.normalized = {_0} 
@@ -388,10 +415,8 @@ var removeRelationships = function (params, options) {
   // or b.normalized = {_2}
   // delete r
 
-  var query = [];
-  var qs = '';
-
-  query.push(util.format('a:User {id:{id}}-[r:%s]-(b:%s)', rels[type], labels[type]));
+  // Otherwise build the query
+  query.push(util.format('MATCH (a:User {id:{id}})-[r:%s]-(b:%s)', rels[type], labels[type]));
 
   _.each(params.relationships, function (rel, i) {
     var key = '_' + i;
@@ -402,7 +427,7 @@ var removeRelationships = function (params, options) {
 
     if (type === 'skills') {
       cypherParams[key] = rel.normalized;
-      where.push(util.format('b.normalized = %s', '_' + i));
+      where.push(util.format('b.normalized = {%s}', '_' + i));
       query.push(where.join(' '));
     }
   });

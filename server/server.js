@@ -18,6 +18,9 @@ var subpath = express();
 log.info('Using configurations for ' + process.env.NODE_ENV);
 log.info('Configurations loaded... initializing the server');
 
+// ## Middlesware
+middleware(server, cfg);
+
 // configure /api path for api versioning and setup to only serve json
 server.use(cfg.server.apiBasePath, subpath);
 subpath.configure(function () {
@@ -28,9 +31,6 @@ subpath.configure(function () {
   
   subpath.use(express.methodOverride());
 });
-
-// ## Middlesware
-middleware(server, cfg);
 
 // ## Initialize Routes
 routes.auth(server, cfg);
