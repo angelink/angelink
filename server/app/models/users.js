@@ -387,9 +387,12 @@ var _hasRelationship = function (rel, to, callback) {
   var cypherParams = {};
 
   // Make sure to is an array
+
+  console.log(to, 'to');
   if (!Array.isArray(to)) toArr.push(to);
   else toArr = to;
 
+  console.log(toArr, 'toArr');
   // Build the cypherParams
   cypherParams.from = that.nodeId; // add the 'from' nodeID
 
