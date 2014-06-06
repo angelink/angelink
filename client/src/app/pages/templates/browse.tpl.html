@@ -33,15 +33,15 @@
       <ul class="jobs recommended">
         <li ng-repeat="job in jobs" class="job" ng-click="goTo(job)">
           <div class="meta top">
-            <span class="company">{{job.company}}</span>
+            <span class="company">{{job.company.name}}</span>
           </div>
           <h4 class="title">{{job.title}}</h4>
           <ul class="meta bottom">
             <li class="salary">
               <span class="label">Salary:</span>
-              <span class="salary-min">{{job.salary.min | currency: "$"}}</span>
+              <span class="salary-min">{{job.salary.salaryMin | currency: "$"}}</span>
               -
-              <span class="salary-max">{{job.salary.max | currency: "$"}}</span>
+              <span class="salary-max">{{job.salary.salaryMax | currency: "$"}}</span>
             </li>
             <li>
               <div class="btn-group">

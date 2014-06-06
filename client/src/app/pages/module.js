@@ -144,6 +144,8 @@ angular.module('n4j.pages')
 
     RestangularProvider.addResponseInterceptor(function (data, operation) {
       var extracted = null;
+
+      console.log(operation);
       
       if (operation === 'getList') {
         extracted = data.list;
@@ -162,6 +164,7 @@ angular.module('n4j.pages')
     // but we need it to be sent as a query string...
     $httpProvider.defaults.transformRequest.unshift(function (data) {
       var key, result = [];
+
       for (key in data) {
         if (data.hasOwnProperty(key)) {
           result.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
