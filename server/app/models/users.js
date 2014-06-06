@@ -271,8 +271,7 @@ var getUserJobs = function (params, options) {
         return jobResults;
       });
     } else {
-      // @TODO getRecommended based on skills instead
-      return Job.getLatest(userResults.results.node).then(function (jobResults) {
+      return Job.getRecommended(userResults.results.node).then(function (jobResults) {
         return jobResults;
       });
     }
@@ -439,7 +438,6 @@ var _hasRelationship = function (rel, to, callback) {
   _.each(toArr, function (toNode, index) {
     var ident = 'ident_' + index;
 
-    console.log(toNode)
     cypherParams[ident] = toNode.nodeId;
 
     // @NOTE 
