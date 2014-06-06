@@ -54,10 +54,9 @@ body {
 }
 
 // ## Panels 
-.panel {
+.panel.panel-default {
   .panel-heading {
     .panel-title {
-      font-size: 12px;
       color: $gray;
     }
   }
@@ -70,5 +69,6 @@ body {
 @import "partials/drawer";
 @import "partials/home";
 @import "partials/layout";
+@import "partials/profile";
 @import "partials/tagger";
 @import "partials/zocial";

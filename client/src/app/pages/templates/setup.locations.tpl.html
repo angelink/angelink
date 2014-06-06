@@ -1,0 +1,42 @@
+<!-- @TODO show friendly message if this is the first time -->
+
+<div class="layout-1col">
+  <div class="col">
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">Locations</h4>
+      </div>
+      <div class="panel-body">
+
+        <p class="note">Add all the locations where you are interested in finding a job.</p>
+
+        <input 
+          class="form-control"
+          type="text"
+          ng-model="itemToAdd"
+          placeholder="Hit enter to add a location"
+          typeahead="item.name for item in getSuggestion($viewValue)"
+          typeahead-loading="loadingSuggestions"
+          typeahead-min-length="2"
+          typeahead-editable="true"
+          typeahead-on-select="select($item, $model, $label)"
+          ng-keypress="onEnter($event)"
+        />
+
+        <i ng-show="loadingSuggestions" class="fa fa-refresh"></i>
+
+        <ul class="selectedItems">
+          <li ng-repeat="item in selectedItems">{{item.city}} <i class="fa fa-times-circle" ng-click="remove($index)"></i></li>
+        </ul>
+  
+      </div>
+    </div>
+
+    <div class="actions">
+      <a ui-sref="app.profile" class="btn btn-default">Cancel</a>
+      <button class="btn btn-primary" ng-click="save()">Save</button>
+    </div>
+
+  </div>
+</div>

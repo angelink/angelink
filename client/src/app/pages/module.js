@@ -1,6 +1,7 @@
 'use strict';
 
 angular.module('n4j.pages', [
+  'angular-growl',
   'highcharts-ng',
   'ngAnimate',
   'ngResource',
@@ -17,7 +18,7 @@ angular.module('n4j.pages', [
 ]);
 
 angular.module('n4j.pages')
-  .config(function ($stateProvider, RestangularProvider) {
+  .config(function ($stateProvider, RestangularProvider, $httpProvider, growlProvider) {
 
     $stateProvider
       .state('home', {
@@ -29,51 +30,7 @@ angular.module('n4j.pages')
         }
       })
 
-      // Everything in app should be authenticated
-      .state('app', {
-        abstract: true,
-        url: '/app',
-        template: '<ui-view class="layout"/>',
-        resolve: {
-          auth: function ($q, $window, $n4Auth) {
-            var deferred = $q.defer();
-
-            if (!$n4Auth.isLoggedIn()) {
-              // @NOTE 
-              // for some reason $state.go doesn't work here
-              // so we are using $window.location.href
-              $window.location.href = '/login';
-            } else {
-              deferred.resolve();
-            }
-
-            return deferred.promise;
-          }
-        }
-      })
-
-      .state('app.recommended', {
-        abstract: true,
-        url: '^/recommended',
-        templateUrl: 'pages/templates/layout.tpl.html',
-        controller: 'BrowseCtrl'
-      })
-
-      .state('app.recommended.list', {
-        url: '',
-        templateUrl: 'pages/templates/list.tpl.html'
-      })
-
-      .state('app.recommended.detail', {
-        url: '/:id',
-        views: {
-          'detail': {
-            controller: 'BrowseDetailCtrl',
-            templateUrl: 'pages/templates/detail.tpl.html',
-          }
-        }
-      })
-
+      
       .state('login', {
         url: '/login',
         templateUrl: 'pages/templates/login.tpl.html',
@@ -99,10 +56,79 @@ angular.module('n4j.pages')
         }
       })
 
-      .state('profile', {
-        url: '/profile',
+      // Everything in app should be authenticated
+      .state('app', {
+        abstract: true,
+        url: '/app',
+        templateUrl: 'pages/templates/protected.tpl.html',
+        resolve: {
+          auth: function ($q, $window, $n4Auth) {
+            var deferred = $q.defer();
+
+            if (!$n4Auth.isLoggedIn()) {
+              // @NOTE 
+              // for some reason $state.go doesn't work here
+              // so we are using $window.location.href
+              $window.location.href = '/login';
+            } else {
+              deferred.resolve();
+            }
+
+            return deferred.promise;
+          }
+        }
+      })
+
+      .state('app.browse', {
+        abstract: true,
+        url: '^/browse',
+        templateUrl: 'pages/templates/browse.tpl.html',
+        controller: 'BrowseCtrl'
+      })
+
+      .state('app.browse.list', {
+        url: '',
+        templateUrl: 'pages/templates/browse.list.tpl.html'
+      })
+
+      .state('app.browse.detail', {
+        url: '/:id',
+        views: {
+          'detail': {
+            controller: 'BrowseDetailCtrl',
+            templateUrl: 'pages/templates/browse.detail.tpl.html',
+          }
+        }
+      })
+
+      .state('app.profile', {
+        url: '^/profile',
         templateUrl: 'pages/templates/profile.tpl.html',
         controller: 'ProfileCtrl',
+        data: {
+          bodyId: 'profile'
+        }
+      })
+
+      .state('app.setup', {
+        abstract: true,
+        url: '^/profile/setup',
+        template: '<div ui-view></div>'
+      })
+
+      .state('app.setup.locations', {
+        url: '/locations',
+        templateUrl: 'pages/templates/setup.locations.tpl.html',
+        controller: 'SetupCtrl',
+        data: {
+          bodyId: 'profile'
+        }
+      })
+      
+      .state('app.setup.skills', {
+        url: '/skills',
+        templateUrl: 'pages/templates/setup.skills.tpl.html',
+        controller: 'SetupCtrl',
         data: {
           bodyId: 'profile'
         }
@@ -130,6 +156,21 @@ angular.module('n4j.pages')
 
       return extracted;
     });
+
+    // We need to send data as a query string but by default if the the data property 
+    // of the request configuration object contains an object, it is serialized into JSON
+    // but we need it to be sent as a query string...
+    $httpProvider.defaults.transformRequest.unshift(function (data) {
+      var key, result = [];
+      for (key in data) {
+        if (data.hasOwnProperty(key)) {
+          result.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+        }
+      }
+      return result.join('&');
+    });
+
+    growlProvider.globalTimeToLive(3000);
   });
 
 angular.module('n4j.pages.controllers', []);

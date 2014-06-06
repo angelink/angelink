@@ -1,36 +1,43 @@
 'use strict';
 
 angular.module('n4j.pages.controllers')
-  .controller('ProfileCtrl', function ($scope, $http, SkillsFactory) {
-    console.log($scope);
+  .controller('ProfileCtrl', function (_, $state, $scope, $n4User, growl) {
 
-    //user details should be from UserService created on login
-    $scope.user = {
-      firstname: 'Peter',
-      profileImage: 'http://cartwa.com/Puppies_files/PuppyIcon.jpg'
-    };
+    var _user = null;
 
-    // SkillsFactory.get().then(function(skills){
-    //   $scope.skills = {
-    //     value: [],
-    //     options: skills
-    //   };
-    // });
+    $n4User.get().then(function (user) {
+      _user = _.pick(user, ['firstname', 'lastname', 'email']);
+      $scope.user = _.clone(_user);
+    });
 
-    $scope.skills = {
-      value: [],
-      options: ['backbonejs', 'angularjs', 'html', 'css', 'javascript', 'codingskillz']
-    };
+    $n4User.getSkills().then(function (skills) {
+      $scope.skills = skills;
+    });
 
-    //POST user data with skills as property to connect nodes to user
-    $scope.submitSkills = function(){
-      console.log($scope.skills.value);
-      $http({method: 'POST', url: 'localhost:/3000/user', data: $scope.skills.value}).
-        success(function() {
-          console.log('POST skills success');
-        }).
-        error(function() {
-          console.log('POST skills error');
+    $n4User.getLocations().then(function (locations) {
+      $scope.locations = locations;
+    });
+
+    $scope.save = function () {
+      // see if the data actually changed
+      if (_.isEqual(_user, $scope.user)) {
+        growl.addInfoMessage('Nothing Changed');
+      } else {
+        // @TODO set up some data validation before saving
+        $n4User.save($scope.user).then(function () {
+          growl.addSuccessMessage('Profile Successfully Updated');
         });
+      }
+    };
+
+    $scope.deleteAccount = function () {
+      $n4User.del().then(function () {
+        growl.addSuccessMessage('Sorry to see you go.');
+
+        // Give us time to display the success message
+        setTimeout(function () {
+          $state.go('home');
+        }, 1500);
+      });
     };
   });

@@ -6,7 +6,7 @@
     min-height: 100%;
 
     h3 {
-      font-size: 14px;
+      font-size: 18px;
       text-align: center;
       margin: 0;
       background: $lightestGray;
@@ -28,7 +28,8 @@
 
       a {
         margin: 20px 20px 0 20px;
-        width: 250px;
+        width: 300px;
+        font-size: 16px;
       }
 
       a.disabled {

@@ -1,4 +1,3 @@
-
 .browse-list {
   position: relative;
   background: $bgList;
@@ -16,8 +15,11 @@
     background: $bgListHeader;
     border-bottom: 1px solid darken($bgListHeader, 5%);
 
+    h2, .fa {
+      font-size: 16px;
+    }
+
     h2 {
-      font-size: 14px;
       margin: 0;
       padding: 0;
       color: darken($bgListHeader, 15%);
@@ -25,7 +27,6 @@
 
     .list-type {  
       right: -10px;
-      
 
       .btn {
         color: darken($bgListHeader, 15%);
@@ -34,10 +35,6 @@
       .btn.active {
         color: $darkGray;
       }
-
-      .fa {
-        font-size: 12px;
-      } 
     }
   }
   
@@ -62,14 +59,14 @@
       }
 
       .title {
-        font-size: 0.9em;
+        font-size: 16px;
         margin-top: 0;
         margin-bottom: 5px;
       }
 
       .meta {
         &.top {
-          font-size: 0.7em;
+          // font-size: 0.7em;
           color: darken($bgListHeader, 20%);
           
           .company {}
@@ -81,7 +78,7 @@
         }
         
         &.bottom {
-          font-size: 0.8em;
+          // font-size: 0.8em;
           list-style: none;
           margin: 0;
           padding: 0;
@@ -100,7 +97,7 @@
           }
 
           .btn {
-            font-size: 10px;
+            font-size: 12px;
             background: darken($bgListHeader, 5%);
             border: 1px solid darken($bgListHeader, 7%);
 

@@ -23,8 +23,8 @@
       @include background(linear-gradient(180deg, $bgDetail, rgba($bgDetail, 0.8)));
 
       h1 {
-        font-size: 18px;
-        line-height: 18px;
+        font-size: 24px;
+        line-height: 24px;
         margin: 0;
         padding: 0;
         text-align: center;
@@ -32,7 +32,8 @@
 
       .posted {
         margin: 0;
-        line-height: 18px;
+        font-size: 18px;
+        line-height: 24px;
         color: darken($bgDetail, 10%);
 
         .date {
@@ -49,12 +50,14 @@
       position: absolute;
       right: 0;
       top: 0;
-      padding: 60px 10px;
+
+      // Top padding is 60px + page-header height
+      padding: 90px 10px 60px;
 
       .panel {
         .panel-heading {
           .btn {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
             color: $gray;
           }
@@ -66,10 +69,10 @@
             padding: 0;
             list-style: none;
           }
+        }
 
-          li {
-            font-size: .8em;
-          }
+        .highcharts-container {
+          margin: 0 auto;
         }
       }
     }

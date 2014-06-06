@@ -13,13 +13,10 @@
   <div ui-view="detail"></div>
 </div> -->
 
-<header class="header">
-  <h4 class="branding">Relay</h4>
-  <a href="/auth/logout" target="_self">Logout</a>
-</header>
-
 <div class="layout-2col">
+  
   <div ui-view="detail" class="browse-detail col1"></div>
+  
   <div class="col2">
     <div class="browse-list">
       <header class="header">
@@ -38,7 +35,7 @@
           <div class="meta top">
             <span class="company">{{job.company}}</span>
           </div>
-          <h3 class="title">{{job.title}}</h3>
+          <h4 class="title">{{job.title}}</h4>
           <ul class="meta bottom">
             <li class="salary">
               <span class="label">Salary:</span>
@@ -61,4 +58,5 @@
       </ul>
     </div>
   </div>
+  
 </div>

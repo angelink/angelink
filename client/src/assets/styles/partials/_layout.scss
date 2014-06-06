@@ -2,12 +2,41 @@ html, body, #realm {
   width: 100%;
   height: 100%;
   min-height: 100%;
+  overflow: auto;
 }
 
-// .header {
-//   display: flex;
-//   align-items: center;
-// }
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0 20px;
+  height: 30px;
+  background: $darkGray;
+  position: fixed;
+  z-index: 100;
+  width: 100%;
+  top: 0;
+
+  h4, a {
+    margin: 0;
+    padding: 0;
+    color: lighten($darkGray, 50%);
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  nav {
+    a {
+      margin: 0 10px;
+    }
+
+    a.active {
+      color: white;
+      text-decoration: underline;
+    }
+  }
+}
 
 // ## Two Column Layout with scrollable content
 .layout {
@@ -19,27 +48,39 @@ html, body, #realm {
     display: flex;
     flex: 1;
     flex-direction: row;
-  }
 
-  .col1, .col2 {
-    .scrollable {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
+    .col1, .col2 {
+      padding-top: 30px; // needs to the same height as the header
+
+      .scrollable {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+    }
+
+    .col2 {
+      display: flex;
+      flex: 0;
+      order: -1;
+      flex: 0 0 340px;
     }
   }
 
-  .col1 {}
-
-  .col2 {
+  .layout-1col {
     display: flex;
-    flex: 0;
-    order: -1;
-    flex: 0 0 250px;
-  }
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 
+    .col {
+      width: 100%;
+      max-width: 600px;
+    }
+  }
 }
 
 // ## Grid System
@@ -54,10 +95,23 @@ html, body, #realm {
 
 
 .panel {
-  
   .panel-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;    
+  }
+}
+
+// ## Growl Notifications
+.growl-item {
+  position: fixed;
+  z-index: 1000;
+  top: 30px;
+  left: 0px;
+  width: 100%;
+  text-align: center;
+
+  button {
+    display: none;
   }
 }

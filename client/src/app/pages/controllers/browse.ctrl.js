@@ -21,7 +21,7 @@ angular.module('n4j.pages')
 
     $scope.goTo = function (job) {
       $scope.currentJob = job;
-      $state.go('app.recommended.detail', {id: job.id});
+      $state.go('app.browse.detail', {id: job.id});
     };
 
     $scope.like = function (jobId) {

@@ -1,0 +1,54 @@
+#profile {
+
+  form {
+    label {
+      color: lighten($gray, 10%);
+      font-weight: normal;
+    }
+
+    input {
+      color: $darkGray;
+    }
+  }
+
+  .note {
+    em {
+      color: $blue;
+      background: rgba($blue, 0.1);
+      padding: 0 5px;
+      font-style: normal;
+    }
+  }
+
+  .col {
+    padding-top: 50px; // 20px + page-header height
+  }
+
+  .skills, .locations, .selectedItems {
+    margin: 0 -10px;
+    padding: 0;
+    list-style: none;
+    padding-bottom: 15px;
+
+    @include clearfix();
+
+    li {
+      float: left;
+      color: $blue;
+      background: rgba($blue, 0.1);
+      padding: 3px 5px;
+      margin: 10px;
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      margin: 0 5px;
+      width: 70px;
+    }
+  }
+}

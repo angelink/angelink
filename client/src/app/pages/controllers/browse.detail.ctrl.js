@@ -69,8 +69,8 @@ angular.module('n4j.pages')
         }
       ],
       size: {
-        height: 250,
-        width: 800
+        height: 300,
+        width: 980
       },
       title: {
         style: {

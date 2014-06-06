@@ -1,20 +1,65 @@
-<div ng-controller="ProfileCtrl" style='display: flex;align-items: center;justify-content: center; flex-direction:column; min-height:100%; height:100%;'>
-  <div style='margin:15px'>
-    <img src='http://cartwa.com/Puppies_files/PuppyIcon.jpg'/>
+<div class="layout-1col">
+  <div class="col">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">General</h4>
+      </div>
+      <div class="panel-body">
+        <form role="form" ng-submit="save()">
+          <div class="form-group">
+            <label for="firstname" class="control-label">Firstname</label>
+            <input type="text" ng-model="user.firstname" class="form-control" id="firstname" placeholder="Firstname">
+          </div>
+          <div class="form-group">
+            <label for="lastname" class="control-label">Lastname</label>
+            <input type="text" ng-model="user.lastname" class="form-control" id="lastname" placeholder="Lastname">
+          </div>
+          <div class="form-group">
+            <label for="inputTmail" class="control-label">Email</label>
+            <input type="email" ng-model="user.email" class="form-control" id="inputEmail" placeholder="Email">
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">Locations</h4>
+      </div>
+      <div class="panel-body">
+        <ul class="locations">
+          <li class="loc" ng-repeat="loc in locations">{{loc.city}}</li>
+        </ul>
+        
+        <!--
+        Currently not supported because we only look at SF jobs... @TODO implement
+        <a ui-sref="app.setup.locations" class="btn btn-primary">Edit</a>
+        -->
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">Skills</h4>
+      </div>
+      <div class="panel-body">
+        <ul class="skills">
+          <li class="skill" ng-repeat="skill in skills">{{skill.name}}</li>
+        </ul>
+
+        <a ui-sref="app.setup.skills" type="submit" class="btn btn-primary">Edit</a>
+      </div>
+    </div>
+
+    <div class="panel panel-danger">
+      <div class="panel-heading">
+        <h4 class="panel-title">Delete Account</h4>
+      </div>
+      <div class="panel-body">
+        <button class="btn btn-danger" ng-click="deleteAccount()">Delete Account</button>
+      </div>
+    </div>
   </div>
-  <div>
-    <p>Hi {{user.firstname}}.</p>
-  </div>
-  <div>
-    <p>Add your skills so we can get to know you.<p>
-  </div>
-  <div style='margin:15px'>
-    <tagger ng-model="skills.value" options="skills.options" placeholder="Select your skills"></tagger>
-  </div>
-  <div style='margin:15px'>
-    <a href='#' class='btn btn-default' ng-click='submitSkills()'> --> </a>
-  </div>
-  <!-- <div>
-    <pre>{{ empty | json }}</pre>
-  </div> -->
 </div>
