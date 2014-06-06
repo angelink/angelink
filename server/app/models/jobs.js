@@ -415,6 +415,90 @@ var getLatest = function (userNode) {
   });
 };
 
+var getLiked = function (userNode) {
+
+  return when.promise(function (resolve) {
+
+    var query = [];
+    var qs = '';
+    var cypherParams = {
+      id: userNode.data.id,
+    };
+
+    // Query looks like:
+    // MATCH (user:User {id:'_gDgNhqNKU'}), (job:Job)
+    // WHERE NOT (user)-[:LIKES]->(job) AND NOT (user)-[:DISLIKES]->(job)
+    // WITH job
+    // LIMIT 5
+    // MATCH (job)-[relType]-(relationship)
+    // RETURN job,relType,relationship
+
+    query.push('MATCH (user:User {id:{id}}), (job:Job)');
+    query.push('WHERE (user)-[:LIKES]->(job)');
+    query.push('WITH job');
+    query.push('LIMIT 20');
+    query.push('MATCH (job)-[r]-(rel)');
+    query.push('RETURN job, r, rel');
+    query.push('ORDER BY job.created');
+
+    qs = query.join('\n');
+
+    var relMap = {
+      'AT_LOCATION': 'location',
+      'AT_COMPANY': 'company',
+      'HAS_SALARY': 'salary',
+      'REQUIRES_SKILL': 'skills',
+      'HAS_EQUITY': 'equity',
+      'HAS_ROLE': 'roles'
+    };
+
+    db.query(qs, cypherParams, function (err, results) {
+
+      var jobs = {};
+
+      _.each(results, function (result) {
+
+        var job = result.job;
+        var id = job._data.data.id;
+
+        // Check if the job already exists in the jobs object
+        if (jobs[id]) {
+          job = jobs[id];
+        }
+
+        // Get the relationship label
+        var relType = result.r._data.type;
+        var relLabel = relMap[relType];
+
+        // Add the relationship
+        var relationships = result.rel._data;
+
+        if (relLabel === 'skills' || relLabel === 'roles') {
+          job._data.data[relLabel] = job.data[relLabel] || [];
+          job._data.data[relLabel].push(relationships.data);
+        } else {
+          job._data.data[relLabel] = relationships.data;
+        }
+
+        // Save the updated job
+        jobs[id] = job;
+      });
+
+      // We only need the values of jobs and we need to map it to 'job'
+      // so that _manyJobs parses it correctly
+      var res = _.map(jobs, function (job) {
+        return {job: job};
+      });
+
+      // Format the response in the way we expect it to look
+      // This is ugly... need to change this so it doesn't require a callback
+      _manyJobs(res, function (err, results) {
+        resolve(results);
+      });
+    });
+  });
+};
+
 // Job.prototype.hasRole = function (toRole, callback) {
 //   var that = this;
 //   var query = [];
@@ -498,5 +582,6 @@ Job.getById = getById;
 Job.getAll = getAll.done();
 Job.update = update;
 Job.getLatest = getLatest;
+Job.getLiked = getLiked;
 
 module.exports = Job;
