@@ -1,5 +1,5 @@
 {
-  "name": "n4j-client",
+  "name": "angelink-client",
   "version": "0.0.1",
   "dependencies": {
     "angular": "~1.2.10",
