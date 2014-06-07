@@ -97,6 +97,22 @@
               font-weight: bold;
             }
           }
+
+          .social {
+            a {
+              background: $blue;
+              color: lighten($blue, 90%);
+              margin-right: 5px;
+              padding: 2px 5px;
+              display: inline-block;
+              
+              &:hover {
+                text-decoration: none;
+                background: rgba($blue, 0.1);
+                color: $blue;
+              }
+            }
+          }
         }
 
         .highcharts-container {

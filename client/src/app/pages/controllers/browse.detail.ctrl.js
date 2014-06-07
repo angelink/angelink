@@ -10,7 +10,7 @@ angular.module('n4j.pages')
     // Chart colors
     var colors = ['#F25A29', '#AD62CE', '#30B6AF', '#FCC940', '#FF6C7C', '#4356C0', '#DFE1E3'];
 
-    console.log($scope.currentJob, user);
+    // console.log($scope.currentJob, user);
 
     // Map all properties of $scope.currentJob to $scope
     _.each($scope.currentJob, function (val, key) {
@@ -20,7 +20,6 @@ angular.module('n4j.pages')
     $scope.jobTitle = $scope.title;
 
     $scope.hasSkill = function (skill) {
-      console.log(userSkills, skill.normalized);
       return _.contains(userSkills, skill.normalized);
     };
 
