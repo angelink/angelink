@@ -305,6 +305,7 @@ exports.getStatsById = {
     parameters : [
       param.path('id', 'ID of company that needs to be fetched', 'string'),
       param.path('type', 'Type of stats to be fetched, ("followers"/"quality").', 'string'),
+      param.query('period', 'Period of stats to be fetched, ("7"/"30"/"90").', 'string', true),
     ],
     responseMessages : [swe.invalid('input')],
     nickname : 'getCompanyStatsById'
@@ -313,10 +314,11 @@ exports.getStatsById = {
   action: function (req, res) {
     var id = req.params.id;
     var type = req.params.type;
+    var period = req.query.period;
     var options = {};
     var params = {};
 
-    if (!id || !type) throw swe.invalid('input');
+    if (!id || !type || !period) throw swe.invalid('input');
 
     var errLabel = 'Route: GET /companies/{id}/stats/{type}';
     var callback = _.partial(_callback, res, errLabel);
@@ -326,6 +328,9 @@ exports.getStatsById = {
 
     params.id = id;
     params.type = type;
+    params.period = period;
+
+    console.log(params);
 
     Company.getStats(params, options).then(function (results){
       callback(null, results);
