@@ -445,7 +445,7 @@ var getLiked = function (userNode) {
     query.push('MATCH (user:User {id:{id}}), (job:Job)');
     query.push('WHERE (user)-[:LIKES]->(job)');
     query.push('WITH job');
-    query.push('LIMIT 20');
+    // query.push('LIMIT 20');
     query.push('MATCH (job)-[r]-(rel)');
     query.push('RETURN job, r, rel');
     query.push('ORDER BY job.created');
