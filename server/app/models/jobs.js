@@ -524,12 +524,15 @@ var getRecommended = function (userNode) {
     query.push('WITH user, job');
     query.push('MATCH (user)-[:HAS_SKILL]->(skill)<-[:REQUIRES_SKILL]-(job)');
     query.push('WITH job, count(skill) AS skillscount');
+    query.push('ORDER BY job.created DESC');
     query.push('LIMIT 20');
     query.push('MATCH (job)-[r]-(rel)');
     query.push('RETURN job, r, rel, skillscount');
     query.push('ORDER BY skillscount DESC');
 
     qs = query.join('\n');
+
+    // console.log(qs);
 
     var relMap = {
       'AT_LOCATION': 'location',
@@ -574,9 +577,11 @@ var getRecommended = function (userNode) {
         jobs[id] = job;
       });
 
-      // We only need the values of jobs and we need to map it to 'job'
-      // so that _manyJobs parses it correctly
-      var res = _.map(jobs, function (job) {
+      var res = _.sortBy(jobs, function (job) {
+        return -job._data.data.skillscount;
+      });
+
+      res = _.map(res, function (job) {
         return {job: job};
       });
 
