@@ -52,14 +52,25 @@
             </li>
             <li>
               <div class="btn-group">
-                <label 
+                <label ng-show="listType !== 'Likes'"
                   class="btn btn-transparent btn-xs" 
-                  ng-click="rate(job, 'like'); $event.stopPropagation()">
+                  ng-click="rate(job, 'like'); $event.stopPropagation()"
+                  tooltip="Like"
+                  tooltip-placement="right">
                   <i class="fa fa-star"></i>
+                </label>
+                <label ng-show="listType === 'Likes'"
+                  class="btn btn-transparent btn-xs" 
+                  ng-click="archive(job); $event.stopPropagation()"
+                  tooltip="Archive"
+                  tooltip-placement="right">
+                  <i class="fa fa-archive"></i>
                 </label>
                 <label 
                   class="btn btn-transparent btn-xs" 
-                  ng-click="rate(job, 'dislike'); $event.stopPropagation()">
+                  ng-click="rate(job, 'dislike'); $event.stopPropagation()"
+                  tooltip="Dislike"
+                  tooltip-placement="right">
                   <i class="fa fa-thumbs-down"></i>
                 </label>
               </div>

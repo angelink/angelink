@@ -120,4 +120,8 @@ html, body, #realm {
   .tooltip-inner {
     max-width: 250px;
   }
+
+  &.left .tooltip-inner {
+    text-align: left;
+  }
 }

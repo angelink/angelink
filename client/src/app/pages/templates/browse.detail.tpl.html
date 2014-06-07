@@ -1,6 +1,12 @@
 <header class="header">
   <h1>{{currentJob.title}} @ <a href="{{company.companyUrl}}" target="_blank">{{company.name}}</a></h1>
-  <p class="posted">Job posted on <span class="date">{{ currentJob.created | date: "longDate"}}</span></p>
+  <p class="posted">
+    Job posted on 
+    <span class="date" 
+      ng-class="{old: isOldJob(currentJob.created)}"
+      tooltip="Jobs older than 6 months are highlighted."
+      tooltip-placement="left">{{ currentJob.created | date: "longDate"}}</span>
+  </p>
 </header>
 
 <div class="description">
@@ -70,11 +76,15 @@
 
       <div class="panel panel-default skills">
         <div class="panel-heading">
-          <h4 class="panel-title" tooltip="Required skills that overlap with your skills are bolded.">Skill Comparison</h4>
+          <h4 class="panel-title">Skill Comparison</h4>
         </div>
         <div class="panel-body">
           <ul>
-            <li class="skill" ng-repeat="skill in skills" ng-class="{hasSkill: hasSkill(skill)}">
+            <li class="skill" 
+              ng-repeat="skill in skills" 
+              ng-class="{hasSkill: hasSkill(skill)}"
+              tooltip="Required skills that overlap with your skills are bolded."
+              tooltip-placement="left">
               {{skill.name}}
             </li>
           </ul>

@@ -104,6 +104,15 @@
             i {
               color: darken($bgListHeader, 15%);
             }
+
+            &:hover {
+              background: darken($bgListHeader, 20%);
+              border: 1px solid darken($bgListHeader, 30%);
+
+              i {
+                color: darken($bgListHeader, 5%);
+              }
+            }
           }
         }
       }

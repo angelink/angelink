@@ -1,15 +1,19 @@
 'use strict';
 
 angular.module('n4j.pages')
-  .controller('BrowseDetailCtrl', function (_, $scope, $stateParams, $n4Jobs, jobs, user) {
+  .controller('BrowseDetailCtrl', function (_, $rootScope, $scope, $stateParams, $n4Jobs, jobs, user) {
 
     // Make sure that the currentJob matches the id in the url
-    if (!$scope.currentJob || $scope.currentJob.id !== $stateParams.id) {
-      console.log($scope.currentJob, $stateParams.id);
-      // $scope.currentJob = _.find(jobs, function (job) {
-      //   return job.id === $stateParams.id;
-      // });
-    }
+    // 
+    // @TODO figure out why we can't deeplink to a job direcly
+    // if (!$scope.currentJob || String($scope.currentJob.id) !== $stateParams.id) {
+    //   var currentJob = _.find(jobs, function (job) {
+    //     return String(job.id) === $stateParams.id;
+    //   });
+
+    //   $rootScope.$emit('set:currentJob', currentJob);
+    //   $scope.currentJob = currentJob;
+    // }
 
     var userSkills = _.map(user.skills, function (skill) {
       return skill.data.normalized;
@@ -18,7 +22,6 @@ angular.module('n4j.pages')
     // Chart colors
     var colors = ['#F25A29', '#AD62CE', '#30B6AF', '#FCC940', '#FF6C7C', '#4356C0', '#DFE1E3'];
 
-    // console.log($scope.currentJob, user);
 
     // Map all properties of $scope.currentJob to $scope
     _.each($scope.currentJob, function (val, key) {
@@ -29,6 +32,15 @@ angular.module('n4j.pages')
 
     $scope.hasSkill = function (skill) {
       return _.contains(userSkills, skill.normalized);
+    };
+
+    $scope.isOldJob = function (date) {
+
+      var today = new Date();
+
+      date = Date.parse(date);
+
+      return (today - date) > 6 * 30 * 24 * 60 * 60 * 1000;
     };
 
     // ## Highchart Configurations

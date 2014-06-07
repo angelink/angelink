@@ -1,12 +1,17 @@
 'use strict';
 
 angular.module('n4j.pages')
-  .controller('BrowseCtrl', function (_, $scope, $state, $stateParams, $resource, jobs, $n4User, $n4Jobs, growl) {
+  .controller('BrowseCtrl', function (_, $rootScope, $scope, $state, $stateParams, $resource, jobs, $n4User, $n4Jobs, growl) {
 
     // Scope Assignments
     $scope.jobs = jobs;
     $scope.currentJob = null;
     $scope.listType = 'Recommended';
+
+    // @TODO figure out why we can't deeplink to a job direcly
+    // $rootScope.$on('set:currentJob', function (currentJob) {
+    //   $scope.currentJob = currentJob;
+    // });
 
     var loadMore = function () {
 
@@ -69,44 +74,20 @@ angular.module('n4j.pages')
       });
     };
 
-    // $scope.like = function (job, index) {
-    //   var jobId = job.id;
-
-    //   console.log('like', jobId, index);
-
-    //   $n4User.rateJob(jobId, 'like').then(function () {
-    //     growl.addSuccessMessage('Successfull liked ' + job.title);
-    //     $scope.jobs.slice(index, 1);
-    //     if ($scope.jobs.length <= 10) {
-    //       loadMore();
-    //     }
-    //   });
-    // };
-
-    // $scope.dislike = function (job, index) {
-    //   var jobId = job.id;
-
-    //   console.log('dislike', jobId, index);
-
-    //   $n4User.rateJob(jobId, 'dislike').then(function () {
-    //     growl.addSuccessMessage('Successfull disliked ' + job.title);
-    //     $scope.jobs.slice(index, 1);
-    //     if ($scope.jobs.length <= 10) {
-    //       loadMore();
-    //     }
-    //   });
-    // };
+    $scope.archive = function (job) {
+      // @TODO
+      console.log('@TODO Archive', job);
+    };
 
     $scope.show = function (listType) {
       var type = '';
 
-      $scope.listType = listType;
-
       if (listType === 'Likes') type = 'likes';
       if (listType === 'Latest') type = 'latest';
 
+      $scope.listType = listType;
+
       $n4Jobs.list(type).then(function (jobs) {
-        console.log(jobs);
         $scope.jobs = jobs;
       });
     };
