@@ -352,12 +352,14 @@ var getLatest = function (userNode) {
     query.push('MATCH (user:User {id:{id}}), (job:Job)');
     query.push('WHERE NOT (user)-[:LIKES]->(job) AND NOT (user)-[:DISLIKES]->(job)');
     query.push('WITH job');
-    query.push('LIMIT 20');
+    query.push('ORDER BY job.created DESC');
+    query.push('LIMIT 20'); // @TODO make this dynamic
     query.push('MATCH (job)-[r]-(rel)');
-    query.push('RETURN job, r, rel');
-    query.push('ORDER BY job.created');
+    query.push('RETURN job, type(r), rel');
 
     qs = query.join('\n');
+
+    // console.log(qs);
 
     var relMap = {
       'AT_LOCATION': 'location',
@@ -383,7 +385,7 @@ var getLatest = function (userNode) {
         }
 
         // Get the relationship label
-        var relType = result.r._data.type;
+        var relType = result['type(r)'];
         var relLabel = relMap[relType];
 
         // Add the relationship
@@ -400,10 +402,17 @@ var getLatest = function (userNode) {
         jobs[id] = job;
       });
 
+
       // We only need the values of jobs and we need to map it to 'job'
-      // so that _manyJobs parses it correctly
-      var res = _.map(jobs, function (job) {
-        return {job: job};
+      // so that _manyJobs parses it correctly.
+      //
+      // @NOTE
+      // For some reason even though the query returns results in the correct
+      // order by the time we have mapped it to jobs (or loop over it), it is reversed.
+      // Not sure why but it may be for efficiency... in any case that is why we use unshift
+      var res = [];
+      _.each(jobs, function (job) {
+        res.unshift({job: job});
       });
 
       // Format the response in the way we expect it to look
