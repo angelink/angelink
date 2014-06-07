@@ -17,6 +17,7 @@ var _prepareParams = function (req) {
   var params = req.body;
 
   params.id = (req.params && req.params.id) || (req.body && req.body.id);
+  params.id = String(params.id);
 
   // Create normalized name from name
   if (params.name) {
@@ -325,7 +326,6 @@ exports.getStatsById = {
 
     params.id = id;
     params.type = type;
-    params.like = req.body.like;
 
     Company.getStats(params, options).then(function (results){
       callback(null, results);

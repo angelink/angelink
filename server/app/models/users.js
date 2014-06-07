@@ -250,7 +250,7 @@ var getById = function (params, options) {
 
 };
 
-var getLatestJobs = function (params, options) {
+var getUserJobs = function (params, options) {
   var func = new Construct(_matchByUUID).query().then(_singleUser);
   var clone = _.clone(params);
 
@@ -262,9 +262,19 @@ var getLatestJobs = function (params, options) {
   });
 
   return p1.then(function (userResults) {
-    return Job.getLatest(userResults.results.node).then(function (jobResults) {
-      return jobResults;
-    });
+    if (clone.type === 'latest') {
+      return Job.getLatest(userResults.results.node).then(function (jobResults) {
+        return jobResults;
+      });
+    } else if (clone.type === 'likes') {
+      return Job.getLiked(userResults.results.node).then(function (jobResults) {
+        return jobResults;
+      });
+    } else {
+      return Job.getRecommended(userResults.results.node).then(function (jobResults) {
+        return jobResults;
+      });
+    }
   });
 };
 
@@ -508,6 +518,6 @@ User.update = create;
 User.rateJob = rateJob;
 // User.getRecommendations = getRecommendations;
 User.removeRelationships = removeRelationships;
-User.getLatestJobs = getLatestJobs;
+User.getUserJobs = getUserJobs;
 
 module.exports = User;

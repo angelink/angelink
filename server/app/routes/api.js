@@ -51,7 +51,7 @@ module.exports = function (subpath, cfg) {
     .addPost(users.rateJob)
     // .addGet(users.getRecommendations)
     .addPut(users.removeRelationships)
-    .addGet(users.getLatestJobs)
+    .addGet(users.getUserJobs)
 
     // Skill Model and Methods
     .addGet(skills.list)

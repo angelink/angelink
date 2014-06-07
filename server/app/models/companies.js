@@ -93,6 +93,8 @@ var _prepareParams = function (params) {
     params.id = utils.createId(params);
   }
 
+  params.id = String(params.id);
+
   return params;
 };
 

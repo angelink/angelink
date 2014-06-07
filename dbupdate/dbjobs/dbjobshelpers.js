@@ -31,10 +31,10 @@ exports.parseObj= function(angel){
     name: angel.startup.name,
     id: angel.startup.id,
     logoUrl: angel.startup.logo_url,
-    quality: angel.startup.quality,
+    quality: String(angel.startup.quality),
     productDesc: angel.startup.product_desc,
     highConcept: angel.startup.high_concept,
-    followerCount: angel.startup.follower_count,
+    followerCount: String(angel.startup.follower_count),
     companyUrl: angel.startup.company_url,
     today: new Date().toISOString().slice(0,10)
   };
