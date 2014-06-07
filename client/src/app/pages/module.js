@@ -75,6 +75,10 @@ angular.module('n4j.pages')
             }
 
             return deferred.promise;
+          },
+
+          user: function ($n4User) {
+            return $n4User.get();
           }
         }
       })
@@ -83,7 +87,12 @@ angular.module('n4j.pages')
         abstract: true,
         url: '^/browse',
         templateUrl: 'pages/templates/browse.tpl.html',
-        controller: 'BrowseCtrl'
+        controller: 'BrowseCtrl',
+        resolve: {
+          jobs: function ($n4Jobs) {
+            return $n4Jobs.list();
+          }
+        }
       })
 
       .state('app.browse.list', {
@@ -144,8 +153,6 @@ angular.module('n4j.pages')
 
     RestangularProvider.addResponseInterceptor(function (data, operation) {
       var extracted = null;
-
-      console.log(operation);
       
       if (operation === 'getList') {
         extracted = data.list;

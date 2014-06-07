@@ -152,7 +152,11 @@ angular.module('n4j.pages.controllers')
 
         $q.all(promises).then(function () {
           growl.addSuccessMessage('Profile Successfully Updated');
-          $state.go('app.profile');
+
+          // Delay redirect for effect
+          setTimeout(function () {
+            $state.go('app.profile');
+          }, 500);
         });
       }
     };

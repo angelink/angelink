@@ -115,3 +115,9 @@ html, body, #realm {
     display: none;
   }
 }
+
+.tooltip {
+  .tooltip-inner {
+    max-width: 250px;
+  }
+}

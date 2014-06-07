@@ -1,36 +1,97 @@
 <header class="header">
-  <h1>Software Engineer @ IFTTT</h1>
-  <p class="posted">Job posted on <span class="date">{{ "June 14, 2014" | date: "medium"}}</span></p>
+  <h1>{{currentJob.title}} @ <a href="{{company.companyUrl}}" target="_blank">{{company.name}}</a></h1>
+  <p class="posted">Job posted on <span class="date">{{ currentJob.created | date: "longDate"}}</span></p>
 </header>
 
 <div class="description">
   <div class="grid">
+    
     <div class="grid-cell">
-      <div class="panel panel-default">
+      <div class="panel panel-default general">   
         <div class="panel-heading">
           <h4 class="panel-title">General Information</h4>
         </div>
         <div class="panel-body">
           <ul>
-            <li>Size: {{currentJob.company}}</li>
+            <li class="pitch"><span class="label">Elevator Pitch:</span>{{company.highConcept}}</li>
+            <li class="size"><span class="label">Size:</span>{{company.companySize}}</li>
+            <li class="location"><span class="label">Location:</span>{{location.city}}</li>
+            <li class="site">
+              <span class="label">Website:</span> 
+              <a href="{{company.companyUrl}}" target="_blank">{{company.companyUrl}}</a>
+            </li>
+            <li class="social">
+              <span class="label">Social:</span> 
+              <a href="{{company.blogUrl}}" target="_blank">
+                <i class="fa fa-bold"></i> Blog
+              </a>
+              <a href="{{company.blogUrl}}" target="_blank">
+                <i class="fa fa-twitter"></i> Twitter
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel panel-default roles">
+        <div class="panel-heading">
+          <h4 class="panel-title">Job Role(s)</h4>
+        </div>
+        <div class="panel-body">
+          <ul>
+            <li class="role" ng-repeat="role in roles">{{role.name}}</li>
           </ul>
         </div>
       </div>
     </div>
+
     <div class="grid-cell">
-      <div class="panel panel-default">
+      <div class="panel panel-default compensation">
         <div class="panel-heading">
           <h4 class="panel-title">Compensation</h4>
         </div>
-        <div class="panel-body"></div>
+        <div class="panel-body">
+          <ul>
+            <li class="salary">
+              <span class="label">Salary:</span>
+              <span class="min salary-min">{{salary.salaryMin | currency: "$"}}</span>
+              -
+              <span class="max salary-max">{{salary.salaryMax | currency: "$"}}</span>
+            </li>
+            <li class="equity">
+              <span class="label">Equity:</span>
+              <span class="min eq-min">{{equity.equityMin}}%</span>
+              -
+              <span class="max eq-max">{{equity.equityMax}}%</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel panel-default skills">
+        <div class="panel-heading">
+          <h4 class="panel-title" tooltip="Required skills that overlap with your skills are bolded.">Skill Comparison</h4>
+        </div>
+        <div class="panel-body">
+          <ul>
+            <li class="skill" ng-repeat="skill in skills" ng-class="{hasSkill: hasSkill(skill)}">
+              {{skill.name}}
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
-    <div class="grid-cell">
+  </div>
+
+  <div class="grid">
+    <div class="grid-cell long-desc">
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h4 class="panel-title">Skill Comparison</h4>
+          <h4 class="panel-title">Long Description</h4>
         </div>
-        <div class="panel-body"></div>
+        <div class="panel-body">
+          {{company.productDesc}}
+        </div>
       </div>
     </div>
   </div>

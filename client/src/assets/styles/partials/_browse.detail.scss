@@ -28,6 +28,11 @@
         margin: 0;
         padding: 0;
         text-align: center;
+
+        a {
+          color: $darkGray;
+          text-decoration: underline;
+        }
       }
 
       .posted {
@@ -69,12 +74,65 @@
             padding: 0;
             list-style: none;
           }
+
+          li {
+            margin-top: 10px;
+          }
+
+          .label {
+            color: $gray;
+            padding: 0;
+            font-weight: normal;
+            font-size: inherit;
+            text-align: left;
+            margin-right: 5px;
+          }
+
+          .location {
+            text-transform: capitalize;
+          }
+
+          .salary, .equity {
+            .min, .max {
+              font-weight: bold;
+            }
+          }
         }
 
         .highcharts-container {
           margin: 0 auto;
         }
       }
+
+      .panel.skills, .panel.roles {
+        ul {
+          margin: -5px -5px 0 -5px;
+        }
+
+        li {
+          float: left;
+          color: $blue;
+          background: rgba($blue, 0.1);
+          padding: 3px 5px;
+          margin: 10px 5px 0 5px;
+        }
+      }
+
+      .panel.skills {
+        .hasSkill {
+          background: $blue;
+          color: lighten($blue, 90%);
+          font-weight: bold;
+        }
+      }
+
+      // .grid-cell.company {
+      //   flex: 1.75;
+
+      //   .label.desc {
+      //     display: block;
+      //   }
+      // }
     }
 
     .footer {

@@ -1,22 +1,28 @@
 'use strict';
 
 angular.module('n4j.pages')
-  .controller('BrowseDetailCtrl', function (_, $scope, $stateParams, $n4Jobs) {
+  .controller('BrowseDetailCtrl', function (_, $scope, $stateParams, $n4Jobs, user) {
+
+    var userSkills = _.map(user.skills, function (skill) {
+      return skill.data.normalized;
+    });
 
     // Chart colors
     var colors = ['#F25A29', '#AD62CE', '#30B6AF', '#FCC940', '#FF6C7C', '#4356C0', '#DFE1E3'];
 
+    console.log($scope.currentJob, user);
 
-    // ## Scope Assignment
+    // Map all properties of $scope.currentJob to $scope
+    _.each($scope.currentJob, function (val, key) {
+      $scope[key] = val;
+    });
 
-    $scope.currentJob = $scope.currentJob || null;
+    $scope.jobTitle = $scope.title;
 
-    if (!$scope.currentJob) {
-      // GET the job using its id
-      $n4Jobs.get($stateParams.id).then(function (job) {
-        $scope.currentJob = job;
-      });
-    }
+    $scope.hasSkill = function (skill) {
+      console.log(userSkills, skill.normalized);
+      return _.contains(userSkills, skill.normalized);
+    };
 
     // ## Highchart Configurations
     $scope.chartDateRange = 'day';

@@ -31,7 +31,7 @@
         </div>
       </header>
       <ul class="jobs recommended">
-        <li ng-repeat="job in jobs" class="job" ng-click="goTo(job)">
+        <li ng-repeat="job in jobs" class="job" ng-click="goTo(job)" ng-class="{active: job.id === currentJob.id}">
           <div class="meta top">
             <span class="company">{{job.company.name}}</span>
           </div>

@@ -32,7 +32,7 @@
 
     @include clearfix();
 
-    li {
+    li, li.skill {
       float: left;
       color: $blue;
       background: rgba($blue, 0.1);
