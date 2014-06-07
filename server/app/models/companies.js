@@ -180,7 +180,7 @@ var deleteCompany = new Construct(_delete);
 // delete a company by id
 var deleteAllCompanies = new Construct(_deleteAll);
 
-var _queryStats = function (from, type) {
+var _queryStats = function (from, type, period) {
   return when.promise(function (resolve) {
 
     var query = [];
@@ -193,17 +193,22 @@ var _queryStats = function (from, type) {
       followers: ':HAS_FOLLOWERS'
     };
 
+    console.log(cypherParams);
+
     query.push(util.format('MATCH (:%s {id:{id}})-[%s]->(stat)-[:ON_DAY]->(day)', from.object, relationship[type]));
     query.push('RETURN stat, day');
     query.push('ORDER BY day.id');
-    query.push('LIMIT 30');
+    query.push(util.format('LIMIT %s', period));
 
     qs = query.join('\n');
+
+    console.log(qs);
 
     db.query(qs, cypherParams, function (err, results){
       // console.log(err, 'err');
       // console.log(results, 'results');
-      // console.log(results[0].stat._data.data.id, 'results');
+      console.log(results);
+      // console.log(results);
       results = _.map(results, function(value){
         return {
           stat: value.stat._data.data.id,
@@ -228,7 +233,7 @@ var getStats = function (params, options) {
   });
 
   return p1.then(function (companyResults) {
-    return _queryStats(companyResults.results, clone.type);
+    return _queryStats(companyResults.results, clone.type, clone.period);
   });
 
 };
