@@ -131,10 +131,12 @@
     <div class="row">
       <div class="col-sm-12">
         <div class="btn-group">
-          <label class="btn btn-transparent btn-lg">
+          <label class="btn btn-transparent btn-lg"
+            ng-click="rate(currentJob, 'like'); $event.stopPropagation()">
             <i class="fa fa-star"></i>
           </label>
-          <label class="btn btn-transparent btn-lg">
+          <label class="btn btn-transparent btn-lg"
+            ng-click="rate(currentJob, 'dislike'); $event.stopPropagation()">
             <i class="fa fa-thumbs-down"></i>
           </label>
         </div>

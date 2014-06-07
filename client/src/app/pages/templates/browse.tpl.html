@@ -20,18 +20,25 @@
   <div class="col2">
     <div class="browse-list">
       <header class="header">
-        <h2>Recommended</h2>
-        <div class="list-type btn-group">
-          <label class="btn btn-transparent btn-sm" ng-model="listType" btn-radio="'Recommended'">
+        <h2>{{listType}}</h2>
+        <div class="list-type">
+          <label class="btn btn-transparent btn-sm" ng-click="show('Recommended')" ng-class="{active: listType === 'Recommended'}">
             <i class="fa fa-list"></i>
           </label>
-          <label class="btn btn-transparent btn-sm" ng-model="listType" btn-radio="'Liked'">
+          <label class="btn btn-transparent btn-sm" ng-click="show('Latest')" ng-class="{active: listType === 'Latest'}">
+            <i class="fa fa-clock-o"></i>
+          </label>
+          <label class="btn btn-transparent btn-sm" ng-click="show('Likes')" ng-class="{active: listType === 'Likes'}">
             <i class="fa fa-star"></i>
           </label>
         </div>
       </header>
       <ul class="jobs recommended">
-        <li ng-repeat="job in jobs" class="job" ng-click="goTo(job)" ng-class="{active: job.id === currentJob.id}">
+        <li ng-repeat="job in jobs" 
+            class="job" 
+            ng-click="goTo(job)" 
+            ng-class="{active: job.id === currentJob.id}">
+
           <div class="meta top">
             <span class="company">{{job.company.name}}</span>
           </div>
@@ -45,10 +52,14 @@
             </li>
             <li>
               <div class="btn-group">
-                <label class="btn btn-transparent btn-xs" ng-click="like(job.id); $event.stopPropagation()">
+                <label 
+                  class="btn btn-transparent btn-xs" 
+                  ng-click="rate(job, 'like'); $event.stopPropagation()">
                   <i class="fa fa-star"></i>
                 </label>
-                <label class="btn btn-transparent btn-xs" ng-click="dislike(job.id); $event.stopPropagation()">
+                <label 
+                  class="btn btn-transparent btn-xs" 
+                  ng-click="rate(job, 'dislike'); $event.stopPropagation()">
                   <i class="fa fa-thumbs-down"></i>
                 </label>
               </div>

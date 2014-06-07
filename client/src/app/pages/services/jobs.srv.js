@@ -17,9 +17,14 @@ angular.module('n4j.pages.services')
       return res;
     };
 
-    this.list = function () {
+    this.list = function (type) {
+      
+      var params = {
+        type: type || ''
+      };
+
       // Just ONE GET to /users/:id/jobs
-      return Restangular.one('users', user.id).getList('jobs').then(function (jobs) {
+      return Restangular.one('users', user.id).getList('jobs', params).then(function (jobs) {
         return _extractJobs(jobs);
       });
     };

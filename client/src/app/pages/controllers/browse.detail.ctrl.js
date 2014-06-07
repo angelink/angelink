@@ -1,7 +1,15 @@
 'use strict';
 
 angular.module('n4j.pages')
-  .controller('BrowseDetailCtrl', function (_, $scope, $stateParams, $n4Jobs, user) {
+  .controller('BrowseDetailCtrl', function (_, $scope, $stateParams, $n4Jobs, jobs, user) {
+
+    // Make sure that the currentJob matches the id in the url
+    if (!$scope.currentJob || $scope.currentJob.id !== $stateParams.id) {
+      console.log($scope.currentJob, $stateParams.id);
+      // $scope.currentJob = _.find(jobs, function (job) {
+      //   return job.id === $stateParams.id;
+      // });
+    }
 
     var userSkills = _.map(user.skills, function (skill) {
       return skill.data.normalized;

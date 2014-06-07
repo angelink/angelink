@@ -200,7 +200,7 @@ var getById = function (params, options) {
 
   var p1 =  when.promise(function (resolve) {
     
-    if (!clone.id && clone.jobId) clone.id = clone.jobId;
+    if (!clone.id && clone.jobId) clone.id = '' + clone.jobId;
 
     // force id to be a number
     // not sure why this is needed... and its causing probs

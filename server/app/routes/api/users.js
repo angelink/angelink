@@ -412,7 +412,7 @@ exports.rateJob = {
     // params = _prepareParams(req);
 
     params.userId = req.params.userId;
-    params.jobId = req.params.jobId;
+    params.jobId = '' + req.params.jobId;
     params.like = req.body.like;
 
     User.rateJob(params, options).done(function (results) {

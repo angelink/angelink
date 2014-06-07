@@ -76,6 +76,16 @@ angular.module('n4j.pages.services')
       });
     };
 
+    this.rateJob = function (jobId, rating) {
+      var like = rating === 'like' && true || false;
+      var url = baseUrl + user.id + '/jobs/' + jobId;
+      var data = {
+        like: like
+      };
+
+      return $http.post(url, data, config);
+    };
+
     this.removeRelationships = function (data) {
 
       var url = baseUrl + user.id + '/relationships';

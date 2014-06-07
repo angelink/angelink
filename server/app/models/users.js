@@ -318,9 +318,9 @@ var rateJob = function (params, options) {
 
     // console.log(user, 'this is the user node');
 
-    if (JSON.parse(params.like) === true){
+    if (params.like === 'true'){
       user.likes(job, _.noop);
-    } else if (JSON.parse(params.like) === false){
+    } else if (params.like === 'false'){
       user.dislikes(job, _.noop);
     }
 
