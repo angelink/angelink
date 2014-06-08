@@ -74,10 +74,12 @@ var createOrUpdateUser = function (params, callback) {
 
 exports.init = function () {
 
+  console.log('linkedin auth init', cfg.linkedin.baseUrl);
+
   passport.use(new LinkedInStrategy({
     clientID: cfg.linkedin.apiKey,
     clientSecret: cfg.linkedin.secret,
-    callbackURL: cfg.server.baseUrl + '/auth/linkedin/callback',
+    callbackURL: cfg.linkedin.baseUrl + '/auth/linkedin/callback',
     scope: ['r_emailaddress', 'r_fullprofile', 'r_network'],
   }, function (accessToken, refreshToken, profile, done) {
       

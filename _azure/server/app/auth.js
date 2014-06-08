@@ -74,7 +74,7 @@ var createOrUpdateUser = function (params, callback) {
 
 exports.init = function () {
 
-  console.log(cfg.linkedin.baseUrl);
+  console.log('linkedin auth init', cfg.linkedin.baseUrl);
 
   passport.use(new LinkedInStrategy({
     clientID: cfg.linkedin.apiKey,
