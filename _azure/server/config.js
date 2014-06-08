@@ -12,8 +12,6 @@ var PORT = process.env.PORT || 3000;
 var SECRET = process.env.COOKIE_SECRET || 'secret';
 var API_VERSION = 'v0';
 
-console.log(process.env);
-
 // ## Production Environment Configurations
 config.production = {
 
