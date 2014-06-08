@@ -215,7 +215,7 @@ exports.findById = {
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
 
-    console.log(params);
+    // console.log(params);
 
     Equity.getById(params, options, callback);
   }
