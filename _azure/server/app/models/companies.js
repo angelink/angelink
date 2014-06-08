@@ -193,7 +193,7 @@ var _queryStats = function (from, type, period) {
       followers: ':HAS_FOLLOWERS'
     };
 
-    console.log(cypherParams);
+    // console.log(cypherParams);
 
     query.push(util.format('MATCH (:%s {id:{id}})-[%s]->(stat)-[:ON_DAY]->(day)', from.object, relationship[type]));
     query.push('RETURN stat, day');
@@ -202,12 +202,12 @@ var _queryStats = function (from, type, period) {
 
     qs = query.join('\n');
 
-    console.log(qs);
+    // console.log(qs);
 
     db.query(qs, cypherParams, function (err, results){
       // console.log(err, 'err');
       // console.log(results, 'results');
-      console.log(results);
+      // console.log(results);
       // console.log(results);
       results = _.map(results, function(value){
         return {
