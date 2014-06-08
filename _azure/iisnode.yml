@@ -1,0 +1,8 @@
+# For security reasons, logging, dev errors, and debugging
+# should be disabled in production deployments:
+node_env: production
+loggingEnabled: false
+debuggingEnabled: false
+devErrorsEnabled: false
+logDirectory: iisnode
+debuggerPathSegment: nodeMothFinder1947
