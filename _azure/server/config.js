@@ -35,7 +35,7 @@ config.production = {
 
     // base url
     // baseUrl: 'http://angelink.azurewebsites.net',
-    baseUrl: 'http://127.0.0.1:' + PORT,
+    baseUrl: process.env.BASE_URL || 'http://127.0.0.1:' + PORT,
 
     apiBasePath: '/api/' + API_VERSION
   },
