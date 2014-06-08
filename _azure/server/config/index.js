@@ -11,6 +11,7 @@ var _ = require('lodash')
 var pexcf = path.resolve(__dirname, '../config.example.js')
   , pconf = path.resolve(__dirname, '../config.js');
 
+console.log('config path', pconf);
 
 function Config () {
   if (!(this instanceof Config)) {
