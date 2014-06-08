@@ -1,5 +1,7 @@
 'use strict';
 
+/* jshint camelcase:false */
+
 var path = require('path');
 
 module.exports = {
@@ -8,7 +10,6 @@ module.exports = {
     port: 3000
   },
   dev: {
-    // jshint camelcase:false
     options: {
       node_env: 'development',
       debug: true
@@ -17,6 +18,11 @@ module.exports = {
   dist: {
     options: {
       node_env: 'production'
+    }
+  },
+  azure: {
+    options: {
+      node_env: 'azure'
     }
   }
 };

@@ -12,7 +12,7 @@ module.exports = {
         'utils/**/*.js',
         'middleware/**/*.js',
         'server.js',
-        'config.js'
+        '!config.js'
       ],
       dest: '<%= paths.heroku.tld %>/server'
     }]
@@ -28,7 +28,7 @@ module.exports = {
         'utils/**/*.js',
         'middleware/**/*.js',
         'server.js',
-        'config.js'
+        '!config.js'
       ],
       dest: '<%= paths.azure.tld %>/server'
     }]

@@ -15,6 +15,15 @@ module.exports = function (grunt) {
       return grunt.task.run([
         'build',
         'express:dist',
+        'watch' // is there another way to keepalive?
+      ]);
+    }
+
+    if (target === 'azure') {
+      return grunt.task.run([
+        'build',
+        'express:azure',
+        'watch' // is there another way to keepalive?
       ]);
     }
 
