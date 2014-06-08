@@ -7,7 +7,6 @@ angular.module('n4j.pages', [
   'ngResource',
   'ngCookies',
   'restangular',
-  'snap',
   'ui.bootstrap',
   'ui.router.compat',
 

@@ -15,7 +15,6 @@
     "ng-Fx": "~0.3.3",
     "restangular": "~1.4.0",
     "sass-bootstrap": "~3.0.2",
-    "angular-snap": "~1.5.0",
     "highcharts-ng": "~0.0.6",
     "angular-growl": "~0.4.0"
   },
