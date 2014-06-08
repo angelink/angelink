@@ -42,8 +42,7 @@ config.production = {
 
   // https://developer.linkedin.com/documents/authentication
   linkedin: {
-    // baseUrl: process.env.LINKEDIN_BASE_URL,
-    baseUrl: 'http://angelink.azurewebsites.net',
+    baseUrl: process.env.LINKEDIN_BASE_URL || 'http://angelink.azurewebsites.net',
     apiKey: process.env.LINKEDIN_APIKEY,
     secret: process.env.LINKEDIN_SECRET,
     state: process.env.LINKEDIN_STATE
