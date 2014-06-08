@@ -75,6 +75,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('azure', [
+    'clean:azure',
     'dist',
     'copy:azure'
   ]);

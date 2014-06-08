@@ -11,8 +11,9 @@ module.exports = {
       src: [
         // List of files that need to be made min-safe
         'app.concat.js',
-        'app.vendor.js'
+        // 'app.vendor.js'
       ],
+      // dest: '<%= paths.compiled.tld %>/concat/scripts/min'
       dest: '<%= paths.compiled.tld %>/concat/scripts'
     }]
   }

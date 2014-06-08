@@ -3,7 +3,7 @@
 module.exports = {
   options: {
     // lets us delete stuff outside the current working directory
-    // force: true 
+    force: true
   },
 
   serve: {
@@ -16,6 +16,18 @@ module.exports = {
       src: [
         '<%= paths.compiled.tld %>',
         '<%= paths.dist.tld %>'
+      ]
+    }]
+  },
+
+  azure: {
+    files: [{
+      dot: true,
+      src: [
+        '<%= paths.azure.tld %>/client/scripts',
+        '<%= paths.azure.tld %>/client/images',
+        '<%= paths.azure.tld %>/client/fonts',
+        '<%= paths.azure.tld %>/client/styles'
       ]
     }]
   },
