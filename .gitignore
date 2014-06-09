@@ -14,7 +14,10 @@ dist/*
 .sass-cache/*
  
 # Config Files
-config.js
+server/config.js
  
 # Editor Files
 *.sublime-*
+
+# Azure Files
+azure.err

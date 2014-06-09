@@ -1,24 +1,15 @@
 #auth {
-  .login {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100%;
+  .login-form {
 
     h3 {
-      font-size: 18px;
+      font-size: 24px;
       text-align: center;
       margin: 0;
-      background: $lightestGray;
-      border-bottom: 1px solid darken($bgBody, 10%);
-      padding: 20px;
+      color: white;
     }
 
     .authSelect {
-      background: white;
-      border: 1px solid darken($bgBody, 10%);
       text-align: center;
-      padding-bottom: 20px;
 
       ul {
         list-style: none;
@@ -26,10 +17,28 @@
         padding: 0;
       }
 
-      a {
-        margin: 20px 20px 0 20px;
-        width: 300px;
-        font-size: 16px;
+      .btn {
+        
+        .fa {
+          position: relative;
+          top: -1px;
+          background: white;
+          color: $blue;
+          line-height: 40px;
+          width: 40px;
+          height: 40px;
+          margin-right: 10px;
+          padding-left: 1px;
+
+          @include border-radius(999em);
+        }
+
+        &:hover {
+          .fa {
+            background: $darkBlue;
+            color: $lightBlue;
+          }
+        }
       }
 
       a.disabled {

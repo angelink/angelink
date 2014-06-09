@@ -5,16 +5,21 @@ var _ = require('lodash');
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 var passport = require('passport');
 var request = require('request');
+var url = require('url');
 
 var Config = require('../config/index.js');
 var cfg = new Config().getSync();
 
-var getUser = function (params, callback) {
+var getUser = function (req, params, callback) {
 
-  var baseUrl = cfg.server.baseUrl;
+  var urlObj = _.pick(req, ['protocol', 'auth']);
+  urlObj.host = req.get('host');
+  urlObj.pathname = '/api/v0/users/' + params.id;
+
+  var endpoint = url.format(urlObj);
 
   var options = {
-    url: baseUrl + '/api/v0/users/' + params.id,
+    url: endpoint,
     method: 'GET',
     headers: {
       'api_key': 'special-key'
@@ -40,12 +45,16 @@ var getUser = function (params, callback) {
   });
 };
 
-var createOrUpdateUser = function (params, callback) {
+var createOrUpdateUser = function (req, params, callback) {
 
-  var baseUrl = cfg.server.baseUrl;
+  var urlObj = _.pick(req, ['protocol', 'auth']);
+  urlObj.host = req.get('host');
+  urlObj.pathname = '/api/v0/users/';
+
+  var endpoint = url.format(urlObj);
 
   var options = {
-    url: baseUrl + '/api/v0/users',
+    url: endpoint,
     method: 'POST',
     headers: {
       'api_key': 'special-key'
@@ -74,12 +83,15 @@ var createOrUpdateUser = function (params, callback) {
 
 exports.init = function () {
 
+  console.log('linkedin auth init', cfg.linkedin.baseUrl);
+
   passport.use(new LinkedInStrategy({
     clientID: cfg.linkedin.apiKey,
     clientSecret: cfg.linkedin.secret,
-    callbackURL: cfg.server.baseUrl + '/auth/linkedin/callback',
+    callbackURL: cfg.linkedin.baseUrl + '/auth/linkedin/callback',
     scope: ['r_emailaddress', 'r_fullprofile', 'r_network'],
-  }, function (accessToken, refreshToken, profile, done) {
+    passReqToCallback: true
+  }, function (req, accessToken, refreshToken, profile, done) {
       
       var params = {};
 
@@ -98,11 +110,11 @@ exports.init = function () {
       params.linkedInToken = accessToken;
 
       // check if user exists
-      getUser(params, function (err, user) {
+      getUser(req, params, function (err, user) {
 
         // if user doesn't exist or doesn't have a linkedin token...
         if (!user || !user.linkedInToken) {
-          createOrUpdateUser(params, function (err, user) {
+          createOrUpdateUser(req, params, function (err, user) {
 
             if (err) {
               console.error('Error creating user');

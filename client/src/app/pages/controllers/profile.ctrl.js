@@ -5,6 +5,8 @@ angular.module('n4j.pages.controllers')
 
     var _user = null;
 
+    $scope.skills = {};
+
     $n4User.get().then(function (user) {
       _user = _.pick(user, ['firstname', 'lastname', 'email']);
       $scope.user = _.clone(_user);

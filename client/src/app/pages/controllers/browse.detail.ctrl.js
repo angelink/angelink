@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('n4j.pages')
-  .controller('BrowseDetailCtrl', function (_, $rootScope, $scope, $stateParams, $n4Jobs, jobs, user) {
+  .controller('BrowseDetailCtrl', function (_, $rootScope, $scope, $stateParams, $n4Jobs, jobs, user, $timeout) {
 
     // Make sure that the currentJob matches the id in the url
     // 
@@ -45,6 +45,7 @@ angular.module('n4j.pages')
 
     // ## Highchart Configurations
     $scope.chartDateRange = 'day';
+
     $scope.chartConfig = {
       options: {
         colors: colors,
@@ -95,7 +96,7 @@ angular.module('n4j.pages')
       ],
       size: {
         height: 300,
-        width: 980
+        width: 300
       },
       title: {
         style: {

@@ -330,7 +330,7 @@ exports.getStatsById = {
     params.type = type;
     params.period = period;
 
-    console.log(params);
+    // console.log(params);
 
     Company.getStats(params, options).then(function (results){
       callback(null, results);

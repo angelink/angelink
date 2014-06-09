@@ -187,8 +187,10 @@ exports.addUsers = {
       _.each(results, function (user, index, results) {
         var nextUser = getNextUser(index, results.length, results);
 
-        user.node.knows(nextUser, function (err, res) {
-          console.log(err, res);
+        user.node.knows(nextUser, function (err) {
+          if (err) {
+            console.log('Error creating user "knows" relationship', err);
+          }
         });
       });
 

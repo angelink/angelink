@@ -112,13 +112,13 @@
         <div class="panel-heading">
           <h4 class="panel-title">AngelList Stats</h4>
           <div class="btn-group">
-            <label class="btn btn-default btn-sm" ng-model="chartDateRange" btn-radio="'day'">Day</label>
-            <label class="btn btn-default btn-sm" ng-model="chartDateRange" btn-radio="'week'">Week</label>
-            <label class="btn btn-default btn-sm" ng-model="chartDateRange" btn-radio="'month'">Month</label>
+            <label class="btn btn-default btn-sm" ng-model="chartDateRange" btn-radio="'day'">Week</label>
+            <label class="btn btn-default btn-sm" ng-model="chartDateRange" btn-radio="'week'">Month</label>
+            <label class="btn btn-default btn-sm" ng-model="chartDateRange" btn-radio="'month'">3 Months</label>
           </div>
         </div>
         <div class="panel-body">
-          <highchart config="chartConfig"></highchart>
+          <highchart set-chart-size config="chartConfig"></highchart>
         </div>
       </div>
     </div>

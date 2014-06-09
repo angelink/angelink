@@ -2,6 +2,7 @@
 
 angular.module('n4j.pages', [
   'angular-growl',
+  'fx.animations',
   'highcharts-ng',
   'ngAnimate',
   'ngResource',
@@ -20,8 +21,14 @@ angular.module('n4j.pages')
   .config(function ($stateProvider, RestangularProvider, $httpProvider, growlProvider) {
 
     $stateProvider
-      .state('home', {
+      .state('public', {
+        abstract: true,
         url: '/',
+        templateUrl: 'pages/templates/public.tpl.html'
+      })
+
+      .state('public.home', {
+        url: '',
         templateUrl: 'pages/templates/home.tpl.html',
         controller: 'HomeCtrl',
         data: {
@@ -30,8 +37,8 @@ angular.module('n4j.pages')
       })
 
       
-      .state('login', {
-        url: '/login',
+      .state('public.login', {
+        url: 'login',
         templateUrl: 'pages/templates/login.tpl.html',
         controller: 'AuthCtrl',
         data: {
@@ -53,6 +60,14 @@ angular.module('n4j.pages')
             return deferred.promise;
           }
         }
+      })
+
+      .state('public.about', {
+        url: 'about',
+        templateUrl: 'pages/templates/about.tpl.html',
+        data: {
+          bodyId: 'about'
+        },
       })
 
       // Everything in app should be authenticated
