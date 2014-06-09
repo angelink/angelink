@@ -3,6 +3,9 @@
 /**
  * General Utility Services
  */
+
+/* jshint bitwise:false */
+
 angular.module('n4j.common.utils')
   
   // Allows lodash to be injected
@@ -12,15 +15,14 @@ angular.module('n4j.common.utils')
 
   // utility function
   .factory('utils', function () {
-    var utils = {};
-
+    
     /**
      * Returns a random integer between min and max
-     * Using Math.round() will give you a non-uniform distribution!
+     * Using ~~ because it is faster than Math.floor...
      */
-    utils.getRandomInt = function (min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
+    this.getRandomInt = function (min, max) {
+      return ~~(Math.random() * (max - min + 1)) + min;
     };
 
-    return utils;
+    return this;
   });

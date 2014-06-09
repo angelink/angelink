@@ -12,3 +12,17 @@ angular.module('n4j.pages.directives')
 
     return def;
   });
+
+  // .directive('viewChangeFx', function ($animate) {
+  //   var link = function (scope, el) {
+
+  //     scope.$on('enter fade-normal', function (el) {
+  //       console.log('enter');
+  //     });
+
+  //   };
+
+  //   return {
+  //     link: link
+  //   };
+  // });

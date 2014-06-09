@@ -12,6 +12,7 @@
 @import "compass/css3/opacity";
 @import "compass/css3/images";
 @import "compass/css3/box";
+@import "compass/css3/filter";
 
 // Import Variables
 // --------------------------------------------
@@ -25,14 +26,26 @@
 // --------------------------------------------
 @import "partials/sticky-footer";
 
-html {
-  height: 100%;
-}
-
-body {
+html, body, #realm {
   background: $bgBody;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: $darkGray;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: auto;
+}
+
+h1, h2, h3, h4, h5, h6, p, span, a, label, i {
+  @include opacity(0);
+}
+
+.wf-inactive,
+.wf-active {
+  h1, h2, h3, h4, h5, h6, p, span, a, label, i {
+    @include opacity(1);
+    @include transition(all 0.7s);
+  }
 }
 
 .browsehappy {
@@ -44,12 +57,41 @@ body {
 
 
 // ## Buttons
+.btn {
+  line-height: 1;
+
+  @include transition(all 0.7s);
+
+  .fa {
+    @include transition(all 0.7s);
+  }
+}
+
 .btn-transparent {
   background: none;
   border: none;
 
   &:hover, &.active {
     @include box-shadow(none);
+  }
+}
+
+.btn-xl {
+  border-style: solid;
+  border-width: 2px;
+  font-size: 24px;
+  padding: 15px 20px;
+}
+
+.btn-inverse {
+  background: none;
+  border-color: white;
+  color: white;
+
+  &:hover {
+    background: rgba(255,255,255,0.1);
+    color: $darkBlue;
+    border-color: $darkBlue;
   }
 }
 
@@ -62,11 +104,20 @@ body {
   }
 }
 
+// ## Branding
+.brand {
+  font-family: "Oleo Script", sans-serif;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
 // Import App Styling
+@import "partials/about";
 @import "partials/auth";
 @import "partials/browse";
 @import "partials/browse.detail";
 @import "partials/home";
 @import "partials/layout";
+@import "partials/particles";
 @import "partials/profile";
 @import "partials/zocial";

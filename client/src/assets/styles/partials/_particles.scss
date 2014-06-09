@@ -1,0 +1,30 @@
+.particles-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: block;
+
+  @include background(radial-gradient(circle, $lightBlue 0%, $darkBlue 100%));
+}
+
+.particles-left {
+  position: absolute;
+  z-index: 1;
+  left: 5%;
+
+  @include transform(translate(0, 10%))
+}
+
+.particles-middle {
+  position: absolute;
+
+  @include filter(blur(5px));
+  @include transform(translate(50%, 10%))
+}
+
+.particles-right {
+  position: absolute;
+  right: 5%;
+  
+  @include transform(translate(0, 10%))
+}

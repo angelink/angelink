@@ -1,56 +1,46 @@
-#home {
+.main {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  // min-height: 100vh;
+  width: 100%;
+  height: 100%;
+}
 
-  .main {
-    // background: transparent url('../images/sf.jpg') no-repeat 0 0;
-    @include background-size("cover");
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+.content {
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  max-width: 600px;
+
+  h1 {
+    font-size: 76px;
+    color: white;
   }
 
-  .content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    font: "Gotham SSm A","Gotham SSm B","avenir next","helvetica neue",helvetica,arial,sans-serif;
-  
-    h1 {
-      font-size: 68px;
-      line-height: 1.3;
-      font-weight: 500;
-      letter-spacing: 10px;
-      text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
-      // text-transform: uppercase;
-    }
-
-    p {
-      // font-family: "aktiv-grotesk-std", 'Helvetica Neue', Helvetica Neue, Arial, sans-serif;
-      // font-size: 24px;
-      // font-weight: 400px;
-      font: 200 18px "brandon-grotesque", Arial, Helvetica, sans-serif;
-      line-height: 18px;
-      text-align: center;
-      // text-transform: uppercase;
-    }
-
-    .continue {
-      font-size: 60px;
-      margin: 10px 0px;
-
-      a {
-        color: white;
-      }
-    }
-
+  p {
+    text-align: center;
+    color: white;
   }
 
-  .footer {
-    margin: 10px 10px;
+  .btn {
+    margin-top: 30px;
+    display: block;
   }
+}
 
+.footer {
+  padding: 20px 0;
 
+  a {
+    color: rgba(255,255,255,0.7);
+    font-weight: bold;
+    font-size: 16px;
+  }
 }
