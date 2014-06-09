@@ -2,6 +2,7 @@
 
 // ## Module Dependencies
 var _ = require('lodash');
+var auth = require('../../auth');
 var sw = require('swagger-node-express');
 var utils = require('../../utils');
 var when = require('when');
@@ -37,13 +38,28 @@ var _prepareParams = function (req) {
 //   var errLabel = 'Route: POST /users';
 //   var callback = _.partial(_callback, res, errLabel);
 // }
-var _callback = function (res, errLabel, err, results, queries) {
+var _callback = function (req, res, errLabel, err, results, queries) {
   var start = new Date();
 
   if (err || !results) {
     if (err) console.error(errLabel + ' ', err);
     swe.invalid('input', res);
     return;
+  }
+
+  var authToken = req.get('x-auth-onetimetoken');
+
+  // Remove sensitive data (i.e. linkedinToken) from results
+  if (!auth.verifyOneTimeToken(authToken)) {
+    if (results.object === 'User') {
+      delete results.node.data.linkedInToken;
+    } else if (results.object === 'list') {
+      _.each(results.list, function (result) {
+        if (result.data && result.data.linkedInToken) {
+          delete result.data.linkedInToken;
+        }
+      });
+    }
   }
 
   utils.writeResponse(res, results, queries, start);
@@ -76,7 +92,7 @@ exports.list = {
   action: function (req, res) {
     var options = {};
     var errLabel = 'Route: GET /users';
-    var callback = _.partial(_callback, res, errLabel);
+    var callback = _.partial(_callback, req, res, errLabel);
     
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
@@ -121,7 +137,7 @@ exports.addUser = {
     var options = {};
     var params = {};
     var errLabel = 'Route: POST /users';
-    var callback = _.partial(_callback, res, errLabel);
+    var callback = _.partial(_callback, req, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
@@ -163,7 +179,7 @@ exports.addUsers = {
     var options = {};
     var params = req.body;
     var errLabel = 'Route: POST /users';
-    var callback = _.partial(_callback, res, errLabel);
+    var callback = _.partial(_callback, req, res, errLabel);
     var list = JSON.parse(params.list);
 
     if (!list.length) throw swe.invalid('list');
@@ -213,7 +229,7 @@ exports.deleteAllUsers = {
   action: function (req, res) {
     var options = {};
     var errLabel = 'Route: DELETE /users';
-    var callback = _.partial(_callback, res, errLabel);
+    var callback = _.partial(_callback, req, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 
@@ -247,7 +263,7 @@ exports.findById = {
     if (!id) throw swe.invalid('id');
 
     var errLabel = 'Route: GET /users/{id}';
-    var callback = _.partial(_callback, res, errLabel);
+    var callback = _.partial(_callback, req, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
@@ -313,7 +329,7 @@ exports.updateById = {
     var options = {};
     var params = {};
     var errLabel = 'Route: PUT /users/:id';
-    var callback = _.partial(_callback, res, errLabel);
+    var callback = _.partial(_callback, req, res, errLabel);
 
     if (!id) throw swe.invalid('id');
 
@@ -361,9 +377,7 @@ exports.deleteUser = {
     if (!id) throw swe.invalid('id');
 
     var errLabel = 'Route: DELETE /users/{id}';
-    var callback = _.partial(_callback, res, errLabel);
-
-    console.log(req.session);
+    var callback = _.partial(_callback, req, res, errLabel);
 
     // if currentUser.id === id then do a logout first
     if (req.session.passport.user.id === id) {
@@ -408,7 +422,7 @@ exports.rateJob = {
     if (!id || !jobId) throw swe.invalid('id');
 
     var errLabel = 'Route: POST /users/{userId}/jobs/{jobId}';
-    var callback = _.partial(_callback, res, errLabel);
+    var callback = _.partial(_callback, req, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     // params = _prepareParams(req);
@@ -459,7 +473,7 @@ exports.getUserJobs = {
     if (!id) throw swe.invalid('id');
 
     var errLabel = 'Route: GET /users/{id}/jobs';
-    var callback = _.partial(_callback, res, errLabel);
+    var callback = _.partial(_callback, req, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
     params = _prepareParams(req);
@@ -505,7 +519,7 @@ exports.removeRelationships = {
       throw swe.invalid('parameters');
 
     var errLabel = 'Route: PUT /users/{id}/relationships';
-    var callback = _.partial(_callback, res, errLabel);
+    var callback = _.partial(_callback, req, res, errLabel);
 
     options.neo4j = utils.existsInQuery(req, 'neo4j');
 

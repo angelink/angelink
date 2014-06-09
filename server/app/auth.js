@@ -2,6 +2,7 @@
 
 // ## Module Dependencies
 var _ = require('lodash');
+var crypto = require('crypto');
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 var passport = require('passport');
 var request = require('request');
@@ -10,19 +11,35 @@ var url = require('url');
 var Config = require('../config/index.js');
 var cfg = new Config().getSync();
 
-var getUser = function (req, params, callback) {
+// ## Helpers
+
+var _getTimeToNearestMin = function (min) {
+  
+  // Set Defaults
+  min = min || 5;
+  
+  var coeff = 1000 * 60 * min;
+  var date = new Date();
+  var rounded = new Date(Math.round(date.getTime() / coeff) * coeff);
+
+  return rounded;
+};
+
+var _getUser = function (req, params, callback) {
 
   var urlObj = _.pick(req, ['protocol', 'auth']);
   urlObj.host = req.get('host');
   urlObj.pathname = '/api/v0/users/' + params.id;
 
   var endpoint = url.format(urlObj);
+  var oneTimeToken = exports.getOneTimeToken();
 
   var options = {
     url: endpoint,
     method: 'GET',
     headers: {
-      'api_key': 'special-key'
+      'api_key': 'special-key',
+      'X-AUTH-ONETIMETOKEN': oneTimeToken
     },
     json: true
   };
@@ -45,7 +62,7 @@ var getUser = function (req, params, callback) {
   });
 };
 
-var createOrUpdateUser = function (req, params, callback) {
+var _createOrUpdateUser = function (req, params, callback) {
 
   var urlObj = _.pick(req, ['protocol', 'auth']);
   urlObj.host = req.get('host');
@@ -83,8 +100,6 @@ var createOrUpdateUser = function (req, params, callback) {
 
 exports.init = function () {
 
-  console.log('linkedin auth init', cfg.linkedin.baseUrl);
-
   passport.use(new LinkedInStrategy({
     clientID: cfg.linkedin.apiKey,
     clientSecret: cfg.linkedin.secret,
@@ -110,11 +125,11 @@ exports.init = function () {
       params.linkedInToken = accessToken;
 
       // check if user exists
-      getUser(req, params, function (err, user) {
+      _getUser(req, params, function (err, user) {
 
         // if user doesn't exist or doesn't have a linkedin token...
         if (!user || !user.linkedInToken) {
-          createOrUpdateUser(req, params, function (err, user) {
+          _createOrUpdateUser(req, params, function (err, user) {
 
             if (err) {
               console.error('Error creating user');
@@ -134,4 +149,22 @@ exports.init = function () {
   passport.serializeUser(function(user, done) {
     done(null, user);
   });
+};
+
+exports.getOneTimeToken = function () {
+  var token = '';
+  var shasum = crypto.createHash('sha1');
+  var secret = cfg.server.secret;
+  var time = _getTimeToNearestMin();
+
+  // generate the token
+  shasum.update(time + secret);
+  token = shasum.digest('hex');
+
+  return token;
+};
+
+exports.verifyOneTimeToken = function (token) {
+  if (!token) return;
+  return token === exports.getOneTimeToken();
 };
