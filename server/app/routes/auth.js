@@ -13,12 +13,14 @@ var cfg = new Config().getSync();
 auth.init();
 
 // ## Util Functions
-var generateState = function (sessionID) {
+var generateState = function (sessionID, secret) {
   var state = '';
   var shasum = crypto.createHash('sha1');
   
+  secret = secret || '';
+
   // generate the state
-  shasum.update(sessionID);
+  shasum.update(sessionID + secret);
   state = shasum.digest('hex');
 
   return state;
@@ -105,6 +107,7 @@ module.exports = function (server) {
     // @see http://developer.linkedin.com/documents/authentication
     var state = generateState(req.sessionID);
     var user = req.signedCookies.user;
+    // var oneTimeToken = auth.getOneTimeToken();
 
     // save the referer
     req.session.referer = req.header('Referer') || '/';
